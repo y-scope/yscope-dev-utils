@@ -8,7 +8,5 @@ clp-s: Don't add implicit wildcards ('*') at the beginning and the end of a quer
 <!-- Describe what this request will change/fix and provide any details necessary for reviewers. -->
 
 
-
 # Validation performed
 <!-- Describe what tests and validation you performed on the change. -->
-
