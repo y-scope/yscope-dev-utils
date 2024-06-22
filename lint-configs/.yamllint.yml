@@ -17,8 +17,8 @@ rules:
     forbid-undeclared-aliases: false
 
   braces:
-    min-spaces-inside-empty: 0
     max-spaces-inside-empty: 0
+    min-spaces-inside-empty: 0
 
   brackets:
     min-spaces-inside-empty: 0
