@@ -68,6 +68,7 @@ tasks:
   # VENV UTILS
   # ===
   create-venv:
+    desc: "Creates a Python venv using the given requirements file."
     internal: true
     label: "create-venv-{{.LABEL}}"
     requires:
