@@ -21,8 +21,8 @@ rules:
     min-spaces-inside-empty: 0
 
   brackets:
-    min-spaces-inside-empty: 0
     max-spaces-inside-empty: 0
+    min-spaces-inside-empty: 0
 
   comments:
     level: "error"
@@ -45,12 +45,12 @@ rules:
     spaces: 2
 
   line-length:
-    max: 100
     allow-non-breakable-words: false
+    max: 100
 
   octal-values:
-    forbid-implicit-octal: true
     forbid-explicit-octal: false
+    forbid-implicit-octal: true
 
   quoted-strings:
     quote-type: "double"
