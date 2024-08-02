@@ -1,3 +1,6 @@
+FormatStyle: "file"
+WarningsAsErrors: "*"
+
 # Disabled checks:
 # - `bugprone-easily-swappable-parameters` because it's difficult to mitigate.
 # - `readability-identifier-length` because it's case-dependent.
@@ -21,8 +24,6 @@ Checks: >-
   -readability-named-parameter,
   -readability-simplify-boolean-expr,
 
-WarningsAsErrors: "*"
-FormatStyle: "file"
 CheckOptions:
   # This is necessary to allow simple classes (with all members being public) that have a
   # constructor
