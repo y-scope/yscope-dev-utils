@@ -91,6 +91,18 @@ CheckOptions:
   readability-identifier-naming.ClassCase: "CamelCase"
   readability-identifier-naming.StructCase: "CamelCase"
 
+  # Function naming rules
+  readability-identifier-naming.ClassMethodCase: "lower_case"
+  readability-identifier-naming.ConstexprFunctionCase: "lower_case"
+  readability-identifier-naming.ConstexprMethodCase: "lower_case"
+  readability-identifier-naming.FunctionCase: "lower_case"
+  readability-identifier-naming.GlobalFunctionCase: "lower_case"
+  readability-identifier-naming.MethodCase: "lower_case"
+  readability-identifier-naming.PrivateMethodCase: "lower_case"
+  readability-identifier-naming.ProtectedMethodCase: "lower_case"
+  readability-identifier-naming.PublicMethodCase: "lower_case"
+  readability-identifier-naming.VirtualMethodCase: "lower_case"
+
   # Variable naming rules
   readability-identifier-naming.GlobalPointerCase: "lower_case"
   readability-identifier-naming.GlobalVariableCase: "lower_case"
@@ -120,15 +132,3 @@ CheckOptions:
   readability-identifier-naming.TemplateParameterCase: "lower_case"
   readability-identifier-naming.TemplateTemplateParameterCase: "lower_case"
   readability-identifier-naming.ValueTemplateParameterCase: "lower_case"
-
-  # Function naming rules
-  readability-identifier-naming.ClassMethodCase: "lower_case"
-  readability-identifier-naming.ConstexprFunctionCase: "lower_case"
-  readability-identifier-naming.ConstexprMethodCase: "lower_case"
-  readability-identifier-naming.FunctionCase: "lower_case"
-  readability-identifier-naming.GlobalFunctionCase: "lower_case"
-  readability-identifier-naming.MethodCase: "lower_case"
-  readability-identifier-naming.PrivateMethodCase: "lower_case"
-  readability-identifier-naming.ProtectedMethodCase: "lower_case"
-  readability-identifier-naming.PublicMethodCase: "lower_case"
-  readability-identifier-naming.VirtualMethodCase: "lower_case"
