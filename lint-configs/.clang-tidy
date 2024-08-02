@@ -103,6 +103,14 @@ CheckOptions:
   readability-identifier-naming.PublicMethodCase: "lower_case"
   readability-identifier-naming.VirtualMethodCase: "lower_case"
 
+  # Parameter naming rules
+  readability-identifier-naming.ParameterCase: "lower_case"
+  readability-identifier-naming.ParameterPackCase: "lower_case"
+  readability-identifier-naming.PointerParameterCase: "lower_case"
+  readability-identifier-naming.TemplateParameterCase: "lower_case"
+  readability-identifier-naming.TemplateTemplateParameterCase: "lower_case"
+  readability-identifier-naming.ValueTemplateParameterCase: "lower_case"
+
   # Variable naming rules
   readability-identifier-naming.GlobalPointerCase: "lower_case"
   readability-identifier-naming.GlobalVariableCase: "lower_case"
@@ -124,11 +132,3 @@ CheckOptions:
   readability-identifier-naming.ProtectedMemberPrefix: "m_"
   readability-identifier-naming.PublicMemberCase: "lower_case"
   readability-identifier-naming.PublicMemberPrefix: ""
-
-  # Parameter naming rules
-  readability-identifier-naming.ParameterCase: "lower_case"
-  readability-identifier-naming.ParameterPackCase: "lower_case"
-  readability-identifier-naming.PointerParameterCase: "lower_case"
-  readability-identifier-naming.TemplateParameterCase: "lower_case"
-  readability-identifier-naming.TemplateTemplateParameterCase: "lower_case"
-  readability-identifier-naming.ValueTemplateParameterCase: "lower_case"
