@@ -50,6 +50,9 @@ CheckOptions:
   readability-identifier-naming.TypeTemplateParameterCase: "CamelCase"
   readability-identifier-naming.TypeTemplateParameterIgnoredRegexp: "[0-9a-z_]+_t"
 
+  # Concept naming rules
+  readability-identifier-naming.ConceptCase: "CamelCase"
+
   # Class naming rules
   readability-identifier-naming.AbstractClassCase: "CamelCase"
   readability-identifier-naming.ClassCase: "CamelCase"
@@ -104,9 +107,6 @@ CheckOptions:
   readability-identifier-naming.ProtectedMemberPrefix: "m_"
   readability-identifier-naming.PublicMemberCase: "lower_case"
   readability-identifier-naming.PublicMemberPrefix: ""
-
-  # Concept naming rules
-  readability-identifier-naming.ConceptCase: "CamelCase"
 
   # Parameter naming rules
   readability-identifier-naming.ParameterCase: "lower_case"
