@@ -61,31 +61,6 @@ CheckOptions:
   readability-identifier-naming.EnumConstantCase: "CamelCase"
   readability-identifier-naming.ScopedEnumConstantCase: "CamelCase"
 
-  # Constexpr naming rules
-  readability-identifier-naming.ConstexprVariableCase: "CamelCase"
-  readability-identifier-naming.ConstexprVariablePrefix: "c"
-
-  # Constant naming rules
-  readability-identifier-naming.ClassConstantCase: "CamelCase"
-  readability-identifier-naming.ClassConstantPrefix: "c"
-  readability-identifier-naming.ConstantCase: "CamelCase"
-  readability-identifier-naming.ConstantPrefix: "c"
-  readability-identifier-naming.GlobalConstantCase: "CamelCase"
-  readability-identifier-naming.GlobalConstantPrefix: "c"
-  readability-identifier-naming.GlobalConstantPointerCase: "CamelCase"
-  readability-identifier-naming.GlobalConstantPointerPrefix: "c"
-  readability-identifier-naming.StaticConstantCase: "CamelCase"
-  readability-identifier-naming.StaticConstantPrefix: "c"
-
-  # Naming rules for constants that can be determined at runtime
-  readability-identifier-naming.ConstantMemberCase: "lower_case"
-  # NOTE: We set this to ensure it doesn't default to `MemberPrefix`
-  readability-identifier-naming.ConstantMemberPrefix: ""
-  readability-identifier-naming.ConstantParameterCase: "lower_case"
-  readability-identifier-naming.ConstantPointerParameterCase: "lower_case"
-  readability-identifier-naming.LocalConstantCase: "lower_case"
-  readability-identifier-naming.LocalConstantPointerCase: "lower_case"
-
   # Class naming rules
   readability-identifier-naming.AbstractClassCase: "CamelCase"
   readability-identifier-naming.ClassCase: "CamelCase"
@@ -110,6 +85,31 @@ CheckOptions:
   readability-identifier-naming.TemplateParameterCase: "lower_case"
   readability-identifier-naming.TemplateTemplateParameterCase: "lower_case"
   readability-identifier-naming.ValueTemplateParameterCase: "lower_case"
+
+  # Constexpr naming rules
+  readability-identifier-naming.ConstexprVariableCase: "CamelCase"
+  readability-identifier-naming.ConstexprVariablePrefix: "c"
+
+  # Constant naming rules
+  readability-identifier-naming.ClassConstantCase: "CamelCase"
+  readability-identifier-naming.ClassConstantPrefix: "c"
+  readability-identifier-naming.ConstantCase: "CamelCase"
+  readability-identifier-naming.ConstantPrefix: "c"
+  readability-identifier-naming.GlobalConstantCase: "CamelCase"
+  readability-identifier-naming.GlobalConstantPrefix: "c"
+  readability-identifier-naming.GlobalConstantPointerCase: "CamelCase"
+  readability-identifier-naming.GlobalConstantPointerPrefix: "c"
+  readability-identifier-naming.StaticConstantCase: "CamelCase"
+  readability-identifier-naming.StaticConstantPrefix: "c"
+
+  # Naming rules for constants that can be determined at runtime
+  readability-identifier-naming.ConstantMemberCase: "lower_case"
+  # NOTE: We set this to ensure it doesn't default to `MemberPrefix`
+  readability-identifier-naming.ConstantMemberPrefix: ""
+  readability-identifier-naming.ConstantParameterCase: "lower_case"
+  readability-identifier-naming.ConstantPointerParameterCase: "lower_case"
+  readability-identifier-naming.LocalConstantCase: "lower_case"
+  readability-identifier-naming.LocalConstantPointerCase: "lower_case"
 
   # Class member naming rules
   readability-identifier-naming.ClassMemberCase: "lower_case"
