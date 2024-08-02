@@ -61,6 +61,11 @@ CheckOptions:
   # Union naming rules
   readability-identifier-naming.UnionCase: "CamelCase"
 
+  # Enum naming rules
+  readability-identifier-naming.EnumCase: "CamelCase"
+  readability-identifier-naming.EnumConstantCase: "CamelCase"
+  readability-identifier-naming.ScopedEnumConstantCase: "CamelCase"
+
   # Constexpr naming rules
   readability-identifier-naming.ConstexprVariableCase: "CamelCase"
   readability-identifier-naming.ConstexprVariablePrefix: "c"
@@ -127,8 +132,3 @@ CheckOptions:
   readability-identifier-naming.ProtectedMethodCase: "lower_case"
   readability-identifier-naming.PublicMethodCase: "lower_case"
   readability-identifier-naming.VirtualMethodCase: "lower_case"
-
-  # Enum naming rules
-  readability-identifier-naming.EnumCase: "CamelCase"
-  readability-identifier-naming.EnumConstantCase: "CamelCase"
-  readability-identifier-naming.ScopedEnumConstantCase: "CamelCase"
