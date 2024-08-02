@@ -53,11 +53,6 @@ CheckOptions:
   # Concept naming rules
   readability-identifier-naming.ConceptCase: "CamelCase"
 
-  # Class naming rules
-  readability-identifier-naming.AbstractClassCase: "CamelCase"
-  readability-identifier-naming.ClassCase: "CamelCase"
-  readability-identifier-naming.StructCase: "CamelCase"
-
   # Union naming rules
   readability-identifier-naming.UnionCase: "CamelCase"
 
@@ -90,6 +85,11 @@ CheckOptions:
   readability-identifier-naming.ConstantPointerParameterCase: "lower_case"
   readability-identifier-naming.LocalConstantCase: "lower_case"
   readability-identifier-naming.LocalConstantPointerCase: "lower_case"
+
+  # Class naming rules
+  readability-identifier-naming.AbstractClassCase: "CamelCase"
+  readability-identifier-naming.ClassCase: "CamelCase"
+  readability-identifier-naming.StructCase: "CamelCase"
 
   # Variable naming rules
   readability-identifier-naming.GlobalPointerCase: "lower_case"
