@@ -10,18 +10,6 @@ tasks:
     silent: true
     requires:
       vars: ["DATA_DIR", "OUTPUT_FILE"]
-    vars:
-      # When the task is called with EXCLUDE_PATHS being a list, concatenate the items into a comma (",") separated
-      # string. This is needed because go-task does not support passing array variables from one task's argument into
-      # another task.
-      EXCLUDE_PATHS: >-
-        {{- if eq (typeOf .EXCLUDE_PATHS) "[]interface {}"}}
-          {{- range .EXCLUDE_PATHS}}
-            {{- .}},
-          {{- end}}
-        {{- else}}
-          {{- .EXCLUDE_PATHS}}
-        {{- end}}
     cmds:
       - >-
         tar cf -
@@ -31,10 +19,8 @@ tasks:
         --numeric-owner
         --owner 0
         --sort name
-        {{- range (.EXCLUDE_PATHS | split ",")}}
-        {{- if .}}
+        {{- range .EXCLUDE_PATHS}}
         --exclude="{{.}}"
-        {{- end}}
         {{- end}}
         . 2> /dev/null
         | md5sum > {{.OUTPUT_FILE}}
@@ -54,12 +40,8 @@ tasks:
       - task: "compute-checksum"
         vars:
           DATA_DIR: "{{.DATA_DIR}}"
-          # Concatenate the EXCLUDE_PATHS items into a comma (",") separated string. This is needed because go-task
-          # does not support passing array variables from one task's argument into another task.
-          EXCLUDE_PATHS: >-
-            {{- range .EXCLUDE_PATHS}}
-              {{- .}},
-            {{- end}}
+          EXCLUDE_PATHS:
+            ref: ".EXCLUDE_PATHS"
           OUTPUT_FILE: "{{.TMP_CHECKSUM_FILE}}"
       - defer: "rm -f '{{.TMP_CHECKSUM_FILE}}'"
       # Check that the directory exists and the checksum matches; otherwise delete the checksum file
