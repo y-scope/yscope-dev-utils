@@ -11,7 +11,7 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Symlinks the given config file to the repo's root.
 #
-# * @param $1 Path to the config file in the repo.
+# @param $1 Path to the config file in the repo.
 function symlink_config () {
     config_file_path="$1"
 

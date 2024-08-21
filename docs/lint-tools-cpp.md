@@ -5,10 +5,10 @@ We use `clang-format` for formatting and `clang-tidy` for code analysis.
 ## General usage
 
 C++ projects should use the [.clang-format] and [.clang-tidy] config files as follows (assuming
-`yscope-dev-utils` was added at `tools/yscope-dev-utils` in the project):
+`yscope-dev-utils` was added to the project at `tools/yscope-dev-utils`):
 
 1. Add a setup step to symlink the files to the project root.
-   * You can use `yscope-dev-utils/scripts/symlink-cpp-lint-configs.sh`.
+   * You can use [symlink-cpp-lint-configs.sh].
 2. Create project-specific config files to override any settings as necessary (see below).
 3. Run `clang-format` and `clang-tidy` using the config files.
 
@@ -70,3 +70,4 @@ Checks: >-
 
 [.clang-format]: ../lint-configs/.clang-format
 [.clang-tidy]: ../lint-configs/.clang-tidy
+[symlink-cpp-lint-configs.sh]: ../lint-configs/symlink-cpp-lint-configs.sh
