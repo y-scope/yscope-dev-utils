@@ -9,26 +9,26 @@ set -u
 repo_dir="$(git rev-parse --show-toplevel)"
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
+# Symlinks the given config file to the repo's root.
+#
+# * @param $1 Path to the config file in the repo.
 function symlink_config () {
-    src_path="$1"
-    dst_path="$2"
+    config_file_path="$1"
 
-    if [ ! -e "$dst_path" ]; then
-        ln -s "$src_path" "$clang_tidy_config_dst"
-    else
-        if [ "$(readlink -f "$clang_tidy_config_dst")" != "$(readlink -f "$clang_tidy_config_src")" ];
-        then
-            echo "Unexpected clang-tidy config at $clang_tidy_config_dst"
-        fi
+    repo_dir="$(git rev-parse --show-toplevel)"
+    repo_relative_config_file_path="$(realpath --relative-to="$repo_dir" "$config_file_path")"
+
+    src_path="${repo_dir}/${repo_relative_config_file_path}"
+    dst_path="${repo_dir}/$(basename "$config_file_path")"
+
+    # NOTE: `-e` will return false if the file is a broken symlink, so that's why we also check
+    # `-L`.
+    if [ ! -e "$dst_path" ] && [ ! -L "$dst_path" ]; then
+        ln -s "$repo_relative_config_file_path" "$dst_path"
+    elif [ "$(readlink -f "$src_path")" != "$(readlink -f "$dst_path")" ]; then
+        echo "Unknown config file exists at '${dst_path}'. Remove it before running this script."
     fi
 }
 
-clang_tidy_config_dst="${repo_dir}/.clang-tidy"
-if [ ! -e "$clang_tidy_config_dst" ]; then
-    ln -s "$clang_tidy_config_src_relative_to_repo" "$clang_tidy_config_dst"
-else
-    if [ "$(readlink -f "$clang_tidy_config_dst")" != "$(readlink -f "$clang_tidy_config_src")" ];
-    then
-        echo "Unexpected clang-tidy config at $clang_tidy_config_dst"
-    fi
-fi
+symlink_config "${script_dir}/.clang-format"
+symlink_config "${script_dir}/.clang-tidy"
