@@ -23,8 +23,8 @@ C++ projects should use the [.clang-format] and [.clang-tidy] config files as fo
 
 In the project-specific config file:
 
-* Set `BasedOnStyle: InheritParentConfig` to inherit from config file in the parent directory.
-* Set `IncludeCategories` for as necessary.
+* Set `BasedOnStyle: InheritParentConfig` to inherit from the config file at the project's root.
+* Set `IncludeCategories` as necessary.
 
 For example:
 
@@ -53,8 +53,8 @@ IncludeCategories:
 
 In the project-specific config file:
 
-* Set `InheritParentConfig: true` to inherit from config file in the parent directory.
-* Update, add, or disable checks for the project as necessary.
+* Set `InheritParentConfig: true` to inherit from the config file at the project's root.
+* Update, add, or disable checks as necessary.
   * For any disabled or added checks, add a comment explaining why.
 
 For example:
@@ -63,7 +63,7 @@ For example:
 InheritParentConfig: true
 
 # Disabled checks:
-# - `cppcoreguidelines-avoid-non-const-global-variables` because 
+# - `cppcoreguidelines-avoid-non-const-global-variables` because ...
 Checks: >-
   -cppcoreguidelines-avoid-non-const-global-variables,
 ```
