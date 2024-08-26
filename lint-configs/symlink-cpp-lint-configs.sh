@@ -6,7 +6,6 @@ set -e
 # Error on undefined variable
 set -u
 
-repo_dir="$(git rev-parse --show-toplevel)"
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Symlinks the given config file to the repo's root.
