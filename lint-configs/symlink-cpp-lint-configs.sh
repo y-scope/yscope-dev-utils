@@ -37,11 +37,7 @@ symlink_config () {
 
 main () {
     symlink_config "${script_dir}/.clang-format"
-    ret_val=$?
     symlink_config "${script_dir}/.clang-tidy"
-    ret_val=$((ret_val || $?))
-
-    return $ret_val
 }
 
 main "$@"
