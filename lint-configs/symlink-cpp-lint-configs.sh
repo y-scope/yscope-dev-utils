@@ -32,5 +32,9 @@ function symlink_config () {
     fi
 }
 
-symlink_config "${script_dir}/.clang-format"
-symlink_config "${script_dir}/.clang-tidy"
+main () {
+    symlink_config "${script_dir}/.clang-format"
+    symlink_config "${script_dir}/.clang-tidy"
+}
+
+main "$@"
