@@ -27,14 +27,21 @@ function symlink_config () {
         echo "Symlinked '${src_path}' to '${dst_path}'."
     elif [ "$(readlink -f "$src_path")" != "$(readlink -f "$dst_path")" ]; then
         echo "Unknown config file exists at '${dst_path}'. Remove it before running this script."
+        return 1
     else
         echo "Already symlinked '${src_path}' to '${dst_path}'."
     fi
+
+    return 0
 }
 
 main () {
     symlink_config "${script_dir}/.clang-format"
+    ret_val=$?
     symlink_config "${script_dir}/.clang-tidy"
+    ret_val=$((ret_val || $?))
+
+    return $ret_val
 }
 
 main "$@"
