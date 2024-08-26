@@ -24,8 +24,11 @@ function symlink_config () {
     # `-L`.
     if [ ! -e "$dst_path" ] && [ ! -L "$dst_path" ]; then
         ln -s "$repo_relative_config_file_path" "$dst_path"
+        echo "Symlinked '${src_path}' to '${dst_path}'."
     elif [ "$(readlink -f "$src_path")" != "$(readlink -f "$dst_path")" ]; then
         echo "Unknown config file exists at '${dst_path}'. Remove it before running this script."
+    else
+        echo "Already symlinked '${src_path}' to '${dst_path}'."
     fi
 }
 
