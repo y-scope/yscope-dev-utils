@@ -4,6 +4,10 @@ tasks:
   # ===
   # CHECKSUM UTILS
   # ===
+
+  # @param {string} DATA_DIR The directory to compute the checksum for.
+  # @param {string} OUTPUT_FILE
+  # @param {[]string} [EXCLUDE_PATHS] A list of paths to exclude from the checksum.
   compute-checksum:
     desc: "Tries to compute a checksum for the given directory and output it to a file."
     internal: true
@@ -19,11 +23,17 @@ tasks:
         --numeric-owner
         --owner 0
         --sort name
+        {{- range .EXCLUDE_PATHS}}
+        --exclude="{{.}}"
+        {{- end}}
         . 2> /dev/null
         | md5sum > {{.OUTPUT_FILE}}
     # Ignore errors so that dependent tasks don't fail
     ignore_error: true
 
+  # @param {string} DATA_DIR The directory to validate the checksum for.
+  # @param {string} OUTPUT_FILE
+  # @param {[]string} [EXCLUDE_PATHS] A list of paths to exclude from the checksum.
   validate-checksum:
     desc: "Validates the checksum of the given directory matches the checksum in the given file, or
     deletes the checksum file otherwise."
@@ -37,6 +47,8 @@ tasks:
       - task: "compute-checksum"
         vars:
           DATA_DIR: "{{.DATA_DIR}}"
+          EXCLUDE_PATHS:
+            ref: ".EXCLUDE_PATHS"
           OUTPUT_FILE: "{{.TMP_CHECKSUM_FILE}}"
       - defer: "rm -f '{{.TMP_CHECKSUM_FILE}}'"
       # Check that the directory exists and the checksum matches; otherwise delete the checksum file
