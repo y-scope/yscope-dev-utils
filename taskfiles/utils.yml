@@ -3,10 +3,11 @@ version: "3"
 tasks:
   # ===
   # CHECKSUM UTILS
+  # ===
+
   # @param {string} DATA_DIR The directory to compute the checksum for.
   # @param {string} OUTPUT_FILE
   # @param {[]string} [EXCLUDE_PATHS] A list of paths to exclude from the checksum.
-  # ===
   compute-checksum:
     desc: "Tries to compute a checksum for the given directory and output it to a file."
     internal: true
@@ -30,6 +31,9 @@ tasks:
     # Ignore errors so that dependent tasks don't fail
     ignore_error: true
 
+  # @param {string} DATA_DIR The directory to compute the checksum for.
+  # @param {string} OUTPUT_FILE
+  # @param {[]string} [EXCLUDE_PATHS] A list of paths to exclude from the checksum.
   validate-checksum:
     desc: "Validates the checksum of the given directory matches the checksum in the given file, or
     deletes the checksum file otherwise."
