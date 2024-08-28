@@ -31,7 +31,7 @@ tasks:
     # Ignore errors so that dependent tasks don't fail
     ignore_error: true
 
-  # @param {string} DATA_DIR The directory to compute the checksum for.
+  # @param {string} DATA_DIR The directory to validate the checksum for.
   # @param {string} OUTPUT_FILE
   # @param {[]string} [EXCLUDE_PATHS] A list of paths to exclude from the checksum.
   validate-checksum:
