@@ -12,7 +12,16 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 #
 # @param $1 Path to the config file in the repo.
 symlink_config () {
+    if [ "$#" -ne 1 ]; then
+        echo "Usage: symlink_config <config-file-path>"
+        exit 1
+    fi
+
     config_file_path="$1"
+    if [ ! -e "$config_file_path" ]; then
+        echo "symlink_config: Config file doesn't exist: '$config_file_path'."
+        exit 1
+    fi
 
     repo_dir="$(git rev-parse --show-toplevel)"
     config_file_absolute_path="$(readlink -f "$config_file_path")"
@@ -36,7 +45,7 @@ symlink_config () {
         echo "Symlinked '${src_path}' to '${dst_path}'."
     elif [ "$(readlink -f "$src_path")" != "$(readlink -f "$dst_path")" ]; then
         echo "Unknown config file exists at '${dst_path}'. Remove it before running this script."
-        return 1
+        exit 1
     else
         echo "Already symlinked '${src_path}' to '${dst_path}'."
     fi
