@@ -15,7 +15,16 @@ symlink_config () {
     config_file_path="$1"
 
     repo_dir="$(git rev-parse --show-toplevel)"
-    repo_relative_config_file_path="$(realpath --relative-to="$repo_dir" "$config_file_path")"
+    config_file_absolute_path="$(readlink -f "$config_file_path")"
+
+    # Ensure $repo_dir has a single trailing slash
+    repo_dir="${repo_dir%/}/"
+
+    # Get the config file's path relative to the repo root
+    # NOTE: This is a bit fragile since it depends on $repo_dir having a single trailing slash.
+    # Ideally, we would use `realpath --relative-to` instead of variable substitution, but
+    # `--relative-to` isn't available on macOS.
+    repo_relative_config_file_path="${config_file_absolute_path#"${repo_dir}"}"
 
     src_path="${repo_dir}/${repo_relative_config_file_path}"
     dst_path="${repo_dir}/$(basename "$config_file_path")"
