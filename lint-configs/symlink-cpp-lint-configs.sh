@@ -18,7 +18,7 @@ symlink_config () {
     fi
 
     config_file_path="$1"
-    if [ ! -e "$config_file_path" ]; then
+    if [ ! -f "$config_file_path" ]; then
         echo "symlink_config: Config file doesn't exist: '$config_file_path'."
         return 1
     fi
