@@ -55,10 +55,10 @@ symlink_config () {
 
 main () {
     if ! symlink_config "${script_dir}/.clang-format"; then
-        exit $?
+        exit 1
     fi
     if ! symlink_config "${script_dir}/.clang-tidy"; then
-        exit $?
+        exit 1
     fi
 }
 
