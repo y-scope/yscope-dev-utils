@@ -25,10 +25,12 @@ Checks: >-
   -readability-simplify-boolean-expr,
 
 CheckOptions:
-  # These checks are intended to catch potentially bug-prone conversions from `signed char`  to
-  # larger integer types. However, these checks are only relevant when `signed char` is used to
-  # store character data. If a type like `int8_t` is used to represent signed integers, these checks
-  # can be safely skipped.
+  # These checks are intended to catch potentially bug-prone conversions from `signed char` to
+  # larger integer types, but are only relevant when `signed char` is used to store character data.
+  # If a type like `int8_t` is used to represent signed integers, these checks can be safely
+  # skipped.
+  #
+  # NOTE: The misspelling of "Typdef" is in clang's code.
   bugprone-signed-char-misuse.CharTypdefsToIgnore: "int8_t"
   cert-str34-c.CharTypdefsToIgnore: "int8_t"
 
