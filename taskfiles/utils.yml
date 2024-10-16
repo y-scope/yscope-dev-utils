@@ -103,3 +103,35 @@ tasks:
         . "{{.OUTPUT_DIR}}/bin/activate"
         pip3 install --upgrade pip
         pip3 install --upgrade -r "{{.REQUIREMENTS_FILE}}"
+
+  # ===
+  # clang UTILS
+  # ===
+  clang-format:
+    internal: true
+    requires:
+      vars: ["G_LINT_VENV_DIR", "SRC_DIR", "FLAGS"]
+    cmd: |-
+      . "{{.G_LINT_VENV_DIR}}/bin/activate"
+      find "{{.SRC_DIR}}" \
+        -type f \
+        \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
+        -print0 | \
+          xargs -0 clang-format {{.FLAGS}} -Werror
+
+  clang-tidy:
+    internal: true
+    requires:
+      vars: ["G_BUILD_DIR", "G_LINT_VENV_DIR", "SRC_DIR", "FLAGS"]
+    vars:
+      FLAGS: >-
+        -p {{.G_BUILD_DIR}}/compile_commands.json
+        --config-file=.clang-tidy
+    cmd: |-
+      . "{{.G_LINT_VENV_DIR}}/bin/activate"
+
+      find "{{.SRC_DIR}}" \
+        -type f \
+        \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
+        -print0 | \
+          xargs -0 clang-tidy {{.FLAGS}} $EXTRA_ARGS
