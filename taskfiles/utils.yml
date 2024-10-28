@@ -110,32 +110,40 @@ tasks:
 
   # @param {string} FLAGS - The flags to pass to clang-format
   # @param {string} LINT_VENV_DIR - Directory with venv fo linting
-  # @param {string} SRC_DIR - The root directory to start linting on.
+  # @param {[]string} SRC_DIRS - The directories to start linting on.
   # clang-format.
   clang-format:
     internal: true
+    ignore_error: true
     requires:
-      vars: ["FLAGS", "LINT_VENV_DIR", "SRC_DIR"]
-    cmd: |-
-      . "{{.LINT_VENV_DIR}}/bin/activate"
-      find "{{.SRC_DIR}}" \
-        -type f \
-        \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
-        -print0 | \
-          xargs -0 --no-run-if-empty clang-format {{.FLAGS}} -Werror
+      vars: ["FLAGS", "LINT_VENV_DIR", "SRC_DIRS"]
+    cmds:
+      - for:
+          var: SRC_DIRS
+        cmd: |-
+          . "{{.LINT_VENV_DIR}}/bin/activate"
+          find {{.ITEM}} \
+            -type f \
+            \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
+            -print0 | \
+              xargs -0 -r clang-format {{.FLAGS}} -Werror
 
   # @param {string} FLAGS - The flags to pass to clang-format
   # @param {string} LINT_VENV_DIR - Directory with venv fo linting
-  # @param {string} SRC_DIR - The root directory to start linting on.
+  # @param {[]string} SRC_DIRS - The directories to start linting on.
   # clang-tidy.
   clang-tidy:
     internal: true
+    ignore_error: true
     requires:
-      vars: ["FLAGS", "LINT_VENV_DIR", "SRC_DIR"]
-    cmd: |-
-      . "{{.LINT_VENV_DIR}}/bin/activate"
-      find "{{.SRC_DIR}}" \
-        -type f \
-        \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
-        -print0 | \
-          xargs -0 --no-run-if-empty clang-tidy {{.FLAGS}}
+      vars: ["FLAGS", "LINT_VENV_DIR", "SRC_DIRS"]
+    cmds:
+      - for:
+          var: SRC_DIRS
+        cmd: |-
+          . "{{.LINT_VENV_DIR}}/bin/activate"
+          find {{.ITEM}} \
+            -type f \
+            \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
+            -print0 | \
+              xargs -0 -r clang-tidy {{.FLAGS}}
