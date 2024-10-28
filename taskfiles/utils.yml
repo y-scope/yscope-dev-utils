@@ -128,10 +128,10 @@ tasks:
             -print0 | \
               xargs -0 -r clang-format {{.FLAGS}} -Werror
 
-  # @param {string} FLAGS - The flags to pass to clang-format
+  # @param {string} FLAGS - The flags to pass to clang-tidy
   # @param {string} LINT_VENV_DIR - Directory with venv fo linting
   # @param {[]string} SRC_DIRS - The directories to start linting on.
-  # clang-tidy.
+  # Runs clang-tidy on C++ source files in the specified directories.
   clang-tidy:
     internal: true
     ignore_error: true
