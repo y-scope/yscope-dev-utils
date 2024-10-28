@@ -105,33 +105,37 @@ tasks:
         pip3 install --upgrade -r "{{.REQUIREMENTS_FILE}}"
 
   # ===
-  # clang UTILS
+  # C++ LINTING UTILS
   # ===
+
+  # @param {string} FLAGS - The flags to pass to clang-format
+  # @param {string} LINT_VENV_DIR - Directory with venv fo linting
+  # @param {string} SRC_DIR - The root directory to start linting on.
+  # clang-format.
   clang-format:
     internal: true
     requires:
-      vars: ["G_LINT_VENV_DIR", "SRC_DIR", "FLAGS"]
+      vars: ["FLAGS", "LINT_VENV_DIR", "SRC_DIR"]
     cmd: |-
-      . "{{.G_LINT_VENV_DIR}}/bin/activate"
+      . "{{.LINT_VENV_DIR}}/bin/activate"
       find "{{.SRC_DIR}}" \
         -type f \
         \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
         -print0 | \
-          xargs -0 clang-format {{.FLAGS}} -Werror
+          xargs -0 --no-run-if-empty clang-format {{.FLAGS}} -Werror
 
+  # @param {string} FLAGS - The flags to pass to clang-format
+  # @param {string} LINT_VENV_DIR - Directory with venv fo linting
+  # @param {string} SRC_DIR - The root directory to start linting on.
+  # clang-tidy.
   clang-tidy:
     internal: true
     requires:
-      vars: ["G_BUILD_DIR", "G_LINT_VENV_DIR", "SRC_DIR", "FLAGS"]
-    vars:
-      FLAGS: >-
-        -p {{.G_BUILD_DIR}}/compile_commands.json
-        --config-file=.clang-tidy
+      vars: ["FLAGS", "LINT_VENV_DIR", "SRC_DIR"]
     cmd: |-
-      . "{{.G_LINT_VENV_DIR}}/bin/activate"
-
+      . "{{.LINT_VENV_DIR}}/bin/activate"
       find "{{.SRC_DIR}}" \
         -type f \
         \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
         -print0 | \
-          xargs -0 clang-tidy {{.FLAGS}} $EXTRA_ARGS
+          xargs -0 --no-run-if-empty clang-tidy {{.FLAGS}}
