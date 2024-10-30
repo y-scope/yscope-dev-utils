@@ -133,7 +133,7 @@ tasks:
             -type f \
             \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
             -print0 | \
-              xargs -0 -r clang-format {{.FLAGS}} -Werror
+              xargs -0 clang-format {{.FLAGS}} -Werror
 
   # Runs clang-tidy on C++ files in the given paths.
   #
@@ -151,4 +151,4 @@ tasks:
         -type f \
         \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
         -print0 | \
-          xargs -0 -r clang-tidy {{.FLAGS}}
+          xargs -0 clang-tidy {{.FLAGS}}
