@@ -1,5 +1,11 @@
 version: "3"
 
+vars:
+  SRC_PATHS: ['{{.ROOT_DIR}}/components/core/src/clp', '{{.ROOT_DIR}}/components/core/src/clp_s']
+  FLAGS: "" #"--dry-run"
+  VENV_DIR: "./build/lint-venv"
+
+
 tasks:
   # ===
   # CHECKSUM UTILS
@@ -116,7 +122,6 @@ tasks:
   # clang-format.
   clang-format:
     internal: true
-    ignore_error: true
     requires:
       vars: ["FLAGS", "SRC_PATHS", "VENV_DIR"]
     cmds:
@@ -124,7 +129,7 @@ tasks:
           var: SRC_PATHS
         cmd: |-
           . "{{.VENV_DIR}}/bin/activate"
-          find "{{.ITEM}}" \
+          find {{- range .SRC_PATHS}} "{{.}}" {{- end}} \
             -type f \
             \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
             -print0 | \
@@ -138,16 +143,12 @@ tasks:
   # clang-tidy
   clang-tidy:
     internal: true
-    ignore_error: true
     requires:
       vars: ["FLAGS", "SRC_PATHS", "VENV_DIR"]
-    cmds:
-      - for:
-          var: SRC_PATHS
-        cmd: |-
-          . "{{.VENV_DIR}}/bin/activate"
-          find "{{.ITEM}}" \
-            -type f \
-            \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
-            -print0 | \
-              xargs -0 -r clang-tidy {{.FLAGS}}
+    cmd: |-
+      . "{{.VENV_DIR}}/bin/activate"
+      find {{- range .SRC_PATHS}} "{{.}}" {{- end}} \
+        -type f \
+        \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
+        -print0 | \
+          xargs -0 -r clang-tidy {{.FLAGS}}
