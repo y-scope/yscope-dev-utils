@@ -1,11 +1,5 @@
 version: "3"
 
-vars:
-  SRC_PATHS: ['{{.ROOT_DIR}}/components/core/src/clp', '{{.ROOT_DIR}}/components/core/src/clp_s']
-  FLAGS: "" #"--dry-run"
-  VENV_DIR: "./build/lint-venv"
-
-
 tasks:
   # ===
   # CHECKSUM UTILS
