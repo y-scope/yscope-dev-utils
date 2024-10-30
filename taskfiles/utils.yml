@@ -124,7 +124,7 @@ tasks:
           var: SRC_PATHS
         cmd: |-
           . "{{.VENV_DIR}}/bin/activate"
-          find "{{.ITEM}}"" \
+          find "{{.ITEM}}" \
             -type f \
             \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
             -print0 | \
@@ -135,6 +135,7 @@ tasks:
   # @param {string} FLAGS Any flags to pass to clang-tidy.
   # @param {[]string} SRC_PATHS The paths on which to run clang-tidy.
   # @param {string} VENV_DIR Python virtual environment where clang-tidy is installed.
+  # clang-tidy
   clang-tidy:
     internal: true
     ignore_error: true
