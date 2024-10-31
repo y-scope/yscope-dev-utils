@@ -108,33 +108,28 @@ tasks:
   # C++ LINTING UTILS
   # ===
 
-  # Runs clang-format on C++ files in the given paths.
+  # Runs clang-format on C++ files at the given paths.
   #
   # @param {string} FLAGS Any flags to pass to clang-format.
   # @param {[]string} SRC_PATHS The paths on which to run clang-format.
   # @param {string} VENV_DIR Python virtual environment where clang-format is installed.
-  # clang-format.
   clang-format:
     internal: true
     requires:
       vars: ["FLAGS", "SRC_PATHS", "VENV_DIR"]
-    cmds:
-      - for:
-          var: SRC_PATHS
-        cmd: |-
-          . "{{.VENV_DIR}}/bin/activate"
-          find {{- range .SRC_PATHS}} "{{.}}" {{- end}} \
-            -type f \
-            \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
-            -print0 | \
-              xargs -0 clang-format {{.FLAGS}} -Werror
+    cmd: |-
+      . "{{.VENV_DIR}}/bin/activate"
+      find {{- range .SRC_PATHS}} "{{.}}" {{- end}} \
+        -type f \
+        \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
+        -print0 | \
+          xargs -0 clang-format {{.FLAGS}} -Werror
 
-  # Runs clang-tidy on C++ files in the given paths.
+  # Runs clang-tidy on C++ files at the given paths.
   #
   # @param {string} FLAGS Any flags to pass to clang-tidy.
   # @param {[]string} SRC_PATHS The paths on which to run clang-tidy.
   # @param {string} VENV_DIR Python virtual environment where clang-tidy is installed.
-  # clang-tidy
   clang-tidy:
     internal: true
     requires:
