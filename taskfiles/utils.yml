@@ -50,7 +50,7 @@ tasks:
         vars:
           DATA_DIR: "{{.DATA_DIR}}"
           EXCLUDE_PATHS:
-            ref: ".EXCLUDE_PATHS"
+            ref: "default (list) .EXCLUDE_PATHS"
           OUTPUT_FILE: "{{.TMP_CHECKSUM_FILE}}"
       - defer: "rm -f '{{.TMP_CHECKSUM_FILE}}'"
       # Check that the directory exists and the checksum matches; otherwise delete the checksum file
