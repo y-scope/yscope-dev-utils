@@ -14,7 +14,7 @@ tasks:
     internal: true
     silent: true
     requires:
-      vars: ["DATA_DIR", "OUTPUT_FILE"]
+      vars: ["DATA_PATHS", "OUTPUT_FILE"]
     cmds:
       - >-
         tar cf -
@@ -46,7 +46,7 @@ tasks:
     vars:
       TMP_CHECKSUM_FILE: "{{.CHECKSUM_FILE}}.tmp"
     requires:
-      vars: ["CHECKSUM_FILE", "DATA_DIR"]
+      vars: ["CHECKSUM_FILE", "DATA_PATHS"]
     cmds:
       - task: "compute-checksum"
         vars:
@@ -162,7 +162,7 @@ tasks:
     internal: true
     vars:
       CHECKSUM_FILE: '{{default (printf "%s.md5" .BUILD_DIR) .CHECKSUM_FILE}}'
-      CMAKE_ARGS: "{{default nil .CMAKE_ARGS}}"
+      CMAKE_ARGS: "{{default "" .CMAKE_ARGS}}"
     requires:
       vars: ["BUILD_DIR", "SOURCE_DIR"]
     sources:
