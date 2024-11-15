@@ -5,9 +5,9 @@ tasks:
   # CHECKSUM UTILS
   # ===
 
-  # @param {[]string} [DATA_PATHS] List of paths to compute the checksum for.
+  # @param {string[]} DATA_PATHS List of paths to compute the checksum for.
   # @param {string} OUTPUT_FILE
-  # @param {[]string} [EXCLUDE_PATHS] List of paths, relative to any `DATA_PATHS`, to exclude from
+  # @param {string[]} [EXCLUDE_PATHS] List of paths, relative to any `DATA_PATHS`, to exclude from
   # the checksum.
   compute-checksum:
     desc: "Tries to compute a checksum for the given directory and output it to a file."
@@ -34,9 +34,9 @@ tasks:
     # Ignore errors so that dependent tasks don't fail
     ignore_error: true
 
-  # @param {[]string} [DATA_PATHS] List of paths to validate the checksum for.
+  # @param {string[]} DATA_PATHS List of paths to validate the checksum for.
   # @param {string} OUTPUT_FILE
-  # @param {[]string} [EXCLUDE_PATHS] List of paths, relative to any `DATA_PATHS`, to exclude from
+  # @param {string[]} [EXCLUDE_PATHS] List of paths, relative to any `DATA_PATHS`, to exclude from
   # the checksum.
   validate-checksum:
     desc: "Validates the checksum of the given directory matches the checksum in the given file, or
@@ -62,8 +62,8 @@ tasks:
         {{- range .DATA_PATHS}}
         test -e "{{.}}" &&
         {{- end}}
-        diff -q '{{.TMP_CHECKSUM_FILE}}' '{{.CHECKSUM_FILE}}' 2> /dev/null
-        ) || rm -f '{{.CHECKSUM_FILE}}'
+        diff -q "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" 2> /dev/null
+        ) || rm -f "{{.CHECKSUM_FILE}}"
 
   # ===
   # STRING UTILS
@@ -80,7 +80,7 @@ tasks:
         # 2. We can't use `--regexp` instead of `-E` since `--regexp` is not supported on macOS
         src="{{.FILE_PATH}}"
         dst="{{.FILE_PATH}}.tmp"
-        sed -E '{{.SED_EXP}}' "${src}" > "${dst}"
+        sed -E "{{.SED_EXP}}" "${src}" > "${dst}"
         mv "${dst}" "${src}"
 
   # ===
@@ -116,7 +116,7 @@ tasks:
   # Runs clang-format on C++ files at the given paths.
   #
   # @param {string} FLAGS Any flags to pass to clang-format.
-  # @param {[]string} SRC_PATHS The paths on which to run clang-format.
+  # @param {string[]} SRC_PATHS The paths on which to run clang-format.
   # @param {string} VENV_DIR Python virtual environment where clang-format is installed.
   clang-format:
     internal: true
@@ -133,7 +133,7 @@ tasks:
   # Runs clang-tidy on C++ files at the given paths.
   #
   # @param {string} FLAGS Any flags to pass to clang-tidy.
-  # @param {[]string} SRC_PATHS The paths on which to run clang-tidy.
+  # @param {string[]} SRC_PATHS The paths on which to run clang-tidy.
   # @param {string} VENV_DIR Python virtual environment where clang-tidy is installed.
   clang-tidy:
     internal: true
@@ -155,14 +155,16 @@ tasks:
   #
   # @param {string} BUILD_DIR Cmake build directory to create.
   # @param {string} SOURCE_DIR Project source directory containing the CMakeLists.txt file.
-  # @param {string}[optional] CHECKSUM_FILE Path to store the checksum of built files.
-  # @param {string}[optional] CMAKE_ARGS Any additional arguments to pass to cmake configure.
+  # @param {string={{.BUILD_DIR}}.md5} [CHECKSUM_FILE] Path to store the checksum of built files.
+  # @param {string=""} [CMAKE_ARGS] Any additional arguments to pass to cmake configure.
   cmake-build:
-    label: "cmake-build: {{.SOURCE_DIR}} {{.BUILD_DIR}}"
+    label: "{{.TASK}}-{{.SOURCE_DIR}}-{{.BUILD_DIR}}"
     internal: true
     vars:
-      CHECKSUM_FILE: '{{default (printf "%s.md5" .BUILD_DIR) .CHECKSUM_FILE}}'
-      CMAKE_ARGS: "{{default "" .CMAKE_ARGS}}"
+      CHECKSUM_FILE: >-
+        {{default (printf "%s.md5" .BUILD_DIR) .CHECKSUM_FILE}}
+      CMAKE_ARGS: >-
+        {{default "" .CMAKE_ARGS}}
     requires:
       vars: ["BUILD_DIR", "SOURCE_DIR"]
     sources:
@@ -197,16 +199,17 @@ tasks:
   #
   # @param {string} BUILD_DIR Cmake build directory.
   # @param {string} INSTALL_PREFIX Path prefix for installing the project.
-  # @param {string}[optional] CHECKSUM_FILE Path to store the checksum of installed files.
-  # @param {[]string}[optional] DATA_PATHS Paths to compute the the checksum for. Overrides using
-  # the install prefix path.
+  # @param {string={{.INSTALL_PREFIX}}.md5} [CHECKSUM_FILE] Path to store the checksum of installed
+  # files.
+  # @param {string[]=[{{.INSTALL_PREFIX}}]} [DATA_PATHS] Paths to compute the the checksum for.
   cmake-install:
-    label: "cmake-install: {{.BUILD_DIR}} {{.INSTALL_PREFIX}}"
+    label: "{{.TASK}}-{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}"
     internal: true
     vars:
-      CHECKSUM_FILE: '{{default (printf "%s.md5" .INSTALL_PREFIX) .CHECKSUM_FILE}}'
-      # Convert the install prefix to a single element array for the default case where DATA_PATHS
-      # is not manually set.
+      CHECKSUM_FILE: >-
+        {{default (printf "%s.md5" .INSTALL_PREFIX) .CHECKSUM_FILE}}
+      # Convert the install prefix to a single element array in the default case where DATA_PATHS
+      # has not been set.
       _INSTALL_PREFIX_ARRAY: ["{{.INSTALL_PREFIX}}"]
       DATA_PATHS:
         ref: "default ._INSTALL_PREFIX_ARRAY .DATA_PATHS"
@@ -242,9 +245,9 @@ tasks:
   #
   # @param {string} URL
   # @param {string} URL_SHA256 Content hash to verify downloaded file against.
-  # @param {string}[optional] OUTPUT_FILE File path to store the download file.
+  # @param {string={{(base .URL)}}} [OUTPUT_FILE] File path to store the download file.
   curl:
-    label: "curl: {{.OUTPUT_FILE}}"
+    label: "{{.TASK}}-{{.OUTPUT_FILE}}"
     internal: true
     vars:
       OUTPUT_FILE: "{{default (base .URL) .OUTPUT_FILE}}"
@@ -261,23 +264,41 @@ tasks:
     cmds:
       - |-
         mkdir -p "{{dir .OUTPUT_FILE}}"
-        curl -L "{{.URL}}" -o "{{.OUTPUT_FILE}}"
+        max_attempts=3
+        attempt=1
+        while [ $attempt -le $max_attempts ]; do
+          if curl --fail --location --show-error --connect-timeout 10 --max-time 300 \
+              --location "{{.URL}}" --output "{{.OUTPUT_FILE}}";
+          then
+            break
+          fi
+          echo "Attempt $attempt failed. Retrying..."
+          attempt=$((attempt + 1))
+          sleep 5
+        done
+        if [ $attempt -gt $max_attempts ]; then
+          echo "Failed to download after $max_attempts attempts"
+          exit 1
+        fi
 
   # Runs curl to download the provided URL and tar to extract its contents.
   #
   # @param {string} OUTPUT_DIR Path to extract downloaded tar file contents to.
   # @param {string} URL
   # @param {string} URL_SHA256 Content hash to verify downloaded tar file against.
-  # @param {string}[optional] CHECKSUM_FILE File path to store the checksum of downloaded tar file.
-  # @param {int}[optional] STRIP Number of leading components to strip from file names for tar.
-  # @param {string}[optional] TAR_FILE File path to store the downloaded tar file.
-  fetch-src:
-    label: "fetch-src: {{.OUTPUT_DIR}}"
+  # @param {string={{.OUTPUT_DIR}}.md5} [CHECKSUM_FILE] File path to store the checksum of
+  # downloaded tar file.
+  # @param {int=1} [STRIP] Number of leading components to strip from file names for tar.
+  # @param {string={{.OUTPUT_DIR}}.tar.gz} [TAR_FILE] File path to store the downloaded tar file.
+  download-and-extract-tar:
+    label: "{{.TASK}}-{{.OUTPUT_DIR}}"
     internal: true
     vars:
-      CHECKSUM_FILE: '{{default (printf "%s.md5" .OUTPUT_DIR) .CHECKSUM_FILE}}'
+      CHECKSUM_FILE: >-
+        {{default (printf "%s.md5" .OUTPUT_DIR) .CHECKSUM_FILE}}
       STRIP: "{{default 1 .STRIP}}"
-      TAR_FILE: '{{default (printf "%s.tar.gz" .OUTPUT_DIR) .TAR_FILE}}'
+      TAR_FILE: >-
+        {{default (printf "%s.tar.gz" .OUTPUT_DIR) .TAR_FILE}}
     requires:
       vars: ["OUTPUT_DIR", "URL", "URL_SHA256"]
     sources: ["{{.TASKFILE}}"]
