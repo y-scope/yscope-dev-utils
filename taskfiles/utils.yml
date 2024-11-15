@@ -10,7 +10,7 @@ tasks:
   # @param {string[]} [EXCLUDE_PATHS] List of paths, relative to any `DATA_PATHS`, to exclude from
   # the checksum.
   compute-checksum:
-    desc: "Tries to compute a checksum for the given directory and output it to a file."
+    desc: "Tries to compute a checksum for the given paths and output it to a file."
     internal: true
     silent: true
     requires:
@@ -288,6 +288,8 @@ tasks:
   # @param {string} URL_SHA256 Content hash to verify downloaded tar file against.
   # @param {string={{.OUTPUT_DIR}}.md5} [CHECKSUM_FILE] File path to store the checksum of
   # downloaded tar file.
+  # @param {string[]=[]} [EXCLUDE_PATHS] Wildcard patterns excluded from the tar archive.
+  # @param {string[]=[]} [INCLUDE_PATHS] Wildcard patterns included from the tar archive.
   # @param {int=1} [STRIP] Number of leading components to strip from file names for tar.
   # @param {string={{.OUTPUT_DIR}}.tar.gz} [TAR_FILE] File path to store the downloaded tar file.
   download-and-extract-tar:
@@ -296,6 +298,10 @@ tasks:
     vars:
       CHECKSUM_FILE: >-
         {{default (printf "%s.md5" .OUTPUT_DIR) .CHECKSUM_FILE}}
+      EXCLUDE_PATHS:
+        ref: "default (list) .EXCLUDE_PATHS"
+      INCLUDE_PATHS:
+        ref: "default (list) .INCLUDE_PATHS"
       STRIP: "{{default 1 .STRIP}}"
       TAR_FILE: >-
         {{default (printf "%s.tar.gz" .OUTPUT_DIR) .TAR_FILE}}
@@ -317,7 +323,15 @@ tasks:
       - |-
         rm -rf "{{.OUTPUT_DIR}}"
         mkdir -p "{{.OUTPUT_DIR}}"
-        tar -x --strip-components="{{.STRIP}}" -C "{{.OUTPUT_DIR}}" -f "{{.TAR_FILE}}"
+      - >-
+        tar --extract
+        --strip-components="{{.STRIP}}"
+        --directory "{{.OUTPUT_DIR}}"
+        --file "{{.TAR_FILE}}"
+        --wildcards
+        --no-anchored
+        {{- range .INCLUDE_PATHS}} "{{.}}" {{- end}}
+        {{- range .EXCLUDE_PATHS}} --exclude="{{.}}" {{- end}}
       # This command must be last
       - task: "compute-checksum"
         vars:
