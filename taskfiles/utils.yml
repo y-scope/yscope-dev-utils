@@ -56,7 +56,7 @@ tasks:
             ref: "default (list) .EXCLUDE_PATHS"
           OUTPUT_FILE: "{{.TMP_CHECKSUM_FILE}}"
       - defer: "rm -f '{{.TMP_CHECKSUM_FILE}}'"
-      # Check that the path exists and the checksum matches; otherwise delete the checksum file
+      # Check that the paths exist and the checksum matches; otherwise delete the checksum file.
       - >-
         (
         {{- range .DATA_PATHS}}
@@ -151,12 +151,12 @@ tasks:
   # CMAKE UTILS
   # ===
 
-  # Runs cmake configure and build steps for the given source and build directories.
+  # Runs CMake's configure and build steps for the given source and build directories.
   #
-  # @param {string} BUILD_DIR Cmake build directory to create.
+  # @param {string} BUILD_DIR CMake build directory to create.
   # @param {string} SOURCE_DIR Project source directory containing the CMakeLists.txt file.
   # @param {string={{.BUILD_DIR}}.md5} [CHECKSUM_FILE] Path to store the checksum of built files.
-  # @param {string=""} [CMAKE_ARGS] Any additional arguments to pass to cmake configure.
+  # @param {string=""} [CMAKE_ARGS] Any additional arguments to pass to CMake's configure step.
   cmake-build:
     label: "{{.TASK}}-{{.SOURCE_DIR}}-{{.BUILD_DIR}}"
     internal: true
@@ -192,13 +192,13 @@ tasks:
       - task: "compute-checksum"
         vars:
           DATA_PATHS: ["{{.BUILD_DIR}}"]
-          OUTPUT_FILE: "{{.CHECKSUM_FILE}}"
           EXCLUDE_PATHS: ["install_manifest.txt"]
+          OUTPUT_FILE: "{{.CHECKSUM_FILE}}"
 
-  # Runs cmake install step for the given build directory.
+  # Runs the CMake install step for the given build directory.
   #
-  # @param {string} BUILD_DIR Cmake build directory.
-  # @param {string} INSTALL_PREFIX Path prefix for installing the project.
+  # @param {string} BUILD_DIR CMake build directory.
+  # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
   # @param {string={{.INSTALL_PREFIX}}.md5} [CHECKSUM_FILE] Path to store the checksum of installed
   # files.
   # @param {string[]=[{{.INSTALL_PREFIX}}]} [DATA_PATHS] Paths to compute the the checksum for.
@@ -208,11 +208,8 @@ tasks:
     vars:
       CHECKSUM_FILE: >-
         {{default (printf "%s.md5" .INSTALL_PREFIX) .CHECKSUM_FILE}}
-      # Convert the install prefix to a single element array in the default case where DATA_PATHS
-      # has not been set.
-      _INSTALL_PREFIX_ARRAY: ["{{.INSTALL_PREFIX}}"]
       DATA_PATHS:
-        ref: "default ._INSTALL_PREFIX_ARRAY .DATA_PATHS"
+        ref: "default (list .INSTALL_PREFIX) .DATA_PATHS"
     requires:
       vars: ["BUILD_DIR", "INSTALL_PREFIX"]
     sources:
@@ -241,11 +238,11 @@ tasks:
   # REMOTE UTILS
   # ===
 
-  # Runs curl to download the provided URL.
+  # Runs curl to download a file from the given URL.
   #
   # @param {string} URL
   # @param {string} URL_SHA256 Content hash to verify downloaded file against.
-  # @param {string={{(base .URL)}}} [OUTPUT_FILE] File path to store the download file.
+  # @param {string={{(base .URL)}}} [OUTPUT_FILE] Path where the file should be stored.
   curl:
     label: "{{.TASK}}-{{.OUTPUT_FILE}}"
     internal: true
@@ -253,8 +250,7 @@ tasks:
       OUTPUT_FILE: "{{default (base .URL) .OUTPUT_FILE}}"
     requires:
       vars: ["URL", "URL_SHA256"]
-    generates:
-      - "{{.OUTPUT_FILE}}"
+    generates: ["{{.OUTPUT_FILE}}"]
     status:
       - >-
         diff
@@ -277,21 +273,21 @@ tasks:
           sleep 5
         done
         if [ $attempt -gt $max_attempts ]; then
-          echo "Failed to download after $max_attempts attempts"
+          echo "Failed to download after $max_attempts attempts."
           exit 1
         fi
 
-  # Runs curl to download the provided URL and tar to extract its contents.
+  # Runs curl to download the tarball from the given URL and extracts its contents.
   #
-  # @param {string} OUTPUT_DIR Path to extract downloaded tar file contents to.
+  # @param {string} OUTPUT_DIR Directory in which to extract the tarball.
   # @param {string} URL
   # @param {string} URL_SHA256 Content hash to verify downloaded tar file against.
   # @param {string={{.OUTPUT_DIR}}.md5} [CHECKSUM_FILE] File path to store the checksum of
   # downloaded tar file.
-  # @param {string[]=[]} [EXCLUDE_PATHS] Wildcard patterns excluded from the tar archive.
-  # @param {string[]=[]} [INCLUDE_PATHS] Wildcard patterns included from the tar archive.
-  # @param {int=1} [STRIP] Number of leading components to strip from file names for tar.
-  # @param {string={{.OUTPUT_DIR}}.tar.gz} [TAR_FILE] File path to store the downloaded tar file.
+  # @param {string[]=[]} [EXCLUDE_PATHS] Wildcard patterns for paths that shouldn't be extracted.
+  # @param {string[]=[]} [INCLUDE_PATHS] Wildcard patterns for paths to extract.
+  # @param {int=1} [STRIP] Number of leading path components to strip from the extracted files.
+  # @param {string={{.OUTPUT_DIR}}.tar.gz} [TAR_FILE] Path where the tarball should be stored.
   download-and-extract-tar:
     label: "{{.TASK}}-{{.OUTPUT_DIR}}"
     internal: true
