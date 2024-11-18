@@ -7,7 +7,8 @@ tasks:
 
   # @param {string[]} DATA_PATHS List of paths to compute the checksum for.
   # @param {string} OUTPUT_FILE
-  # @param {string[]} [EXCLUDE_PATHS] List of paths, relative to any `DATA_PATHS`, to exclude from
+  # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `DATA_PATHS`, to
+  # exclude from the checksum.
   # the checksum.
   compute-checksum:
     desc: "Tries to compute a checksum for the given paths and output it to a file."
@@ -23,7 +24,9 @@ tasks:
         --numeric-owner
         --owner 0
         --sort name
-        {{- range .EXCLUDE_PATHS}}
+        --no-anchored
+        --wildcards
+        {{- range .EXCLUDE_PATTERNS}}
         --exclude="{{.}}"
         {{- end}}
         {{- range .DATA_PATHS}}
@@ -36,8 +39,8 @@ tasks:
 
   # @param {string[]} DATA_PATHS List of paths to validate the checksum for.
   # @param {string} OUTPUT_FILE
-  # @param {string[]} [EXCLUDE_PATHS] List of paths, relative to any `DATA_PATHS`, to exclude from
-  # the checksum.
+  # @param {string[]} [EXCLUDE_PATTERNS] List of paths, relative to any `DATA_PATHS`, to exclude
+  # from the checksum.
   validate-checksum:
     desc: "Validates the checksum of the given directory matches the checksum in the given file, or
     deletes the checksum file otherwise."
@@ -52,8 +55,8 @@ tasks:
         vars:
           DATA_PATHS:
             ref: ".DATA_PATHS"
-          EXCLUDE_PATHS:
-            ref: "default (list) .EXCLUDE_PATHS"
+          EXCLUDE_PATTERNS:
+            ref: "default (list) .EXCLUDE_PATTERNS"
           OUTPUT_FILE: "{{.TMP_CHECKSUM_FILE}}"
       - defer: "rm -f '{{.TMP_CHECKSUM_FILE}}'"
       # Check that the paths exist and the checksum matches; otherwise delete the checksum file.
@@ -157,7 +160,7 @@ tasks:
   # @param {string} SOURCE_DIR Project source directory containing the CMakeLists.txt file.
   # @param {string={{.BUILD_DIR}}.md5} [CHECKSUM_FILE] Path to store the checksum of built files.
   # @param {string=""} [CMAKE_ARGS] Any additional arguments to pass to CMake's configure step.
-  cmake-build:
+  cmake-config-and-build:
     label: "{{.TASK}}-{{.SOURCE_DIR}}-{{.BUILD_DIR}}"
     internal: true
     vars:
@@ -169,15 +172,13 @@ tasks:
       vars: ["BUILD_DIR", "SOURCE_DIR"]
     sources:
       - "{{.SOURCE_DIR}}/**/*"
-      - exclude: "{{.SOURCE_DIR}}/.cache/**/*"
-      - exclude: "{{.SOURCE_DIR}}/compile_commands.json"
     generates: ["{{.CHECKSUM_FILE}}"]
     deps:
       - task: "validate-checksum"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           DATA_PATHS: ["{{.BUILD_DIR}}"]
-          EXCLUDE_PATHS: ["install_manifest.txt"]
+          EXCLUDE_PATTERNS: ["install_manifest.txt"]
     cmds:
       - >-
         cmake
@@ -241,7 +242,7 @@ tasks:
   # Runs curl to download a file from the given URL.
   #
   # @param {string} URL
-  # @param {string} URL_SHA256 Content hash to verify downloaded file against.
+  # @param {string} FILE_SHA256 Content hash to verify downloaded file against.
   # @param {string={{(base .URL)}}} [OUTPUT_FILE] Path where the file should be stored.
   curl:
     label: "{{.TASK}}-{{.OUTPUT_FILE}}"
@@ -249,12 +250,12 @@ tasks:
     vars:
       OUTPUT_FILE: "{{default (base .URL) .OUTPUT_FILE}}"
     requires:
-      vars: ["URL", "URL_SHA256"]
+      vars: ["URL", "FILE_SHA256"]
     generates: ["{{.OUTPUT_FILE}}"]
     status:
       - >-
         diff
-        <(echo "{{.URL_SHA256}}")
+        <(echo "{{.FILE_SHA256}}")
         <(openssl dgst -sha256 "{{.OUTPUT_FILE}}"
         | awk '{print $2}')
     cmds:
@@ -263,8 +264,14 @@ tasks:
         max_attempts=3
         attempt=1
         while [ $attempt -le $max_attempts ]; do
-          if curl --fail --location --show-error --connect-timeout 10 --max-time 300 \
-              --location "{{.URL}}" --output "{{.OUTPUT_FILE}}";
+          if curl \
+              --fail \
+              --location \
+              --show-error \
+              --connect-timeout 10 \
+              --max-time 300 \
+              "{{.URL}}" \
+              --output "{{.OUTPUT_FILE}}";
           then
             break
           fi
@@ -281,12 +288,13 @@ tasks:
   #
   # @param {string} OUTPUT_DIR Directory in which to extract the tarball.
   # @param {string} URL
-  # @param {string} URL_SHA256 Content hash to verify downloaded tar file against.
+  # @param {string} FILE_SHA256 Content hash to verify downloaded tar file against.
   # @param {string={{.OUTPUT_DIR}}.md5} [CHECKSUM_FILE] File path to store the checksum of
   # downloaded tar file.
   # @param {string[]=[]} [EXCLUDE_PATHS] Wildcard patterns for paths that shouldn't be extracted.
   # @param {string[]=[]} [INCLUDE_PATHS] Wildcard patterns for paths to extract.
-  # @param {int=1} [STRIP] Number of leading path components to strip from the extracted files.
+  # @param {int=1} [NUM_COMPONENTS_TO_STRIP] Number of leading path components to strip from the
+  # extracted files.
   # @param {string={{.OUTPUT_DIR}}.tar.gz} [TAR_FILE] Path where the tarball should be stored.
   download-and-extract-tar:
     label: "{{.TASK}}-{{.OUTPUT_DIR}}"
@@ -294,22 +302,22 @@ tasks:
     vars:
       CHECKSUM_FILE: >-
         {{default (printf "%s.md5" .OUTPUT_DIR) .CHECKSUM_FILE}}
-      EXCLUDE_PATHS:
-        ref: "default (list) .EXCLUDE_PATHS"
+      EXCLUDE_PATTERNS:
+        ref: "default (list) .EXCLUDE_PATTERNS"
       INCLUDE_PATHS:
         ref: "default (list) .INCLUDE_PATHS"
-      STRIP: "{{default 1 .STRIP}}"
+      NUM_COMPONENTS_TO_STRIP: "{{default 1 .NUM_COMPONENTS_TO_STRIP}}"
       TAR_FILE: >-
         {{default (printf "%s.tar.gz" .OUTPUT_DIR) .TAR_FILE}}
     requires:
-      vars: ["OUTPUT_DIR", "URL", "URL_SHA256"]
+      vars: ["OUTPUT_DIR", "URL", "FILE_SHA256"]
     sources: ["{{.TASKFILE}}"]
     generates: ["{{.CHECKSUM_FILE}}", "{{.TAR_FILE}}"]
     deps:
       - task: "curl"
         vars:
           URL: "{{.URL}}"
-          URL_SHA256: "{{.URL_SHA256}}"
+          FILE_SHA256: "{{.FILE_SHA256}}"
           OUTPUT_FILE: "{{.TAR_FILE}}"
       - task: "validate-checksum"
         vars:
@@ -320,14 +328,20 @@ tasks:
         rm -rf "{{.OUTPUT_DIR}}"
         mkdir -p "{{.OUTPUT_DIR}}"
       - >-
-        tar --extract
-        --strip-components="{{.STRIP}}"
+        tar
+        --extract
+        --strip-components="{{.NUM_COMPONENTS_TO_STRIP}}"
         --directory "{{.OUTPUT_DIR}}"
         --file "{{.TAR_FILE}}"
-        --wildcards
         --no-anchored
-        {{- range .INCLUDE_PATHS}} "{{.}}" {{- end}}
-        {{- range .EXCLUDE_PATHS}} --exclude="{{.}}" {{- end}}
+        --wildcards
+        {{- range .EXCLUDE_PATTERNS}}
+        --exclude="{{.}}"
+        {{- end}}
+        {{- range .DATA_PATHS}}
+        "{{.}}"
+        {{- end}}
+        2> /dev/null
       # This command must be last
       - task: "compute-checksum"
         vars:
