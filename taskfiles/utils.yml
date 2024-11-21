@@ -5,17 +5,16 @@ tasks:
   # CHECKSUM UTILS
   # ===
 
-  # @param {string[]} DATA_PATHS List of paths to compute the checksum for.
+  # @param {string[]} DATA_PATTERNS Path wildcard patterns to compute the checksum for.
   # @param {string} OUTPUT_FILE
-  # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `DATA_PATHS`, to
+  # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `DATA_PATTERNS`, to
   # exclude from the checksum.
-  # the checksum.
   compute-checksum:
     desc: "Tries to compute a checksum for the given paths and output it to a file."
     internal: true
     silent: true
     requires:
-      vars: ["DATA_PATHS", "OUTPUT_FILE"]
+      vars: ["DATA_PATTERNS", "OUTPUT_FILE"]
     cmds:
       - >-
         tar cf -
@@ -29,7 +28,7 @@ tasks:
         {{- range .EXCLUDE_PATTERNS}}
         --exclude="{{.}}"
         {{- end}}
-        {{- range .DATA_PATHS}}
+        {{- range .DATA_PATTERNS}}
         "{{.}}"
         {{- end}}
         2> /dev/null
@@ -37,10 +36,10 @@ tasks:
     # Ignore errors so that dependent tasks don't fail
     ignore_error: true
 
-  # @param {string[]} DATA_PATHS List of paths to validate the checksum for.
+  # @param {string[]} DATA_PATTERNS Path wildcard patterns to validate the checksum for.
   # @param {string} OUTPUT_FILE
-  # @param {string[]} [EXCLUDE_PATTERNS] List of paths, relative to any `DATA_PATHS`, to exclude
-  # from the checksum.
+  # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `DATA_PATTERNS`, to
+  # exclude from the checksum.
   validate-checksum:
     desc: "Validates the checksum of the given directory matches the checksum in the given file, or
     deletes the checksum file otherwise."
@@ -49,12 +48,12 @@ tasks:
     vars:
       TMP_CHECKSUM_FILE: "{{.CHECKSUM_FILE}}.tmp"
     requires:
-      vars: ["CHECKSUM_FILE", "DATA_PATHS"]
+      vars: ["CHECKSUM_FILE", "DATA_PATTERNS"]
     cmds:
       - task: "compute-checksum"
         vars:
-          DATA_PATHS:
-            ref: ".DATA_PATHS"
+          DATA_PATTERNS:
+            ref: ".DATA_PATTERNS"
           EXCLUDE_PATTERNS:
             ref: "default (list) .EXCLUDE_PATTERNS"
           OUTPUT_FILE: "{{.TMP_CHECKSUM_FILE}}"
@@ -62,7 +61,7 @@ tasks:
       # Check that the paths exist and the checksum matches; otherwise delete the checksum file.
       - >-
         (
-        {{- range .DATA_PATHS}}
+        {{- range .DATA_PATTERNS}}
         test -e "{{.}}" &&
         {{- end}}
         diff -q "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" 2> /dev/null
@@ -158,27 +157,15 @@ tasks:
   #
   # @param {string} BUILD_DIR CMake build directory to create.
   # @param {string} SOURCE_DIR Project source directory containing the CMakeLists.txt file.
-  # @param {string={{.BUILD_DIR}}.md5} [CHECKSUM_FILE] Path to store the checksum of built files.
   # @param {string=""} [CMAKE_ARGS] Any additional arguments to pass to CMake's configure step.
   cmake-config-and-build:
     label: "{{.TASK}}-{{.SOURCE_DIR}}-{{.BUILD_DIR}}"
     internal: true
     vars:
-      CHECKSUM_FILE: >-
-        {{default (printf "%s.md5" .BUILD_DIR) .CHECKSUM_FILE}}
       CMAKE_ARGS: >-
         {{default "" .CMAKE_ARGS}}
     requires:
       vars: ["BUILD_DIR", "SOURCE_DIR"]
-    sources:
-      - "{{.SOURCE_DIR}}/**/*"
-    generates: ["{{.CHECKSUM_FILE}}"]
-    deps:
-      - task: "validate-checksum"
-        vars:
-          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
-          DATA_PATHS: ["{{.BUILD_DIR}}"]
-          EXCLUDE_PATTERNS: ["install_manifest.txt"]
     cmds:
       - >-
         cmake
@@ -189,51 +176,21 @@ tasks:
         cmake
         --build "{{.BUILD_DIR}}"
         --parallel
-      # This command must be last
-      - task: "compute-checksum"
-        vars:
-          DATA_PATHS: ["{{.BUILD_DIR}}"]
-          EXCLUDE_PATHS: ["install_manifest.txt"]
-          OUTPUT_FILE: "{{.CHECKSUM_FILE}}"
 
-  # Runs the CMake install step for the given build directory.
+  # Unconditionally runs the CMake install step for the given build directory.
   #
   # @param {string} BUILD_DIR CMake build directory.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
-  # @param {string={{.INSTALL_PREFIX}}.md5} [CHECKSUM_FILE] Path to store the checksum of installed
-  # files.
-  # @param {string[]=[{{.INSTALL_PREFIX}}]} [DATA_PATHS] Paths to compute the the checksum for.
   cmake-install:
     label: "{{.TASK}}-{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}"
     internal: true
-    vars:
-      CHECKSUM_FILE: >-
-        {{default (printf "%s.md5" .INSTALL_PREFIX) .CHECKSUM_FILE}}
-      DATA_PATHS:
-        ref: "default (list .INSTALL_PREFIX) .DATA_PATHS"
     requires:
       vars: ["BUILD_DIR", "INSTALL_PREFIX"]
-    sources:
-      - "{{.BUILD_DIR}}/**/*"
-      - exclude: "{{.BUILD_DIR}}/install_manifest.txt"
-    generates: ["{{.CHECKSUM_FILE}}"]
-    deps:
-      - task: "validate-checksum"
-        vars:
-          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
-          DATA_PATHS:
-            ref: ".DATA_PATHS"
     cmds:
       - >-
         cmake
         --install "{{.BUILD_DIR}}"
         --prefix "{{.INSTALL_PREFIX}}"
-      # This command must be last
-      - task: "compute-checksum"
-        vars:
-          DATA_PATHS:
-            ref: ".DATA_PATHS"
-          OUTPUT_FILE: "{{.CHECKSUM_FILE}}"
 
   # ===
   # REMOTE UTILS
@@ -275,7 +232,6 @@ tasks:
           then
             break
           fi
-          echo "Attempt $attempt failed. Retrying..."
           attempt=$((attempt + 1))
           sleep 5
         done
@@ -284,18 +240,18 @@ tasks:
           exit 1
         fi
 
-  # Runs curl to download the tarball from the given URL and extracts its contents.
+  # Runs curl to download the tarball file from the given URL and extracts its contents.
   #
-  # @param {string} OUTPUT_DIR Directory in which to extract the tarball.
+  # @param {string} OUTPUT_DIR Directory in which to extract the tarball file.
   # @param {string} URL
   # @param {string} FILE_SHA256 Content hash to verify downloaded tar file against.
   # @param {string={{.OUTPUT_DIR}}.md5} [CHECKSUM_FILE] File path to store the checksum of
   # downloaded tar file.
-  # @param {string[]=[]} [EXCLUDE_PATHS] Wildcard patterns for paths that shouldn't be extracted.
-  # @param {string[]=[]} [INCLUDE_PATHS] Wildcard patterns for paths to extract.
+  # @param {string[]=[]} [EXCLUDE_PATTERNS] Path wildcard patterns that should not be extracted.
+  # @param {string[]=[]} [DATA_PATTERNS] Path wildcard patterns to extract.
   # @param {int=1} [NUM_COMPONENTS_TO_STRIP] Number of leading path components to strip from the
   # extracted files.
-  # @param {string={{.OUTPUT_DIR}}.tar.gz} [TAR_FILE] Path where the tarball should be stored.
+  # @param {string={{.OUTPUT_DIR}}.tar.gz} [TAR_FILE] Path where the tarball file should be stored.
   download-and-extract-tar:
     label: "{{.TASK}}-{{.OUTPUT_DIR}}"
     internal: true
@@ -304,8 +260,8 @@ tasks:
         {{default (printf "%s.md5" .OUTPUT_DIR) .CHECKSUM_FILE}}
       EXCLUDE_PATTERNS:
         ref: "default (list) .EXCLUDE_PATTERNS"
-      INCLUDE_PATHS:
-        ref: "default (list) .INCLUDE_PATHS"
+      DATA_PATTERNS:
+        ref: "default (list) .DATA_PATTERNS"
       NUM_COMPONENTS_TO_STRIP: "{{default 1 .NUM_COMPONENTS_TO_STRIP}}"
       TAR_FILE: >-
         {{default (printf "%s.tar.gz" .OUTPUT_DIR) .TAR_FILE}}
@@ -322,7 +278,7 @@ tasks:
       - task: "validate-checksum"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
-          DATA_PATHS: ["{{.OUTPUT_DIR}}"]
+          DATA_PATTERNS: ["{{.OUTPUT_DIR}}"]
     cmds:
       - |-
         rm -rf "{{.OUTPUT_DIR}}"
@@ -338,12 +294,12 @@ tasks:
         {{- range .EXCLUDE_PATTERNS}}
         --exclude="{{.}}"
         {{- end}}
-        {{- range .DATA_PATHS}}
+        {{- range .DATA_PATTERNS}}
         "{{.}}"
         {{- end}}
         2> /dev/null
       # This command must be last
       - task: "compute-checksum"
         vars:
-          DATA_PATHS: ["{{.OUTPUT_DIR}}"]
+          DATA_PATTERNS: ["{{.OUTPUT_DIR}}"]
           OUTPUT_FILE: "{{.CHECKSUM_FILE}}"
