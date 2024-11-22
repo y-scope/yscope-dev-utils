@@ -177,7 +177,7 @@ tasks:
         --build "{{.BUILD_DIR}}"
         --parallel
 
-  # Unconditionally runs the CMake install step for the given build directory.
+  # Runs the CMake install step for the given build directory.
   #
   # @param {string} BUILD_DIR CMake build directory.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
@@ -199,7 +199,7 @@ tasks:
   # Runs curl to download a file from the given URL.
   #
   # @param {string} URL
-  # @param {string} FILE_SHA256 Content hash to verify downloaded file against.
+  # @param {string} FILE_SHA256 Content hash to verify the downloaded file against.
   # @param {string={{(base .URL)}}} [OUTPUT_FILE] Path where the file should be stored.
   curl:
     label: "{{.TASK}}-{{.OUTPUT_FILE}}"
@@ -240,18 +240,18 @@ tasks:
           exit 1
         fi
 
-  # Runs curl to download the tarball file from the given URL and extracts its contents.
+  # Runs curl to download the tar file from the given URL and extracts its contents.
   #
-  # @param {string} OUTPUT_DIR Directory in which to extract the tarball file.
+  # @param {string} OUTPUT_DIR Directory in which to extract the tar file.
   # @param {string} URL
-  # @param {string} FILE_SHA256 Content hash to verify downloaded tar file against.
+  # @param {string} FILE_SHA256 Content hash to verify the downloaded tar file against.
   # @param {string={{.OUTPUT_DIR}}.md5} [CHECKSUM_FILE] File path to store the checksum of
   # downloaded tar file.
   # @param {string[]=[]} [EXCLUDE_PATTERNS] Path wildcard patterns that should not be extracted.
   # @param {string[]=[]} [DATA_PATTERNS] Path wildcard patterns to extract.
   # @param {int=1} [NUM_COMPONENTS_TO_STRIP] Number of leading path components to strip from the
   # extracted files.
-  # @param {string={{.OUTPUT_DIR}}.tar.gz} [TAR_FILE] Path where the tarball file should be stored.
+  # @param {string={{.OUTPUT_DIR}}.tar.gz} [TAR_FILE] Path where the tar file should be stored.
   download-and-extract-tar:
     label: "{{.TASK}}-{{.OUTPUT_DIR}}"
     internal: true
