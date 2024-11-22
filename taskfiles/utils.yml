@@ -207,7 +207,7 @@ tasks:
     vars:
       OUTPUT_FILE: "{{default (base .URL) .OUTPUT_FILE}}"
     requires:
-      vars: ["URL", "FILE_SHA256"]
+      vars: ["FILE_SHA256", "URL"]
     generates: ["{{.OUTPUT_FILE}}"]
     status:
       - >-
@@ -258,23 +258,23 @@ tasks:
     vars:
       CHECKSUM_FILE: >-
         {{default (printf "%s.md5" .OUTPUT_DIR) .CHECKSUM_FILE}}
-      EXCLUDE_PATTERNS:
-        ref: "default (list) .EXCLUDE_PATTERNS"
       DATA_PATTERNS:
         ref: "default (list) .DATA_PATTERNS"
+      EXCLUDE_PATTERNS:
+        ref: "default (list) .EXCLUDE_PATTERNS"
       NUM_COMPONENTS_TO_STRIP: "{{default 1 .NUM_COMPONENTS_TO_STRIP}}"
       TAR_FILE: >-
         {{default (printf "%s.tar.gz" .OUTPUT_DIR) .TAR_FILE}}
     requires:
-      vars: ["OUTPUT_DIR", "URL", "FILE_SHA256"]
+      vars: ["FILE_SHA256", "OUTPUT_DIR", "URL"]
     sources: ["{{.TASKFILE}}"]
     generates: ["{{.CHECKSUM_FILE}}", "{{.TAR_FILE}}"]
     deps:
       - task: "curl"
         vars:
-          URL: "{{.URL}}"
           FILE_SHA256: "{{.FILE_SHA256}}"
           OUTPUT_FILE: "{{.TAR_FILE}}"
+          URL: "{{.URL}}"
       - task: "validate-checksum"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
