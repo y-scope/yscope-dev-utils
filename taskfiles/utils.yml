@@ -1,5 +1,8 @@
 version: "3"
 
+set: ["u", "pipefail"]
+shopt: ["globstar"]
+
 tasks:
   # ===
   # CHECKSUM UTILS
@@ -29,7 +32,7 @@ tasks:
         --exclude="{{.}}"
         {{- end}}
         {{- range .DATA_PATTERNS}}
-        "{{.}}"
+        {{.}}
         {{- end}}
         2> /dev/null
         | md5sum > {{.OUTPUT_FILE}}
@@ -58,13 +61,14 @@ tasks:
             ref: "default (list) .EXCLUDE_PATTERNS"
           OUTPUT_FILE: "{{.TMP_CHECKSUM_FILE}}"
       - defer: "rm -f '{{.TMP_CHECKSUM_FILE}}'"
-      # Check that the paths exist and the checksum matches; otherwise delete the checksum file.
-      - >-
-        (
-        {{- range .DATA_PATTERNS}}
-        test -e "{{.}}" &&
-        {{- end}}
-        diff -q "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" 2> /dev/null
+      # Check that all paths exist and the checksum matches; otherwise delete the checksum file.
+      - |-
+        ( {{- range .DATA_PATTERNS}}
+          for path in {{.}}; do
+            test -e "$path"
+          done
+          {{- end}}
+          diff -q "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" 2> /dev/null
         ) || rm -f "{{.CHECKSUM_FILE}}"
 
   # ===
