@@ -15,6 +15,7 @@ tasks:
   compute-checksum:
     desc: "Tries to compute a checksum for the given paths and output it to a file."
     internal: true
+    label: "{{.TASK}}-{{.OUTPUT_FILE}}"
     silent: true
     requires:
       vars: ["DATA_PATTERNS", "OUTPUT_FILE"]
@@ -47,6 +48,7 @@ tasks:
     desc: "Validates the checksum of the given directory matches the checksum in the given file, or
     deletes the checksum file otherwise."
     internal: true
+    label: "{{.TASK}}-{{.CHECKSUM_FILE}}"
     silent: true
     vars:
       TMP_CHECKSUM_FILE: "{{.CHECKSUM_FILE}}.tmp"
@@ -163,8 +165,8 @@ tasks:
   # @param {string} SOURCE_DIR Project source directory containing the CMakeLists.txt file.
   # @param {string=""} [CMAKE_ARGS] Any additional arguments to pass to CMake's configure step.
   cmake-config-and-build:
-    label: "{{.TASK}}-{{.SOURCE_DIR}}-{{.BUILD_DIR}}"
     internal: true
+    label: "{{.TASK}}-{{.SOURCE_DIR}}-{{.BUILD_DIR}}"
     vars:
       CMAKE_ARGS: >-
         {{default "" .CMAKE_ARGS}}
@@ -186,8 +188,8 @@ tasks:
   # @param {string} BUILD_DIR CMake build directory.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
   cmake-install:
-    label: "{{.TASK}}-{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}"
     internal: true
+    label: "{{.TASK}}-{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}"
     requires:
       vars: ["BUILD_DIR", "INSTALL_PREFIX"]
     cmds:
@@ -206,8 +208,8 @@ tasks:
   # @param {string} FILE_SHA256 Content hash to verify the downloaded file against.
   # @param {string={{(base .URL)}}} [OUTPUT_FILE] Path where the file should be stored.
   curl:
-    label: "{{.TASK}}-{{.OUTPUT_FILE}}"
     internal: true
+    label: "{{.TASK}}-{{.OUTPUT_FILE}}"
     vars:
       OUTPUT_FILE: "{{default (base .URL) .OUTPUT_FILE}}"
     requires:
@@ -257,8 +259,8 @@ tasks:
   # extracted files.
   # @param {string={{.OUTPUT_DIR}}.tar.gz} [TAR_FILE] Path where the tar file should be stored.
   download-and-extract-tar:
-    label: "{{.TASK}}-{{.OUTPUT_DIR}}"
     internal: true
+    label: "{{.TASK}}-{{.OUTPUT_DIR}}"
     vars:
       CHECKSUM_FILE: >-
         {{default (printf "%s.md5" .OUTPUT_DIR) .CHECKSUM_FILE}}
