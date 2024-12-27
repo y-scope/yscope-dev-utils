@@ -58,6 +58,7 @@ BreakBeforeConceptDeclarations: "Always"
 BreakBeforeInlineASMColon: "OnlyMultiline"
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: "BeforeColon"
+BreakFunctionDefinitionParameters: false
 BreakInheritanceList: "BeforeColon"
 BreakStringLiterals: true
 BreakTemplateDeclarations: "Yes"
@@ -94,6 +95,7 @@ KeepEmptyLines:
   AtStartOfFile: false
 LambdaBodyIndentation: "Signature"
 LineEnding: "LF"
+MainIncludeChar: "Quote"
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: "None"
 PPIndentWidth: -1
