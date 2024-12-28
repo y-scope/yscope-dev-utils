@@ -27,9 +27,7 @@ AllowShortFunctionsOnASingleLine: "Inline"
 AllowShortIfStatementsOnASingleLine: "Never"
 AllowShortLambdasOnASingleLine: "All"
 AllowShortLoopsOnASingleLine: false
-AlwaysBreakAfterReturnType: "None"
 AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: "Yes"
 BinPackArguments: false
 BinPackParameters: false
 BitFieldColonSpacing: "Both"
@@ -52,14 +50,17 @@ BraceWrapping:
   SplitEmptyNamespace: false
   SplitEmptyRecord: false
 BreakAfterAttributes: "Never"
+BreakAfterReturnType: "Automatic"
 BreakBeforeBinaryOperators: "All"
 BreakBeforeBraces: "Custom"
 BreakBeforeConceptDeclarations: "Always"
 BreakBeforeInlineASMColon: "OnlyMultiline"
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: "BeforeColon"
+BreakFunctionDefinitionParameters: false
 BreakInheritanceList: "BeforeColon"
 BreakStringLiterals: true
+BreakTemplateDeclarations: "Yes"
 CompactNamespaces: true
 ConstructorInitializerIndentWidth: 8
 ContinuationIndentWidth: 8
@@ -87,9 +88,13 @@ IntegerLiteralSeparator:
   DecimalMinDigits: 5
   Hex: 4
   HexMinDigits: 4
-KeepEmptyLinesAtTheStartOfBlocks: false
+KeepEmptyLines:
+  AtEndOfFile: true
+  AtStartOfBlock: false
+  AtStartOfFile: false
 LambdaBodyIndentation: "Signature"
 LineEnding: "LF"
+MainIncludeChar: "Quote"
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: "None"
 PPIndentWidth: -1
@@ -139,6 +144,7 @@ SpacesInLineCommentPrefix:
   Maximum: -1
 SpacesInParens: "Custom"
 SpacesInParensOptions:
+  ExceptDoubleParentheses: false
   InConditionalStatements: false
   InCStyleCasts: false
   InEmptyParentheses: false
