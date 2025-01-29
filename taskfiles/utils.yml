@@ -65,7 +65,8 @@ tasks:
       - defer: "rm -f '{{.TMP_CHECKSUM_FILE}}'"
       # Check that all paths exist and the checksum matches; otherwise delete the checksum file.
       - |-
-        ( {{- range .DATA_PATTERNS}}
+        (
+          {{- range .DATA_PATTERNS}}
           for path in {{.}}; do
             test -e "$path"
           done
@@ -251,7 +252,7 @@ tasks:
   # @param {string} OUTPUT_DIR Directory in which to extract the tar file.
   # @param {string} URL
   # @param {string} FILE_SHA256 Content hash to verify the downloaded tar file against.
-  # @param {string={{.OUTPUT_DIR}}.md5} [CHECKSUM_FILE] File path to store the checksum of
+  # @param {string={{.OUTPUT_DIR}}.md5} [CHECKSUM_FILE] File path to store the checksum of the
   # downloaded tar file.
   # @param {string[]=[]} [EXCLUDE_PATTERNS] Path wildcard patterns that should not be extracted.
   # @param {string[]=[]} [DATA_PATTERNS] Path wildcard patterns to extract.
