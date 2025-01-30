@@ -20,13 +20,14 @@ tasks:
     requires:
       vars: ["INCLUDE_PATTERNS", "OUTPUT_FILE"]
     cmds:
-      # We explicitly set --no-anchored and --wildcards to ensure the behaviour for both exclusion
-      # and inclusion matches, as they are only the default for exclusion.
-      # We can quote the exclude patterns for tar because the patterns themselves are passed to tar
-      # as arguments and evaluated by tar during execution. However, for tar --create the input
-      # patterns cannot be quoted as they are evaluated by the shell and the results are passed to
-      # tar as arguments. If the input patterns are passed to tar with quotes the pattern will not
-      # be evaluated and will be treated literally.
+      # We explicitly set `--no-anchored` and `--wildcards` to make the inclusion behaviour match
+      # the default exclusion behaviour.
+      #
+      # We can quote the exclude patterns for `tar` because the patterns themselves are passed to
+      # `tar` as arguments and evaluated by `tar` during execution. However, for `tar --create`, the
+      # input patterns cannot be quoted since they're evaluated by the shell and the results are
+      # passed to `tar` as arguments. If the input patterns are passed to `tar` with quotes, the
+      # pattern won't be evaluated and will instead be treated literally.
       - >-
         tar
         --create
@@ -49,10 +50,10 @@ tasks:
     # Ignore errors so that dependent tasks don't fail
     ignore_error: true
 
+  # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to validate the checksum for.
-  # @param {string} OUTPUT_FILE
-  # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`, to
-  # exclude from the checksum.
+  # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
+  # to exclude from the checksum.
   validate-checksum:
     desc: "Validates the checksum of the given directory matches the checksum in the given file, or
     deletes the checksum file otherwise."
@@ -75,7 +76,7 @@ tasks:
       # Check that all paths exist and the checksum matches; otherwise delete the checksum file.
       - |-
         (
-          {{- range .DATA_PATTERNS}}
+          {{- range .INCLUDE_PATTERNS}}
           for path in {{.}}; do
             test -e "$path"
           done
@@ -174,16 +175,16 @@ tasks:
   # @param {string} BUILD_DIR CMake build directory to create.
   # @param {string} SOURCE_DIR Project source directory containing the CMakeLists.txt file.
   # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
-  # omitted the native build tool's default number is used. See man cmake.
+  # omitted, the native build tool's default number is used. See `man cmake`.
   # @param {string} [CONF_ARGS] Any additional arguments to pass to CMake's configure step.
   cmake-config-and-build:
     internal: true
     label: "{{.TASK}}-{{.SOURCE_DIR}}-{{.BUILD_DIR}}"
     vars:
-      JOBS: >-
-        {{default "" .JOBS}}
       CONF_ARGS: >-
         {{default "" .CONF_ARGS}}
+      JOBS: >-
+        {{default "" .JOBS}}
     requires:
       vars: ["BUILD_DIR", "SOURCE_DIR"]
     cmds:
@@ -276,15 +277,20 @@ tasks:
     internal: true
     label: "{{.TASK}}-{{.OUTPUT_DIR}}"
     vars:
+      # Paths
       CHECKSUM_FILE: >-
         {{default (printf "%s.md5" .OUTPUT_DIR) .CHECKSUM_FILE}}
-      INCLUDE_PATTERNS:
-        ref: "default (list) .INCLUDE_PATTERNS"
-      EXCLUDE_PATTERNS:
-        ref: "default (list) .EXCLUDE_PATTERNS"
-      NUM_COMPONENTS_TO_STRIP: "{{default 1 .NUM_COMPONENTS_TO_STRIP}}"
       TAR_FILE: >-
         {{default (printf "%s.tar.gz" .OUTPUT_DIR) .TAR_FILE}}
+      
+      # Path patterns
+      EXCLUDE_PATTERNS:
+        ref: "default (list) .EXCLUDE_PATTERNS"
+      INCLUDE_PATTERNS:
+        ref: "default (list) .INCLUDE_PATTERNS"
+      
+      # Misc
+      NUM_COMPONENTS_TO_STRIP: "{{default 1 .NUM_COMPONENTS_TO_STRIP}}"
     requires:
       vars: ["FILE_SHA256", "OUTPUT_DIR", "URL"]
     sources: ["{{.TASKFILE}}", "{{.TAR_FILE}}"]
@@ -303,8 +309,8 @@ tasks:
       - |-
         rm --force --recursive "{{.OUTPUT_DIR}}"
         mkdir --parents  "{{.OUTPUT_DIR}}"
-      # Unlike tar --create, in --extract both the exclude and include patterns can be quoted as
-      # they are both evaluted by tar.
+      # Unlike for `tar --create`, in `--extract` both the exclude and include patterns can be
+      # quoted since they're both evaluated by `tar`.
       - >-
         tar
         --extract
