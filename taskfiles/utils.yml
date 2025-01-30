@@ -8,17 +8,17 @@ tasks:
   # CHECKSUM UTILS
   # ===
 
+  # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to compute the checksum for.
-  # @param {string} OUTPUT_FILE
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
   # to exclude from the checksum.
   compute-checksum:
     desc: "Tries to compute a checksum for the given paths and output it to a file."
     internal: true
-    label: "{{.TASK}}-{{.OUTPUT_FILE}}"
+    label: "{{.TASK}}-{{.CHECKSUM_FILE}}"
     silent: true
     requires:
-      vars: ["INCLUDE_PATTERNS", "OUTPUT_FILE"]
+      vars: ["CHECKSUM_FILE", "INCLUDE_PATTERNS"]
     cmds:
       # We explicitly set `--no-anchored` and `--wildcards` to make the inclusion behaviour match
       # the default exclusion behaviour.
@@ -46,7 +46,7 @@ tasks:
         {{.}}
         {{- end}}
         2> /dev/null
-        | md5sum > {{.OUTPUT_FILE}}
+        | md5sum > {{.CHECKSUM_FILE}}
     # Ignore errors so that dependent tasks don't fail
     ignore_error: true
 
@@ -71,7 +71,7 @@ tasks:
             ref: ".INCLUDE_PATTERNS"
           EXCLUDE_PATTERNS:
             ref: "default (list) .EXCLUDE_PATTERNS"
-          OUTPUT_FILE: "{{.TMP_CHECKSUM_FILE}}"
+          CHECKSUM_FILE: "{{.TMP_CHECKSUM_FILE}}"
       - defer: "rm -f '{{.TMP_CHECKSUM_FILE}}'"
       # Check that all paths exist and the checksum matches; otherwise delete the checksum file.
       - |-
@@ -282,13 +282,13 @@ tasks:
         {{default (printf "%s.md5" .OUTPUT_DIR) .CHECKSUM_FILE}}
       TAR_FILE: >-
         {{default (printf "%s.tar.gz" .OUTPUT_DIR) .TAR_FILE}}
-      
+
       # Path patterns
       EXCLUDE_PATTERNS:
         ref: "default (list) .EXCLUDE_PATTERNS"
       INCLUDE_PATTERNS:
         ref: "default (list) .INCLUDE_PATTERNS"
-      
+
       # Misc
       NUM_COMPONENTS_TO_STRIP: "{{default 1 .NUM_COMPONENTS_TO_STRIP}}"
     requires:
@@ -330,4 +330,4 @@ tasks:
       - task: "compute-checksum"
         vars:
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
-          OUTPUT_FILE: "{{.CHECKSUM_FILE}}"
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
