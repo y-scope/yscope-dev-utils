@@ -16,10 +16,11 @@ Or, installing the tool in a virtual environment:
 uv venv
 uv pip install .
 ```
+Chech [here] for uv's virtual environment behaviour.
 
 ## Usage
 ```shell
-uv run yscope-clang-tidy-utils [-h] [-j NUM_JOBS] FILE [FILE ...] [-- CLANG-TIDY-ARGS ...]
+yscope-clang-tidy-utils [-h] [-j NUM_JOBS] FILE [FILE ...] [-- CLANG-TIDY-ARGS ...]
 ```
 Note:
 - By default, the number of jobs will be set to the number of cores in the running environment.
@@ -37,3 +38,4 @@ uv tool run ruff check --fix src
 
 [clang-tidy-home]: https://clang.llvm.org/extra/clang-tidy/
 [uv]: https://docs.astral.sh/uv/getting-started/installation/
+[uv-venv]: https://docs.astral.sh/uv/pip/compatibility/#virtual-environments-by-default
