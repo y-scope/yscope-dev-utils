@@ -2,13 +2,20 @@
 
 This project contains CLI scripts for running [clang-tidy][clang-tidy-home] checks.
 
+## Requirements
+- [uv]
+
 ## Installation
+To install the tool permanently:
 ```shell
-python3 -m pip install .
+uv tool install .
 ```
-Note:
-- Python 3.10 or higher is required.
-- It is highly suggested to install in a virtual environment.
+
+Using virtual environment:
+```shell
+uv venv
+uv pip install .
+```
 
 ## Usage
 ```shell
@@ -21,11 +28,11 @@ Note:
 
 ## Development:
 ```shell
-pip install -e .[dev]
-mypy src
-docformatter -i src
-black src
-ruff check --fix src
+uv tool run mypy src
+uv tool run docformatter -i src
+uv tool run black src
+uv tool run ruff check --fix src
 ```
 
 [clang-tidy-home]: https://clang.llvm.org/extra/clang-tidy/
+[uv]: https://docs.astral.sh/uv/getting-started/installation/

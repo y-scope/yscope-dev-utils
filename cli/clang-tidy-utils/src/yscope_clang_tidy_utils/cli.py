@@ -133,7 +133,7 @@ def main() -> None:
         default_parser_usage = default_parser_usage[:-1]
     usage_prefix: str = "usage: "
     if default_parser_usage.startswith(usage_prefix):
-        default_parser_usage = default_parser_usage[len(usage_prefix):]
+        default_parser_usage = default_parser_usage[len(usage_prefix) :]
     usage: str = default_parser_usage + " [-- CLANG-TIDY-ARGS ...]"
     parser.usage = usage
 
