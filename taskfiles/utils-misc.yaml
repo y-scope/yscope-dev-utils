@@ -200,8 +200,8 @@ tasks:
       # This command must be last
       - task: "compute-checksum"
         vars:
-          INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
 
   # ===
   # STRING UTILS
