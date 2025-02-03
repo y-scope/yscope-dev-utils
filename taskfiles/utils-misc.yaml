@@ -85,135 +85,6 @@ tasks:
         ) || rm -f "{{.CHECKSUM_FILE}}"
 
   # ===
-  # STRING UTILS
-  # ===
-  replace-text:
-    desc: "Replaces some text in a file using sed."
-    internal: true
-    requires:
-      vars: ["FILE_PATH", "SED_EXP"]
-    cmds:
-      - |-
-        # NOTE:
-        # 1. We can't use `sed -i` since `-i` has different syntax on Linux and macOS
-        # 2. We can't use `--regexp` instead of `-E` since `--regexp` is not supported on macOS
-        src="{{.FILE_PATH}}"
-        dst="{{.FILE_PATH}}.tmp"
-        sed -E "{{.SED_EXP}}" "${src}" > "${dst}"
-        mv "${dst}" "${src}"
-
-  # ===
-  # VENV UTILS
-  # ===
-  create-venv:
-    desc: "Creates a Python venv using the given requirements file."
-    internal: true
-    label: "create-venv-{{.LABEL}}"
-    requires:
-      vars: ["LABEL", "OUTPUT_DIR", "REQUIREMENTS_FILE"]
-    cmds:
-      - "rm -rf '{{.OUTPUT_DIR}}'"
-      - "python3 -m venv '{{.OUTPUT_DIR}}'"
-      # Remove calls to `hash` from the venv activation script since Task uses `gosh` rather than
-      # `bash`.
-      # NOTE: Older versions of Python's venv would only call `hash` if they detected the running
-      # shell was one that had the command, but that's not the case in newer versions.
-      - task: "replace-text"
-        vars:
-          FILE_PATH: "{{.OUTPUT_DIR}}/bin/activate"
-          SED_EXP: >-
-            s/^([[:space:]]*)hash[[:space:]]+.*/\1true/g
-      - |-
-        . "{{.OUTPUT_DIR}}/bin/activate"
-        pip3 install --upgrade pip
-        pip3 install --upgrade -r "{{.REQUIREMENTS_FILE}}"
-
-  # ===
-  # C++ LINTING UTILS
-  # ===
-
-  # Runs clang-format on C++ files at the given paths.
-  #
-  # @param {string} FLAGS Any flags to pass to clang-format.
-  # @param {string[]} SRC_PATHS The paths on which to run clang-format.
-  # @param {string} VENV_DIR Python virtual environment where clang-format is installed.
-  clang-format:
-    internal: true
-    requires:
-      vars: ["FLAGS", "SRC_PATHS", "VENV_DIR"]
-    cmd: |-
-      . "{{.VENV_DIR}}/bin/activate"
-      find {{- range .SRC_PATHS}} "{{.}}" {{- end}} \
-        -type f \
-        \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
-        -print0 | \
-          xargs -0 clang-format {{.FLAGS}} -Werror
-
-  # Runs clang-tidy on C++ files at the given paths.
-  #
-  # @param {string} FLAGS Any flags to pass to clang-tidy.
-  # @param {string[]} SRC_PATHS The paths on which to run clang-tidy.
-  # @param {string} VENV_DIR Python virtual environment where clang-tidy is installed.
-  clang-tidy:
-    internal: true
-    requires:
-      vars: ["FLAGS", "SRC_PATHS", "VENV_DIR"]
-    cmd: |-
-      . "{{.VENV_DIR}}/bin/activate"
-      find {{- range .SRC_PATHS}} "{{.}}" {{- end}} \
-        -type f \
-        \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
-        -print0 | \
-          xargs -0 clang-tidy {{.FLAGS}}
-
-  # ===
-  # CMAKE UTILS
-  # ===
-
-  # Runs CMake's configure and build steps for the given source and build directories.
-  #
-  # @param {string} BUILD_DIR CMake build directory to create.
-  # @param {string} SOURCE_DIR Project source directory containing the CMakeLists.txt file.
-  # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
-  # omitted, the native build tool's default number is used. See `man cmake`.
-  # @param {string} [CONF_ARGS] Any additional arguments to pass to CMake's configure step.
-  cmake-config-and-build:
-    internal: true
-    label: "{{.TASK}}-{{.SOURCE_DIR}}-{{.BUILD_DIR}}"
-    vars:
-      CONF_ARGS: >-
-        {{default "" .CONF_ARGS}}
-      JOBS: >-
-        {{default "" .JOBS}}
-    requires:
-      vars: ["BUILD_DIR", "SOURCE_DIR"]
-    cmds:
-      - >-
-        cmake
-        -S "{{.SOURCE_DIR}}"
-        -B "{{.BUILD_DIR}}"
-        {{.CONF_ARGS}}
-      - >-
-        cmake
-        --build "{{.BUILD_DIR}}"
-        --parallel "{{.JOBS}}"
-
-  # Runs the CMake install step for the given build directory.
-  #
-  # @param {string} BUILD_DIR CMake build directory.
-  # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
-  cmake-install:
-    internal: true
-    label: "{{.TASK}}-{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}"
-    requires:
-      vars: ["BUILD_DIR", "INSTALL_PREFIX"]
-    cmds:
-      - >-
-        cmake
-        --install "{{.BUILD_DIR}}"
-        --prefix "{{.INSTALL_PREFIX}}"
-
-  # ===
   # REMOTE UTILS
   # ===
 
@@ -331,3 +202,47 @@ tasks:
         vars:
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+
+  # ===
+  # STRING UTILS
+  # ===
+  replace-text:
+    desc: "Replaces some text in a file using sed."
+    internal: true
+    requires:
+      vars: ["FILE_PATH", "SED_EXP"]
+    cmds:
+      - |-
+        # NOTE:
+        # 1. We can't use `sed -i` since `-i` has different syntax on Linux and macOS
+        # 2. We can't use `--regexp` instead of `-E` since `--regexp` is not supported on macOS
+        src="{{.FILE_PATH}}"
+        dst="{{.FILE_PATH}}.tmp"
+        sed -E "{{.SED_EXP}}" "${src}" > "${dst}"
+        mv "${dst}" "${src}"
+
+  # ===
+  # VENV UTILS
+  # ===
+  create-venv:
+    desc: "Creates a Python venv using the given requirements file."
+    internal: true
+    label: "create-venv-{{.LABEL}}"
+    requires:
+      vars: ["LABEL", "OUTPUT_DIR", "REQUIREMENTS_FILE"]
+    cmds:
+      - "rm -rf '{{.OUTPUT_DIR}}'"
+      - "python3 -m venv '{{.OUTPUT_DIR}}'"
+      # Remove calls to `hash` from the venv activation script since Task uses `gosh` rather than
+      # `bash`.
+      # NOTE: Older versions of Python's venv would only call `hash` if they detected the running
+      # shell was one that had the command, but that's not the case in newer versions.
+      - task: "replace-text"
+        vars:
+          FILE_PATH: "{{.OUTPUT_DIR}}/bin/activate"
+          SED_EXP: >-
+            s/^([[:space:]]*)hash[[:space:]]+.*/\1true/g
+      - |-
+        . "{{.OUTPUT_DIR}}/bin/activate"
+        pip3 install --upgrade pip
+        pip3 install --upgrade -r "{{.REQUIREMENTS_FILE}}"

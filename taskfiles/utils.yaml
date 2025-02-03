@@ -1,0 +1,9 @@
+version: "3"
+
+includes:
+  cpp:
+    taskfile: utils-cpp.yaml
+    flatten: true
+  misc:
+    taskfile: utils-misc.yaml
+    flatten: true
