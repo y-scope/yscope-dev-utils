@@ -10,9 +10,9 @@ includes:
   cpp-lint:
     taskfile: utils-cpp-lint.yaml
     flatten: true
-  remote:
-    taskfile: utils-remote.yaml
-    flatten: true
   misc:
     taskfile: utils-misc.yaml
+    flatten: true
+  remote:
+    taskfile: utils-remote.yaml
     flatten: true
