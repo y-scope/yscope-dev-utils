@@ -4,10 +4,6 @@ set: ["u", "pipefail"]
 shopt: ["globstar"]
 
 tasks:
-  # ===
-  # C++ LINTING UTILS
-  # ===
-
   # Runs clang-format on C++ files at the given paths.
   #
   # @param {string} FLAGS Any flags to pass to clang-format.
@@ -41,10 +37,6 @@ tasks:
         \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
         -print0 | \
           xargs -0 clang-tidy {{.FLAGS}}
-
-  # ===
-  # CMAKE UTILS
-  # ===
 
   # Runs CMake's configure and build steps for the given source and build directories.
   #

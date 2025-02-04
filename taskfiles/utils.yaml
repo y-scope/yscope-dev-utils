@@ -1,8 +1,14 @@
 version: "3"
 
 includes:
+  checksum:
+    taskfile: utils-checksum.yaml
+    flatten: true
   cpp:
     taskfile: utils-cpp.yaml
+    flatten: true
+  remote:
+    taskfile: utils-remote.yaml
     flatten: true
   misc:
     taskfile: utils-misc.yaml
