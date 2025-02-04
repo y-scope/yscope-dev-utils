@@ -4,40 +4,6 @@ set: ["u", "pipefail"]
 shopt: ["globstar"]
 
 tasks:
-  # Runs clang-format on C++ files at the given paths.
-  #
-  # @param {string} FLAGS Any flags to pass to clang-format.
-  # @param {string[]} SRC_PATHS The paths on which to run clang-format.
-  # @param {string} VENV_DIR Python virtual environment where clang-format is installed.
-  clang-format:
-    internal: true
-    requires:
-      vars: ["FLAGS", "SRC_PATHS", "VENV_DIR"]
-    cmd: |-
-      . "{{.VENV_DIR}}/bin/activate"
-      find {{- range .SRC_PATHS}} "{{.}}" {{- end}} \
-        -type f \
-        \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
-        -print0 | \
-          xargs -0 clang-format {{.FLAGS}} -Werror
-
-  # Runs clang-tidy on C++ files at the given paths.
-  #
-  # @param {string} FLAGS Any flags to pass to clang-tidy.
-  # @param {string[]} SRC_PATHS The paths on which to run clang-tidy.
-  # @param {string} VENV_DIR Python virtual environment where clang-tidy is installed.
-  clang-tidy:
-    internal: true
-    requires:
-      vars: ["FLAGS", "SRC_PATHS", "VENV_DIR"]
-    cmd: |-
-      . "{{.VENV_DIR}}/bin/activate"
-      find {{- range .SRC_PATHS}} "{{.}}" {{- end}} \
-        -type f \
-        \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
-        -print0 | \
-          xargs -0 clang-tidy {{.FLAGS}}
-
   # Runs CMake's configure and build steps for the given source and build directories.
   #
   # @param {string} BUILD_DIR CMake build directory to create.
@@ -80,3 +46,4 @@ tasks:
         cmake
         --install "{{.BUILD_DIR}}"
         --prefix "{{.INSTALL_PREFIX}}"
+
