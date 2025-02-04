@@ -5,7 +5,7 @@ includes:
     taskfile: utils-checksum.yaml
     flatten: true
   cmake:
-    taskfile: utils-cpp-cmake.yaml
+    taskfile: utils-cmake.yaml
     flatten: true
   cpp-lint:
     taskfile: utils-cpp-lint.yaml
