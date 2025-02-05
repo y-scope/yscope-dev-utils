@@ -1,0 +1,43 @@
+version: "3"
+
+set: ["u", "pipefail"]
+shopt: ["globstar"]
+
+tasks:
+  replace-text:
+    desc: "Replaces some text in a file using sed."
+    internal: true
+    requires:
+      vars: ["FILE_PATH", "SED_EXP"]
+    cmds:
+      - |-
+        # NOTE:
+        # 1. We can't use `sed -i` since `-i` has different syntax on Linux and macOS
+        # 2. We can't use `--regexp` instead of `-E` since `--regexp` is not supported on macOS
+        src="{{.FILE_PATH}}"
+        dst="{{.FILE_PATH}}.tmp"
+        sed -E "{{.SED_EXP}}" "${src}" > "${dst}"
+        mv "${dst}" "${src}"
+
+  create-venv:
+    desc: "Creates a Python venv using the given requirements file."
+    internal: true
+    label: "create-venv-{{.LABEL}}"
+    requires:
+      vars: ["LABEL", "OUTPUT_DIR", "REQUIREMENTS_FILE"]
+    cmds:
+      - "rm -rf '{{.OUTPUT_DIR}}'"
+      - "python3 -m venv '{{.OUTPUT_DIR}}'"
+      # Remove calls to `hash` from the venv activation script since Task uses `gosh` rather than
+      # `bash`.
+      # NOTE: Older versions of Python's venv would only call `hash` if they detected the running
+      # shell was one that had the command, but that's not the case in newer versions.
+      - task: "replace-text"
+        vars:
+          FILE_PATH: "{{.OUTPUT_DIR}}/bin/activate"
+          SED_EXP: >-
+            s/^([[:space:]]*)hash[[:space:]]+.*/\1true/g
+      - |-
+        . "{{.OUTPUT_DIR}}/bin/activate"
+        pip3 install --upgrade pip
+        pip3 install --upgrade -r "{{.REQUIREMENTS_FILE}}"

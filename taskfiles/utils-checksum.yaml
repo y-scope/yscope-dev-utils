@@ -1,0 +1,81 @@
+version: "3"
+
+set: ["u", "pipefail"]
+shopt: ["globstar"]
+
+tasks:
+  # @param {string} CHECKSUM_FILE
+  # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to compute the checksum for.
+  # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
+  # to exclude from the checksum.
+  compute-checksum:
+    desc: "Tries to compute a checksum for the given paths and output it to a file."
+    internal: true
+    label: "{{.TASK}}-{{.CHECKSUM_FILE}}"
+    silent: true
+    requires:
+      vars: ["CHECKSUM_FILE", "INCLUDE_PATTERNS"]
+    cmds:
+      # We explicitly set `--no-anchored` and `--wildcards` to make the inclusion behaviour match
+      # the default exclusion behaviour.
+      #
+      # We can quote the exclude patterns for `tar` because the patterns themselves are passed to
+      # `tar` as arguments and evaluated by `tar` during execution. However, for `tar --create`, the
+      # input patterns cannot be quoted since they're evaluated by the shell and the results are
+      # passed to `tar` as arguments. If the input patterns are passed to `tar` with quotes, the
+      # pattern won't be evaluated and will instead be treated literally.
+      - >-
+        tar
+        --create
+        --file -
+        --group 0
+        --mtime "UTC 1970-01-01"
+        --numeric-owner
+        --owner 0
+        --sort name
+        --no-anchored
+        --wildcards
+        {{- range .EXCLUDE_PATTERNS}}
+        --exclude="{{.}}"
+        {{- end}}
+        {{- range .INCLUDE_PATTERNS}}
+        {{.}}
+        {{- end}}
+        2> /dev/null
+        | md5sum > {{.CHECKSUM_FILE}}
+    # Ignore errors so that dependent tasks don't fail
+    ignore_error: true
+
+  # @param {string} CHECKSUM_FILE
+  # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to validate the checksum for.
+  # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
+  # to exclude from the checksum.
+  validate-checksum:
+    desc: "Validates the checksum of the given directory matches the checksum in the given file, or
+    deletes the checksum file otherwise."
+    internal: true
+    label: "{{.TASK}}-{{.CHECKSUM_FILE}}"
+    silent: true
+    vars:
+      TMP_CHECKSUM_FILE: "{{.CHECKSUM_FILE}}.tmp"
+    requires:
+      vars: ["CHECKSUM_FILE", "INCLUDE_PATTERNS"]
+    cmds:
+      - task: "compute-checksum"
+        vars:
+          INCLUDE_PATTERNS:
+            ref: ".INCLUDE_PATTERNS"
+          EXCLUDE_PATTERNS:
+            ref: "default (list) .EXCLUDE_PATTERNS"
+          CHECKSUM_FILE: "{{.TMP_CHECKSUM_FILE}}"
+      - defer: "rm -f '{{.TMP_CHECKSUM_FILE}}'"
+      # Check that all paths exist and the checksum matches; otherwise delete the checksum file.
+      - |-
+        (
+          {{- range .INCLUDE_PATTERNS}}
+          for path in {{.}}; do
+            test -e "$path"
+          done
+          {{- end}}
+          diff -q "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" 2> /dev/null
+        ) || rm -f "{{.CHECKSUM_FILE}}"
