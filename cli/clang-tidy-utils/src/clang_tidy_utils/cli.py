@@ -110,7 +110,7 @@ async def clang_tidy_parallel_execution_entry(
 
 def main() -> None:
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
-        description="yscope-clang-tidy-utils cli options.",
+        description="clang-tidy-utils cli options.",
     )
 
     parser.add_argument(

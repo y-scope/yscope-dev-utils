@@ -1,33 +1,38 @@
-# yscope-clang-tidy-utils
+# clang-tidy-utils
 
-This project is a CLI scripts for running [clang-tidy][clang-tidy-home] checks.
+`clang-tidy-utils` is a command-line tool for running [clang-tidy][clang-tidy-home] checks efficiently.
 
 ## Requirements
-- [uv]
+- [uv] (for package and environment management)
 
 ## Installation
-To install the tool system-wide (permanently), run:
-```shell
-uv tool install .
-```
 
-Or, installing the tool in a virtual environment:
+### Virtual environment installation (Recommended)
+
+For installation within a virtual environment:
 ```shell
 uv venv
 uv pip install .
 ```
 
-## Usage
+### System-wide installation
+
+To install the tool globally:
 ```shell
-uv run yscope-clang-tidy-utils [-h] [-j NUM_JOBS] FILE [FILE ...] [-- CLANG-TIDY-ARGS ...]
+uv tool install .
 ```
-Note:
-- By default, the number of jobs will be set to the number of cores in the running environment.
-- Anything after `--` will be considered as clang-tidy arguments and will be directly passed into
-  clang-tidy.
+
+## Usage
+
+Run the tool using:
+```shell
+uv run clang-tidy-utils [-h] [-j NUM_JOBS] FILE [FILE ...] [-- CLANG-TIDY-ARGS ...]
+```
+- By default, the number of jobs (`-j`) is set to the number of available CPU cores.
+- Arguments after `--` are directly passed to `clang-tidy`.
 
 ## Development:
-Run linting tools with the following commands:
+To format and lint the code, run:
 ```shell
 uv tool run mypy src
 uv tool run docformatter -i src

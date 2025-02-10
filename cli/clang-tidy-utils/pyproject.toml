@@ -1,5 +1,5 @@
 [project]
-name = "yscope-clang-tidy-utils"
+name = "clang-tidy-utils"
 version = "0.0.1"
 authors = [
     { name="zhihao lin", email="lin.zhihao@yscope.com" },
@@ -18,7 +18,7 @@ dev = [
 ]
 
 [project.scripts]
-yscope-clang-tidy-utils = "yscope_clang_tidy_utils.cli:main"
+clang-tidy-utils = "clang_tidy_utils.cli:main"
 
 [tool.black]
 line-length = 100
