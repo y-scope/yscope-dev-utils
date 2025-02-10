@@ -19,7 +19,7 @@ class ClangTidyResult:
     stderr: str
 
 
-def create_clang_tidy_task_arg_list(file: str, clang_tidy_args: List[str]) -> List[str]:
+def _create_clang_tidy_task_arg_list(file: str, clang_tidy_args: List[str]) -> List[str]:
     """
     :param file: The file to check.
     :param clang_tidy_args: The clang-tidy cli arguments.
@@ -30,7 +30,7 @@ def create_clang_tidy_task_arg_list(file: str, clang_tidy_args: List[str]) -> Li
     return args
 
 
-async def execute_clang_tidy_task(file: str, clang_tidy_args: List[str]) -> ClangTidyResult:
+async def _execute_clang_tidy_task(file: str, clang_tidy_args: List[str]) -> ClangTidyResult:
     """
     Executes a single clang-tidy task by checking one file using a process managed by asyncio.
 
@@ -38,7 +38,7 @@ async def execute_clang_tidy_task(file: str, clang_tidy_args: List[str]) -> Clan
     :param clang_tidy_args: The clang-tidy cli arguments.
     :return: Execution results represented by an instance of `ClangTidyResult`.
     """
-    task_args: List[str] = create_clang_tidy_task_arg_list(file, clang_tidy_args)
+    task_args: List[str] = _create_clang_tidy_task_arg_list(file, clang_tidy_args)
     try:
         process = await asyncio.create_subprocess_exec(
             *task_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -58,7 +58,7 @@ async def execute_clang_tidy_task(file: str, clang_tidy_args: List[str]) -> Clan
     )
 
 
-async def execute_clang_tidy_task_with_sem(
+async def _execute_clang_tidy_task_with_sem(
     sem: asyncio.Semaphore, file: str, clang_tidy_args: List[str]
 ) -> ClangTidyResult:
     """
@@ -70,10 +70,10 @@ async def execute_clang_tidy_task_with_sem(
     :return: Forwards `execute_clang_tidy_task`'s return values.
     """
     async with sem:
-        return await execute_clang_tidy_task(file, clang_tidy_args)
+        return await _execute_clang_tidy_task(file, clang_tidy_args)
 
 
-async def clang_tidy_parallel_execution_entry(
+async def _clang_tidy_parallel_execution_entry(
     num_jobs: int,
     files: List[str],
     clang_tidy_args: List[str],
@@ -86,7 +86,7 @@ async def clang_tidy_parallel_execution_entry(
     """
     sem: asyncio.Semaphore = asyncio.Semaphore(num_jobs)
     tasks: List[asyncio.Task[ClangTidyResult]] = [
-        asyncio.create_task(execute_clang_tidy_task_with_sem(sem, file, clang_tidy_args))
+        asyncio.create_task(_execute_clang_tidy_task_with_sem(sem, file, clang_tidy_args))
         for file in files
     ]
     num_total_files: int = len(files)
@@ -161,7 +161,7 @@ def main() -> None:
     ret_code: int = 0
     try:
         ret_code = asyncio.run(
-            clang_tidy_parallel_execution_entry(
+            _clang_tidy_parallel_execution_entry(
                 num_jobs, parsed_cli_args.input_files, clang_tidy_args
             )
         )
