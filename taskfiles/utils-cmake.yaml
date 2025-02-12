@@ -16,6 +16,11 @@ tasks:
   cmake-build:
     internal: true
     label: "{{.TASK}}:{{.BUILD_DIR}}-{{.TARGETS}}-{{.EXTRA_ARGS}}"
+    vars:
+      EXTRA_ARGS:
+        ref: default (list) .EXTRA_ARGS
+      TARGETS:
+        ref: default (list) .TARGETS
     requires:
       vars: ["BUILD_DIR"]
     cmds:
@@ -44,7 +49,7 @@ tasks:
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
-            ref: "default (list) .EXTRA_ARGS"
+            ref: .EXTRA_ARGS
           TARGETS: ["clean"]
 
   # Runs the CMake generate step for the given source and build directories. We purposely omit
@@ -57,6 +62,9 @@ tasks:
   cmake-generate:
     internal: true
     label: "{{.TASK}}:{{.SOURCE_DIR}}-{{.BUILD_DIR}}-{{.EXTRA_ARGS}}"
+    vars:
+      EXTRA_ARGS:
+        ref: default (list) .EXTRA_ARGS
     requires:
       vars: ["BUILD_DIR", "SOURCE_DIR"]
     cmds:
@@ -78,6 +86,9 @@ tasks:
   cmake-install:
     internal: true
     label: "{{.TASK}}:{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}-{{.EXTRA_ARGS}}"
+    vars:
+      EXTRA_ARGS:
+        ref: default (list) .EXTRA_ARGS
     requires:
       vars: ["BUILD_DIR", "INSTALL_PREFIX"]
     cmds:
@@ -88,3 +99,66 @@ tasks:
         {{- range .EXTRA_ARGS}}
         "{{.}}"
         {{- end}}
+
+  # Downloads a CMake project tar file from `URL` and then generates, builds, and installs the
+  # project. We purposely omit `sources` and `generates` as we defer to `cmake` to decide whether it
+  # should perform any actions. However, the download and extraction will be skipped if unnecessary.
+  #
+  # @param {string} NAME Project name used for directory names.
+  # @param {string} FILE_SHA256 Content hash to verify the downloaded tar file against.
+  # @param {string} URL
+  # @param {string[]} [BUILD_ARGS] Any additional arguments to pass to the build command.
+  # @param {string} [BUILD_DIR={{.WORK_DIR}}/{{.NAME}}-build] Directory in which to generate the
+  # build system and perform the build.
+  # @param {string[]} [GEN_ARGS] Any additional arguments to pass to the generate command.
+  # @param {string[]} [INSTALL_ARGS] Any additional arguments to pass to the install command.
+  # @param {string} [INSTALL_PREFIX={{.WORK_DIR}}/{{.NAME}}-install] Path prefix of where the
+  # project should be installed.
+  # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
+  # omitted, the native build tool's default number is used. See `man cmake`.
+  # @param {string} [SOURCE_DIR={{.WORK_DIR}}/{{.NAME}}-src] Directory in which to extract the tar
+  # file.
+  # @param {string[]} [TARGETS] A list of specific targets to build instead of the default target.
+  # @param {string} [WORK_DIR={{.TASK_DIR}}] Base directory to store the build, install, and src
+  # directories inside.
+  cmake-install-remote-tar:
+    internal: true
+    label: "{{.TASK}}:{{.NAME}}-{{.URL}}-{{.INSTALL_PREFIX}}"
+    vars:
+      BUILD_DIR: >-
+        {{default (printf "%s/%s-build" .WORK_DIR .NAME) .BUILD_DIR}}
+      INSTALL_PREFIX: >-
+        {{default (printf "%s/%s-install" .WORK_DIR .NAME) .INSTALL_PREFIX}}
+      SOURCE_DIR: >-
+        {{default (printf "%s/%s-src" .WORK_DIR .NAME) .SOURCE_DIR}}
+      WORK_DIR: >-
+        {{default .TASK_DIR .WORK_DIR}}
+    requires:
+      vars: ["NAME", "FILE_SHA256", "URL", "WORK_DIR"]
+    deps:
+      - task: ":utils:download-and-extract-tar"
+        vars:
+          FILE_SHA256: "{{.FILE_SHA256}}"
+          OUTPUT_DIR: "{{.SOURCE_DIR}}"
+          URL: "{{.URL}}"
+    cmds:
+      - task: ":utils:cmake-generate"
+        vars:
+          BUILD_DIR: "{{.BUILD_DIR}}"
+          EXTRA_ARGS:
+            ref: .GEN_ARGS
+          SOURCE_DIR: "{{.SOURCE_DIR}}"
+      - task: ":utils:cmake-build"
+        vars:
+          BUILD_DIR: "{{.BUILD_DIR}}"
+          EXTRA_ARGS:
+            ref: .BUILD_ARGS
+          JOBS: "{{.JOBS}}"
+          TARGETS:
+            ref: .TARGETS
+      - task: ":utils:cmake-install"
+        vars:
+          BUILD_DIR: "{{.BUILD_DIR}}"
+          EXTRA_ARGS:
+            ref: .INSTALL_ARGS
+          INSTALL_PREFIX: "{{.INSTALL_PREFIX}}"
