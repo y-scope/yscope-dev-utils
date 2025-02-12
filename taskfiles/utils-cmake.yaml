@@ -104,8 +104,8 @@ tasks:
   # project. We purposely omit `sources` and `generates` as we defer to `cmake` to decide whether it
   # should perform any actions. However, the download and extraction will be skipped if unnecessary.
   #
-  # @param {string} NAME Project name used for directory names.
   # @param {string} FILE_SHA256 Content hash to verify the downloaded tar file against.
+  # @param {string} NAME Project name used for directory names.
   # @param {string} URL
   # @param {string[]} [BUILD_ARGS] Any additional arguments to pass to the build command.
   # @param {string} [BUILD_DIR={{.WORK_DIR}}/{{.NAME}}-build] Directory in which to generate the
@@ -125,16 +125,16 @@ tasks:
     internal: true
     label: "{{.TASK}}:{{.NAME}}-{{.URL}}-{{.INSTALL_PREFIX}}"
     vars:
+      WORK_DIR: >-
+        {{default .ROOT_DIR .WORK_DIR}}
       BUILD_DIR: >-
         {{default (printf "%s/%s-build" .WORK_DIR .NAME) .BUILD_DIR}}
       INSTALL_PREFIX: >-
         {{default (printf "%s/%s-install" .WORK_DIR .NAME) .INSTALL_PREFIX}}
       SOURCE_DIR: >-
         {{default (printf "%s/%s-src" .WORK_DIR .NAME) .SOURCE_DIR}}
-      WORK_DIR: >-
-        {{default .TASK_DIR .WORK_DIR}}
     requires:
-      vars: ["NAME", "FILE_SHA256", "URL", "WORK_DIR"]
+      vars: ["FILE_SHA256", "NAME", "URL"]
     deps:
       - task: ":utils:download-and-extract-tar"
         vars:
