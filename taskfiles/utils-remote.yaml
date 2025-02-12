@@ -101,7 +101,7 @@ tasks:
       # Unlike for `tar --create`, in `--extract` both the exclude and include patterns can be
       # quoted since they're both evaluated by `tar`.
       - >-
-        {.ARCHIVER}
+        "{{.ARCHIVER}}"
         --extract
         --strip-components="{{.NUM_COMPONENTS_TO_STRIP}}"
         --directory "{{.OUTPUT_DIR}}"
