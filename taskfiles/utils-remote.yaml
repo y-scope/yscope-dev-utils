@@ -78,7 +78,7 @@ tasks:
 
       # Misc
       ARCHIVER: >-
-          {{if eq OS "darwin"}}gtar{{else}}tar{{end}}
+        {{if eq OS "darwin"}}gtar{{else}}tar{{end}}
       NUM_COMPONENTS_TO_STRIP: "{{default 1 .NUM_COMPONENTS_TO_STRIP}}"
     requires:
       vars: ["FILE_SHA256", "OUTPUT_DIR", "URL"]
