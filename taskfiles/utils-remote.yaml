@@ -25,7 +25,7 @@ tasks:
         | awk '{print $2}')
     cmds:
       - |-
-        mkdir --parents "{{dir .OUTPUT_FILE}}"
+        mkdir -p "{{dir .OUTPUT_FILE}}"
         max_attempts=3
         attempt=1
         while [ $attempt -le $max_attempts ]; do
@@ -77,6 +77,8 @@ tasks:
         ref: "default (list) .INCLUDE_PATTERNS"
 
       # Misc
+      ARCHIVER: |
+          {{if eq OS "darwin"}}gtar{{else}}tar{{end}}
       NUM_COMPONENTS_TO_STRIP: "{{default 1 .NUM_COMPONENTS_TO_STRIP}}"
     requires:
       vars: ["FILE_SHA256", "OUTPUT_DIR", "URL"]
@@ -94,8 +96,8 @@ tasks:
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
     cmds:
       - |-
-        rm --force --recursive "{{.OUTPUT_DIR}}"
-        mkdir --parents  "{{.OUTPUT_DIR}}"
+        rm -rf "{{.OUTPUT_DIR}}"
+        mkdir -p  "{{.OUTPUT_DIR}}"
       # Unlike for `tar --create`, in `--extract` both the exclude and include patterns can be
       # quoted since they're both evaluated by `tar`.
       - >-
