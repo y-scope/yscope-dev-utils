@@ -77,7 +77,7 @@ tasks:
         ref: "default (list) .INCLUDE_PATTERNS"
 
       # Misc
-      ARCHIVER: |
+      ARCHIVER: >-
           {{if eq OS "darwin"}}gtar{{else}}tar{{end}}
       NUM_COMPONENTS_TO_STRIP: "{{default 1 .NUM_COMPONENTS_TO_STRIP}}"
     requires:
