@@ -4,21 +4,59 @@ set: ["u", "pipefail"]
 shopt: ["globstar"]
 
 tasks:
-  # Runs CMake's configure and build steps for the given source and build directories.
+  # Runs the CMake build step for the given build directory. The caller must have previously called
+  # `cmake-generate` on `BUILD_DIR` for this task to succeed. We purposely omit `sources` and
+  # `generates` as we defer to `cmake` to decide whether it should perform any actions.
   #
-  # @param {string} BUILD_DIR CMake build directory to create.
-  # @param {string} SOURCE_DIR Project source directory containing the CMakeLists.txt file.
+  # @param {string} BUILD_DIR Directory containing the generated build system to use.
+  # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the build command.
   # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
   # omitted, the native build tool's default number is used. See `man cmake`.
-  # @param {string} [CONF_ARGS] Any additional arguments to pass to CMake's configure step.
-  cmake-config-and-build:
+  # @param {string[]} [TARGETS] A list of specific targets to build instead of the default target.
+  cmake-build:
     internal: true
-    label: "{{.TASK}}-{{.SOURCE_DIR}}-{{.BUILD_DIR}}"
-    vars:
-      CONF_ARGS: >-
-        {{default "" .CONF_ARGS}}
-      JOBS: >-
-        {{default "" .JOBS}}
+    label: "{{.TASK}}:{{.BUILD_DIR}}-{{.TARGETS}}-{{.EXTRA_ARGS}}"
+    requires:
+      vars: ["BUILD_DIR"]
+    cmds:
+      - >-
+        cmake
+        --build "{{.BUILD_DIR}}"
+        --parallel "{{.JOBS}}"
+        {{- range .TARGETS}}
+        --target="{{.}}"
+        {{- end}}
+        {{- range .EXTRA_ARGS}}
+        "{{.}}"
+        {{- end}}
+
+  # Runs the CMake clean target for the given build directory. The caller must have previously
+  # called `cmake-generate` on `BUILD_DIR` for this task to succeed.
+  #
+  # @param {string} BUILD_DIR Directory containing the generated buildsystem to use.
+  # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass with the clean target.
+  cmake-clean:
+    internal: true
+    requires:
+      vars: ["BUILD_DIR"]
+    cmds:
+      - task: "cmake-build"
+        vars:
+          BUILD_DIR: "{{.BUILD_DIR}}"
+          EXTRA_ARGS:
+            ref: "default (list) .EXTRA_ARGS"
+          TARGETS: ["clean"]
+
+  # Runs the CMake generate step for the given source and build directories. We purposely omit
+  # `sources` and `generates` as we defer to `cmake` to decide whether it should perform any
+  # actions.
+  #
+  # @param {string} BUILD_DIR Directory in which to generate the build system.
+  # @param {string} SOURCE_DIR Project source directory containing the CMakeLists.txt file.
+  # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the generate command.
+  cmake-generate:
+    internal: true
+    label: "{{.TASK}}:{{.SOURCE_DIR}}-{{.BUILD_DIR}}-{{.EXTRA_ARGS}}"
     requires:
       vars: ["BUILD_DIR", "SOURCE_DIR"]
     cmds:
@@ -26,19 +64,20 @@ tasks:
         cmake
         -S "{{.SOURCE_DIR}}"
         -B "{{.BUILD_DIR}}"
-        {{.CONF_ARGS}}
-      - >-
-        cmake
-        --build "{{.BUILD_DIR}}"
-        --parallel "{{.JOBS}}"
+        {{- range .EXTRA_ARGS}}
+        "{{.}}"
+        {{- end}}
 
-  # Runs the CMake install step for the given build directory.
+  # Runs the CMake install step for the given build directory. The caller must have previously
+  # called `cmake-build` on `BUILD_DIR` for this task to succeed. We purposely omit `sources` and
+  # `generates` as we defer to `cmake` to decide whether it should perform any actions.
   #
-  # @param {string} BUILD_DIR CMake build directory.
+  # @param {string} BUILD_DIR Directory containing the completed build to use.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
+  # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the install command.
   cmake-install:
     internal: true
-    label: "{{.TASK}}-{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}"
+    label: "{{.TASK}}:{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}-{{.EXTRA_ARGS}}"
     requires:
       vars: ["BUILD_DIR", "INSTALL_PREFIX"]
     cmds:
@@ -46,3 +85,6 @@ tasks:
         cmake
         --install "{{.BUILD_DIR}}"
         --prefix "{{.INSTALL_PREFIX}}"
+        {{- range .EXTRA_ARGS}}
+        "{{.}}"
+        {{- end}}
