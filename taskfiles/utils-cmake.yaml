@@ -147,6 +147,8 @@ tasks:
         ref: default (list) .GEN_ARGS
       INSTALL_ARGS:
         ref: default (list) .INSTALL_ARGS
+      JOBS: >-
+        {{default "" .JOBS}}
       TARGETS:
         ref: default (list) .TARGETS
     requires:
