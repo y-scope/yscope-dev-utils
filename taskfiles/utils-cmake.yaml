@@ -19,6 +19,8 @@ tasks:
     vars:
       EXTRA_ARGS:
         ref: default (list) .EXTRA_ARGS
+      JOBS: >-
+        {{default "" .JOBS}}
       TARGETS:
         ref: default (list) .TARGETS
     requires:
@@ -42,6 +44,9 @@ tasks:
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass with the clean target.
   cmake-clean:
     internal: true
+    vars:
+      EXTRA_ARGS:
+        ref: default (list) .EXTRA_ARGS
     requires:
       vars: ["BUILD_DIR"]
     cmds:
@@ -125,6 +130,7 @@ tasks:
     internal: true
     label: "{{.TASK}}:{{.NAME}}-{{.URL}}-{{.INSTALL_PREFIX}}"
     vars:
+      # Paths
       WORK_DIR: >-
         {{default .ROOT_DIR .WORK_DIR}}
       BUILD_DIR: >-
@@ -133,6 +139,16 @@ tasks:
         {{default (printf "%s/%s-install" .WORK_DIR .NAME) .INSTALL_PREFIX}}
       SOURCE_DIR: >-
         {{default (printf "%s/%s-src" .WORK_DIR .NAME) .SOURCE_DIR}}
+
+      # Optional CMake arguments
+      BUILD_ARGS:
+        ref: default (list) .BUILD_ARGS
+      GEN_ARGS:
+        ref: default (list) .GEN_ARGS
+      INSTALL_ARGS:
+        ref: default (list) .INSTALL_ARGS
+      TARGETS:
+        ref: default (list) .TARGETS
     requires:
       vars: ["FILE_SHA256", "NAME", "URL"]
     deps:
