@@ -53,6 +53,7 @@ tasks:
           echo "Failed to download after $max_attempts attempts."
           exit 1
         fi
+      - "echo Verifying the commit hash of {{.OUTPUT_FILE}}."
       - >-
         diff
         <(echo "{{.FILE_SHA256}}")
