@@ -14,10 +14,15 @@ tasks:
     label: "{{.TASK}}-{{.OUTPUT_FILE}}"
     vars:
       OUTPUT_FILE: "{{default (base .URL) .OUTPUT_FILE}}"
+      URL_FILE: "{{.OUTPUT_FILE | replace \".\" \"#\"}}.url"
     requires:
       vars: ["FILE_SHA256", "URL"]
-    generates: ["{{.OUTPUT_FILE}}"]
+    generates: ["{{.OUTPUT_FILE}}, {{.URL_FILE}}"]
     status:
+      - >-
+        diff
+        <(echo "{{.URL}}")
+        <(cat "{{.URL_FILE}}")
       - >-
         diff
         <(echo "{{.FILE_SHA256}}")
@@ -26,6 +31,7 @@ tasks:
     cmds:
       - |-
         mkdir -p "{{dir .OUTPUT_FILE}}"
+        echo "{{.URL}}" > "{{.URL_FILE}}"
         max_attempts=3
         attempt=1
         while [ $attempt -le $max_attempts ]; do
@@ -47,6 +53,11 @@ tasks:
           echo "Failed to download after $max_attempts attempts."
           exit 1
         fi
+      - >-
+        diff
+        <(echo "{{.FILE_SHA256}}")
+        <(openssl dgst -sha256 "{{.OUTPUT_FILE}}"
+        | awk '{print $2}')
 
   # Runs curl to download the tar file from the given URL and extracts its contents.
   #
