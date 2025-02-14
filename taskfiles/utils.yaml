@@ -2,17 +2,17 @@ version: "3"
 
 includes:
   checksum:
-    taskfile: utils-checksum.yaml
+    taskfile: "utils-checksum.yaml"
     flatten: true
   cmake:
-    taskfile: utils-cmake.yaml
+    taskfile: "utils-cmake.yaml"
     flatten: true
   cpp-lint:
-    taskfile: utils-cpp-lint.yaml
+    taskfile: "utils-cpp-lint.yaml"
     flatten: true
   misc:
-    taskfile: utils-misc.yaml
+    taskfile: "utils-misc.yaml"
     flatten: true
   remote:
-    taskfile: utils-remote.yaml
+    taskfile: "utils-remote.yaml"
     flatten: true
