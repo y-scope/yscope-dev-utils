@@ -6,34 +6,259 @@ shopt: ["globstar"]
 tasks:
   # Runs clang-format on C++ files at the given paths.
   #
-  # @param {string} FLAGS Any flags to pass to clang-format.
-  # @param {string[]} SRC_PATHS The paths on which to run clang-format.
-  # @param {string} VENV_DIR Python virtual environment where clang-format is installed.
+  # @param {string[]} ROOT_PATHS The paths on which to start `find`. When combined with
+  # EXCLUDE_PATTERNS and INCLUDE_PATTERNS `find` will output a list of files used as the input to
+  # `clang-format`.
+  # @param {string} VENV_DIR Python virtual environment where `clang-format` is installed.
+  # @param {string[]} [EXCLUDE_PATTERNS] `-path` wildcard patterns to prune in `find`.
+  # @param {string[]} [EXTENSION_PATTERNS=["*.cpp", "*.h", "*.hpp"]] `-name` wildcard patterns to
+  # match in `find`.
+  # @param {string} [FLAGS] Any flags to pass to `clang-format`.
+  # @param {string[]} [INCLUDE_PATTERNS] `-path` wildcard patterns to match in `find`.
   clang-format:
     internal: true
+    vars:
+      EXTENSION_PATTERNS: ["*.cpp", "*.h", "*.hpp"]
     requires:
-      vars: ["FLAGS", "SRC_PATHS", "VENV_DIR"]
+      vars: ["ROOT_PATHS", "VENV_DIR"]
     cmd: |-
       . "{{.VENV_DIR}}/bin/activate"
-      find {{- range .SRC_PATHS}} "{{.}}" {{- end}} \
+      shopt -s globstar
+      find \
+        {{- range .ROOT_PATHS}}
+        {{.}} \
+        {{- end}}
+        {{- if .EXCLUDE_PATTERNS}}
+          \( \ {{- range $i, $pattern := .EXCLUDE_PATTERNS}}
+            {{if $i}}-or {{end -}}
+             -path "{{$pattern}}" \
+            {{- end}}
+          \) \
+        -prune \
+        -or \
+        {{- end}}
         -type f \
-        \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
-        -print0 | \
-          xargs -0 clang-format {{.FLAGS}} -Werror
+        {{- if .INCLUDE_PATTERNS}}
+          \( \ {{- range $i, $pattern := .INCLUDE_PATTERNS}}
+            {{if $i}}-or {{end -}}
+            -path "{{$pattern}}" \
+            {{- end}}
+          \) \
+        {{- end}}
+        {{- if .EXTENSION_PATTERNS}}
+          \( \ {{- range $i, $pattern := .EXTENSION_PATTERNS}}
+            {{if $i}}-or {{end -}}
+            -name "{{$pattern}}" \
+            {{- end}}
+          \) \
+        {{- end}}
+        -print0 \
+      | xargs -0 clang-format {{.FLAGS}} -Werror
 
-  # Runs clang-tidy on C++ files at the given paths.
+  # Runs clang-tidy on C++ files at the given paths. `INCLUDE_PATTERNS` and `EXCLUDE_PATTERNS` use
+  # the `find` flag `-path` and must match the full path rooted in `ROOT_PATHS`.
+  # `EXTENSION_PATTERNS` use the `find` flag `-name` and only matches the base file name.
   #
-  # @param {string} FLAGS Any flags to pass to clang-tidy.
-  # @param {string[]} SRC_PATHS The paths on which to run clang-tidy.
-  # @param {string} VENV_DIR Python virtual environment where clang-tidy is installed.
+  # @param {string[]} ROOT_PATHS The paths on which to start `find`. When combined with
+  # EXCLUDE_PATTERNS and INCLUDE_PATTERNS `find` will output a list of files used as the input to
+  # `clang-tidy`.
+  # @param {string} VENV_DIR Python virtual environment where `clang-tidy` is installed.
+  # @param {string[]} [EXCLUDE_PATTERNS] `-path` wildcard patterns to prune in `find`.
+  # @param {string[]} [EXTENSION_PATTERNS=["*.cpp", "*.h", "*.hpp"]] `-name` wildcard patterns to
+  # match in `find`.
+  # @param {string} [FLAGS] Any flags to pass to `clang-tidy`.
+  # @param {string[]} [INCLUDE_PATTERNS] `-path` wildcard patterns to match in `find`.
+  # @param {string} [OUTPUT_DIR="{{.ROOT_DIR}}/lint-clang-tidy"] Directory to store the `clang-tidy`
+  # output for each file.
+  clang-tidy-find:
+    internal: true
+    label: "{{.TASK}}:{{.OUTPUT_DIR}}"
+    vars:
+      EXTENSION_PATTERNS: ["*.cpp", "*.h", "*.hpp"]
+      FLAGS:
+        ref: "default (list) .FLAGS"
+      OUTPUT_DIR: >-
+        {{default "{{.ROOT_DIR}}/lint-clang-tidy" .OUTPUT_DIR}}
+      SOURCE_PATHS_:
+        # Do not quote `ROOT_PATHS` entries so that wildcards can be evaluated by the shell.
+        sh: |-
+          find \
+            {{- range .ROOT_PATHS}}
+            {{.}} \
+            {{- end}}
+            {{- if .EXCLUDE_PATTERNS}}
+              \( \ {{- range $i, $pattern := .EXCLUDE_PATTERNS}}
+                {{if $i}}-or {{end -}}
+                 -path "{{$pattern}}" \
+                {{- end}}
+              \) \
+            -prune \
+            -or \
+            {{- end}}
+            -type f \
+            {{- if .INCLUDE_PATTERNS}}
+              \( \ {{- range $i, $pattern := .INCLUDE_PATTERNS}}
+                {{if $i}}-or {{end -}}
+                -path "{{$pattern}}" \
+                {{- end}}
+              \) \
+            {{- end}}
+            {{- if .EXTENSION_PATTERNS}}
+              \( \ {{- range $i, $pattern := .EXTENSION_PATTERNS}}
+                {{if $i}}-or {{end -}}
+                -name "{{$pattern}}" \
+                {{- end}}
+              \) \
+            {{- end}}
+            -print0
+      SOURCE_PATHS:
+        # `-print0` output ends in "\x00" causing `splitList` to generate an empty entry, that we
+        # remove using `compact`.
+        ref: >-
+          compact (splitList "\x00" .SOURCE_PATHS_)
+    requires:
+      vars: ["ROOT_PATHS", "VENV_DIR"]
+    cmds:
+      - task: ":utils:clang-tidy-output"
+        vars:
+          FLAGS:
+            ref: ".FLAGS"
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+          SOURCE_PATHS:
+            ref: ".SOURCE_PATHS"
+          VENV_DIR: "{{.VENV_DIR}}"
+
+  # Run `clang-tidy` on `SOURCE_PATH` and write the output to `OUTPUT_PATH`. The output is appended
+  # with "Passed" or "Failed" depending on the result.
+  #
+  # @param {string} OUTPUT_PATH Path to output log of `clang-tidy` for `SOURCE_PATH`.
+  # @param {string} SOURCE_PATH Source file path to run `clang-tidy` on.
+  # @param {string} VENV_DIR Python virtual environment where `clang-tidy` is installed.
   clang-tidy:
     internal: true
+    label: "{{.TASK}}:{{.SOURCE_PATH}}"
+    sources: ["{{.SOURCE_PATH}}"]
     requires:
-      vars: ["FLAGS", "SRC_PATHS", "VENV_DIR"]
-    cmd: |-
-      . "{{.VENV_DIR}}/bin/activate"
-      find {{- range .SRC_PATHS}} "{{.}}" {{- end}} \
-        -type f \
-        \( -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \) \
-        -print0 | \
-          xargs -0 clang-tidy {{.FLAGS}}
+      vars: ["OUTPUT_PATH", "SOURCE_PATH", "VENV_DIR"]
+    generates: ["{{.OUTPUT_PATH}}"]
+    cmds:
+      - defer: |-
+          if [[ 0 -eq "{{.EXIT_CODE}}" ]]; then
+            echo "Passed" >> "{{.OUTPUT_PATH}}"
+          else
+            echo "Failed" >> "{{.OUTPUT_PATH}}"
+          fi
+      - |-
+        . "{{.VENV_DIR}}/bin/activate"
+        clang-tidy {{.FLAGS}} {{.SOURCE_PATH}} &> "{{.OUTPUT_PATH}}"
+
+  # Run `clang-tidy` in parallel on `SOURCE_PATHS`, storing the output for each file in
+  # `OUTPUT_DIR`. Each file is named after the source file path with '/' replaced with '-' and
+  # suffixed with '.log'. The task will fail on the first file to fail `clang-tidy`, which will
+  # result in some files having incomplete output.
+  #
+  # @param {string} SOURCE_PATHS List of source file paths.
+  # @param {string} VENV_DIR Python virtual environment where `clang-tidy` is installed.
+  # @param {string[]} [FLAGS] Any flags to pass to `clang-tidy`.
+  # @param {string} [OUTPUT_DIR="{{.ROOT_DIR}}/lint-clang-tidy"] Directory to store the `clang-tidy`
+  # output for each file.
+  clang-tidy-parallel:
+    internal: true
+    vars:
+      FLAGS:
+        ref: "default (list) .FLAGS"
+      OUTPUT_DIR: >-
+        {{default "{{.ROOT_DIR}}/lint-clang-tidy" .OUTPUT_DIR}}
+    requires:
+      vars: ["SOURCE_PATHS", "VENV_DIR"]
+    deps:
+      - for: { var: SOURCE_PATHS }
+        task: ":utils:clang-tidy"
+        vars:
+          FLAGS:
+            ref: ".FLAGS"
+          OUTPUT_PATH: >-
+            {{printf "%s/%s.log" .OUTPUT_DIR (replace "/" "-" .ITEM)}}
+          SOURCE_PATH: "{{.ITEM}}"
+          VENV_DIR: "{{.VENV_DIR}}"
+
+  # Run `clang-tidy` in parallel on C++ source files that differ between HEAD and the target branch.
+  # On failure the `clang-tidy` output is printed. The task will fail on the first file to fail
+  # `clang-tidy`, which will result in some files having incomplete output. Either fix the known
+  # errors and run the task again or directly run `clang-tidy` on a file of interest.
+  #
+  # @param {string} VENV_DIR Python virtual environment where `clang-tidy` is installed.
+  # @param {string} [GIT_REF="origin/main"] A `git` reference that HEAD is diff'd with.
+  # @param {string[]} [FLAGS] Any flags to pass to `clang-tidy`.
+  # @param {string} [OUTPUT_DIR="{{.ROOT_DIR}}/lint-clang-tidy"] Directory to store the `clang-tidy`
+  # output for each file.
+  clang-tidy-diff:
+    internal: true
+    label: "{{.TASK}}:{{.OUTPUT_DIR}}"
+    vars:
+      GIT_REF: >-
+        {{default "origin/main" .GIT_REF}}
+      DIFF_SOURCE_PATHS_:
+        sh: >-
+          git diff --name-only --ignore-submodules "{{.GIT_REF}}"
+          | grep ".*\.\(cpp\|h\|hpp\)"
+          | xargs --no-run-if-empty realpath
+      DIFF_SOURCE_PATHS:
+        ref: >-
+          splitList "\n" .DIFF_SOURCE_PATHS_
+      FLAGS:
+        ref: "default (list) .FLAGS"
+      OUTPUT_DIR: >-
+        {{default "{{.ROOT_DIR}}/lint-clang-tidy" .OUTPUT_DIR}}
+    requires:
+      vars: ["VENV_DIR"]
+    dir: "{{.ROOT_DIR}}"
+    cmds:
+      - task: ":utils:clang-tidy-output"
+        vars:
+          FLAGS:
+            ref: ".FLAGS"
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+          SOURCE_PATHS:
+            ref: ".DIFF_SOURCE_PATHS"
+          VENV_DIR: "{{.VENV_DIR}}"
+
+  # Run `clang-tidy-parallel` and print completed output logs on failure. Output logs that were not
+  # fully completed or do not exist (`clang-tidy` did not get a chance to run for the file) are
+  # skipped.
+  #
+  # @param {string} SOURCE_PATHS List of source file paths.
+  # @param {string} VENV_DIR Python virtual environment where `clang-tidy` is installed.
+  # @param {string[]} [FLAGS] Any flags to pass to `clang-tidy`.
+  # @param {string} [OUTPUT_DIR="{{.ROOT_DIR}}/lint-clang-tidy"] Directory to store the `clang-tidy`
+  # output for each file.
+  clang-tidy-output:
+    internal: true
+    vars:
+      FLAGS:
+        ref: "default (list) .FLAGS"
+      OUTPUT_DIR: >-
+        {{default "{{.ROOT_DIR}}/lint-clang-tidy" .OUTPUT_DIR}}
+    requires:
+      vars: ["SOURCE_PATHS", "VENV_DIR"]
+    cmds:
+      - defer: |-
+          {{- if .EXIT_CODE}}
+            {{- $output_dir := .OUTPUT_DIR}}
+            {{- range .SOURCE_PATHS}}
+              {{- $output_path := printf "%s/%s.log" $output_dir (replace "/" "-" .)}}
+              if [[ -f "{{$output_path}}" ]] \
+                  && [[ "Failed" == "$(tail -n 1 {{$output_path}})" ]]; then
+                tail -v -n +1 "{{$output_path}}"
+              fi
+            {{- end}}
+          {{- end}}
+      - mkdir -p "{{.OUTPUT_DIR}}"
+      - task: ":utils:clang-tidy-parallel"
+        vars:
+          FLAGS:
+            ref: ".FLAGS"
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+          SOURCE_PATHS:
+            ref: ".SOURCE_PATHS"
+          VENV_DIR: "{{.VENV_DIR}}"
