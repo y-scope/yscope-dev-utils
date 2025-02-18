@@ -18,9 +18,15 @@ tasks:
   clang-format:
     internal: true
     vars:
-      EXTENSION_PATTERNS: ["*.cpp", "*.h", "*.hpp"]
+      EXCLUDE_PATTERNS:
+        ref: "default (list) .EXCLUDE_PATTERNS"
+      EXTENSION_PATTERNS:
+        ref: >-
+          default (list "*.cpp" "*.h" "*.hpp") .EXTENSION_PATTERNS
       FLAGS:
         ref: "default (list) .FLAGS"
+      INCLUDE_PATTERNS:
+        ref: "default (list) .INCLUDE_PATTERNS"
     requires:
       vars: ["ROOT_PATHS", "VENV_DIR"]
     cmd: |-
@@ -152,9 +158,15 @@ tasks:
     internal: true
     label: "{{.TASK}}:{{.OUTPUT_DIR}}"
     vars:
-      EXTENSION_PATTERNS: ["*.cpp", "*.h", "*.hpp"]
+      EXCLUDE_PATTERNS:
+        ref: "default (list) .EXCLUDE_PATTERNS"
+      EXTENSION_PATTERNS:
+        ref: >-
+          default (list "*.cpp" "*.h" "*.hpp") .EXTENSION_PATTERNS
       FLAGS:
         ref: "default (list) .FLAGS"
+      INCLUDE_PATTERNS:
+        ref: "default (list) .INCLUDE_PATTERNS"
       OUTPUT_DIR: >-
         {{default "{{.ROOT_DIR}}/lint-clang-tidy" .OUTPUT_DIR}}
       SOURCE_PATHS_:
