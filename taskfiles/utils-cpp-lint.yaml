@@ -19,6 +19,8 @@ tasks:
     internal: true
     vars:
       EXTENSION_PATTERNS: ["*.cpp", "*.h", "*.hpp"]
+      FLAGS:
+        ref: "default (list) .FLAGS"
     requires:
       vars: ["ROOT_PATHS", "VENV_DIR"]
     cmd: |-
@@ -52,7 +54,11 @@ tasks:
           \) \
         {{- end}}
         -print0 \
-      | xargs -0 clang-format {{.FLAGS}} -Werror
+      | xargs -0 clang-format \
+        {{- range .FLAGS}}
+        {{.}} \
+        {{- end}}
+        -Werror
 
   # Run `clang-tidy` on `SOURCE_PATH` and write the output to `OUTPUT_PATH`. The output is appended
   # with "Passed" or "Failed" depending on the result.
@@ -60,10 +66,14 @@ tasks:
   # @param {string} OUTPUT_PATH Path to output log of `clang-tidy` for `SOURCE_PATH`.
   # @param {string} SOURCE_PATH Source file path to run `clang-tidy` on.
   # @param {string} VENV_DIR Python virtual environment where `clang-tidy` is installed.
+  # @param {string[]} [FLAGS] Any flags to pass to `clang-tidy`.
   clang-tidy:
     internal: true
     label: "{{.TASK}}:{{.SOURCE_PATH}}"
     sources: ["{{.SOURCE_PATH}}"]
+    vars:
+      FLAGS:
+        ref: "default (list) .FLAGS"
     requires:
       vars: ["OUTPUT_PATH", "SOURCE_PATH", "VENV_DIR"]
     generates: ["{{.OUTPUT_PATH}}"]
@@ -76,7 +86,11 @@ tasks:
           fi
       - |-
         . "{{.VENV_DIR}}/bin/activate"
-        clang-tidy {{.FLAGS}} {{.SOURCE_PATH}} &> "{{.OUTPUT_PATH}}"
+        clang-tidy \
+          {{- range .FLAGS}}
+          {{.}} \
+          {{- end}}
+          {{.SOURCE_PATH}} &> "{{.OUTPUT_PATH}}"
 
   # Run `clang-tidy` in parallel on C++ source files that differ between HEAD and the target branch.
   # On failure the `clang-tidy` output is printed. The task will fail on the first file to fail
