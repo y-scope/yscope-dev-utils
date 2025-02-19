@@ -8,7 +8,7 @@ tasks:
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to compute the checksum for.
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
   # to exclude from the checksum.
-  compute-checksum:
+  compute:
     desc: "Tries to compute a checksum for the given paths and output it to a file."
     internal: true
     label: "{{.TASK}}-{{.CHECKSUM_FILE}}"
@@ -50,7 +50,7 @@ tasks:
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to validate the checksum for.
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
   # to exclude from the checksum.
-  validate-checksum:
+  validate:
     desc: "Validates the checksum of the given directory matches the checksum in the given file, or
     deletes the checksum file otherwise."
     internal: true
@@ -61,7 +61,7 @@ tasks:
     requires:
       vars: ["CHECKSUM_FILE", "INCLUDE_PATTERNS"]
     cmds:
-      - task: "compute-checksum"
+      - task: "compute"
         vars:
           INCLUDE_PATTERNS:
             ref: ".INCLUDE_PATTERNS"

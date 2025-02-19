@@ -1,0 +1,8 @@
+version: "3"
+
+includes:
+  checksum: checksum.yaml
+  cmake: cmake.yaml
+  cpp-lint: cpp-lint.yaml
+  misc: misc.yaml
+  remote: remote.yaml
