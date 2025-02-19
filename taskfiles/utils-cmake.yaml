@@ -167,19 +167,19 @@ tasks:
     requires:
       vars: ["FILE_SHA256", "NAME", "URL"]
     deps:
-      - task: ":utils:download-and-extract-tar"
+      - task: "download-and-extract-tar"
         vars:
           FILE_SHA256: "{{.FILE_SHA256}}"
           OUTPUT_DIR: "{{.SOURCE_DIR}}"
           URL: "{{.URL}}"
     cmds:
-      - task: ":utils:cmake-generate"
+      - task: "cmake-generate"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
             ref: ".GEN_ARGS"
           SOURCE_DIR: "{{.SOURCE_DIR}}"
-      - task: ":utils:cmake-build"
+      - task: "cmake-build"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
@@ -187,7 +187,7 @@ tasks:
           JOBS: "{{.JOBS}}"
           TARGETS:
             ref: ".TARGETS"
-      - task: ":utils:cmake-install"
+      - task: "cmake-install"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
