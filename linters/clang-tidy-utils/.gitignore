@@ -1,0 +1,10 @@
+# Environment
+venv*/
+__pycache__
+
+# Packaging
+*.egg-info
+
+# Dev
+.mypy_cache
+.ruff_cache
