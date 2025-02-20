@@ -137,7 +137,7 @@ tasks:
           | xargs --no-run-if-empty realpath
       DIFF_SOURCE_FILE_PATHS:
         ref: >-
-          splitList "\n" .DIFF_SOURCE_FILE_PATHS_
+          compact (splitList "\n" .DIFF_SOURCE_FILE_PATHS_)
       FLAGS:
         ref: "default (list) .FLAGS"
       OUTPUT_DIR: >-
