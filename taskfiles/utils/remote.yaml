@@ -1,5 +1,8 @@
 version: "3"
 
+includes:
+  checksum: "checksum.yaml"
+
 set: ["u", "pipefail"]
 shopt: ["globstar"]
 
@@ -90,7 +93,7 @@ tasks:
           FILE_SHA256: "{{.FILE_SHA256}}"
           OUTPUT_FILE: "{{.TAR_FILE}}"
           URL: "{{.URL}}"
-      - task: "validate-checksum"
+      - task: "checksum:validate"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
@@ -116,7 +119,7 @@ tasks:
         {{- end}}
         2> /dev/null
       # This command must be last
-      - task: "compute-checksum"
+      - task: "checksum:compute"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]

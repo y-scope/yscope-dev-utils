@@ -1,19 +1,22 @@
 version: "3"
 
+includes:
+  remote: "remote.yaml"
+
 set: ["u", "pipefail"]
 shopt: ["globstar"]
 
 tasks:
   # Runs the CMake build step for the given build directory. The caller must have previously called
-  # `cmake-generate` on `BUILD_DIR` for this task to succeed. We purposely omit `sources` and
-  # `generates` as we defer to `cmake` to decide whether it should perform any actions.
+  # `generate` on `BUILD_DIR` for this task to succeed. We purposely omit `sources` and `generates`
+  # as we defer to `cmake` to decide whether it should perform any actions.
   #
   # @param {string} BUILD_DIR Directory containing the generated build system to use.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the build command.
   # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
   # omitted, the native build tool's default number is used. See `man cmake`.
   # @param {string[]} [TARGETS] A list of specific targets to build instead of the default target.
-  cmake-build:
+  build:
     internal: true
     label: "{{.TASK}}:{{.BUILD_DIR}}-{{.TARGETS}}-{{.EXTRA_ARGS}}"
     vars:
@@ -38,11 +41,11 @@ tasks:
         {{- end}}
 
   # Runs the CMake clean target for the given build directory. The caller must have previously
-  # called `cmake-generate` on `BUILD_DIR` for this task to succeed.
+  # called `generate` on `BUILD_DIR` for this task to succeed.
   #
   # @param {string} BUILD_DIR Directory containing the generated buildsystem to use.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass with the clean target.
-  cmake-clean:
+  clean:
     internal: true
     vars:
       EXTRA_ARGS:
@@ -50,7 +53,7 @@ tasks:
     requires:
       vars: ["BUILD_DIR"]
     cmds:
-      - task: "cmake-build"
+      - task: "build"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
@@ -64,7 +67,7 @@ tasks:
   # @param {string} BUILD_DIR Directory in which to generate the build system.
   # @param {string} SOURCE_DIR Project source directory containing the CMakeLists.txt file.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the generate command.
-  cmake-generate:
+  generate:
     internal: true
     label: "{{.TASK}}:{{.SOURCE_DIR}}-{{.BUILD_DIR}}-{{.EXTRA_ARGS}}"
     vars:
@@ -82,13 +85,13 @@ tasks:
         {{- end}}
 
   # Runs the CMake install step for the given build directory. The caller must have previously
-  # called `cmake-build` on `BUILD_DIR` for this task to succeed. We purposely omit `sources` and
+  # called `build` on `BUILD_DIR` for this task to succeed. We purposely omit `sources` and
   # `generates` as we defer to `cmake` to decide whether it should perform any actions.
   #
   # @param {string} BUILD_DIR Directory containing the completed build to use.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the install command.
-  cmake-install:
+  install:
     internal: true
     label: "{{.TASK}}:{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}-{{.EXTRA_ARGS}}"
     vars:
@@ -135,7 +138,7 @@ tasks:
   # @param {string[]} [INSTALL_ARGS] Any additional arguments to pass to the CMake install command.
   # @param {string} [INSTALL_PREFIX={{.WORK_DIR}}/{{.NAME}}-install] Path prefix of where the
   # project should be installed.
-  cmake-install-remote-tar:
+  install-remote-tar:
     internal: true
     label: "{{.TASK}}:{{.NAME}}-{{.URL}}-{{.INSTALL_PREFIX}}"
     vars:
@@ -167,19 +170,19 @@ tasks:
     requires:
       vars: ["FILE_SHA256", "NAME", "URL"]
     deps:
-      - task: ":utils:download-and-extract-tar"
+      - task: "remote:download-and-extract-tar"
         vars:
           FILE_SHA256: "{{.FILE_SHA256}}"
           OUTPUT_DIR: "{{.SOURCE_DIR}}"
           URL: "{{.URL}}"
     cmds:
-      - task: ":utils:cmake-generate"
+      - task: "generate"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
             ref: ".GEN_ARGS"
           SOURCE_DIR: "{{.SOURCE_DIR}}"
-      - task: ":utils:cmake-build"
+      - task: "build"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
@@ -187,7 +190,7 @@ tasks:
           JOBS: "{{.JOBS}}"
           TARGETS:
             ref: ".TARGETS"
-      - task: ":utils:cmake-install"
+      - task: "install"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
