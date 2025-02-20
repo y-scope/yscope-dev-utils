@@ -4,27 +4,37 @@ set: ["u", "pipefail"]
 shopt: ["globstar"]
 
 tasks:
-  # Runs clang-format on C++ files at the given paths.
+  # Runs `clang-format` on files found after searching and filtering. Each path in `ROOT_PATHS` is
+  # recursively searched for files. Paths matching any `EXCLUDE_PATTERNS` are skipped. File paths
+  # matching at least one entry from `INCLUDE_PATTERNS` and at least one entry from
+  # `EXCLUDE_PATTERNS` are passed to `clang-format`.
   #
-  # @param {string[]} ROOT_PATHS The paths on which to start `find`. When combined with
-  # EXCLUDE_PATTERNS and INCLUDE_PATTERNS `find` will output a list of files used as the input to
-  # `clang-format`.
+  # General parameters
   # @param {string} VENV_DIR Python virtual environment where `clang-format` is installed.
-  # @param {string[]} [EXCLUDE_PATTERNS] `-path` wildcard patterns to prune in `find`.
-  # @param {string[]} [EXTENSION_PATTERNS=["*.cpp", "*.h", "*.hpp"]] `-name` wildcard patterns to
-  # match in `find`.
-  # @param {string} [FLAGS] Any flags to pass to `clang-format`.
-  # @param {string[]} [INCLUDE_PATTERNS] `-path` wildcard patterns to match in `find`.
+  # @param {string[]} ROOT_PATHS Paths recursively searched for files to run on.
+  # @param {string[]} [FLAGS] Any flags to pass to `clang-format`.
+  #
+  # Pattern parameters
+  # @param {string[]} [EXCLUDE_PATTERNS] Wildcard patterns where any matching paths (relative to
+  # `ROOT_PATHS`) will be excluded. The search will not descend into matching directory paths. By
+  # default no paths match.
+  # @param {string[]} [EXTENSION_PATTERNS=["*.cpp", "*.h", "*.hpp"]] Wildcard patterns matched
+  # against the file name (not the full path) determining files to run on.
+  # @param {string[]} [INCLUDE_PATTERNS] Wildcard patterns where any matching file paths (relative
+  # to `ROOT_PATHS`) will be included. By default all paths match.
   clang-format:
     internal: true
     vars:
+      # General parameters
+      FLAGS:
+        ref: "default (list) .FLAGS"
+
+      # Pattern parameters
       EXCLUDE_PATTERNS:
         ref: "default (list) .EXCLUDE_PATTERNS"
       EXTENSION_PATTERNS:
         ref: >-
           default (list "*.cpp" "*.h" "*.hpp") .EXTENSION_PATTERNS
-      FLAGS:
-        ref: "default (list) .FLAGS"
       INCLUDE_PATTERNS:
         ref: "default (list) .INCLUDE_PATTERNS"
     requires:
@@ -33,36 +43,45 @@ tasks:
       . "{{.VENV_DIR}}/bin/activate"
       find \
         {{- range .ROOT_PATHS}}
-        {{.}} \
+          {{.}} \
         {{- end}}
         {{- if .EXCLUDE_PATTERNS}}
-          \( \ {{- range $i, $pattern := .EXCLUDE_PATTERNS}}
-            {{if $i}}-or {{end -}}
-             -path "{{$pattern}}" \
+          \( \
+            {{- range $i, $pattern := .EXCLUDE_PATTERNS}}
+              {{- if $i}}
+                -or \
+              {{- end}}
+              -path "{{$pattern}}" \
             {{- end}}
           \) \
-        -prune \
-        -or \
+          -prune \
+          -or \
         {{- end}}
         -type f \
         {{- if .INCLUDE_PATTERNS}}
-          \( \ {{- range $i, $pattern := .INCLUDE_PATTERNS}}
-            {{if $i}}-or {{end -}}
-            -path "{{$pattern}}" \
+          \( \
+            {{- range $i, $pattern := .INCLUDE_PATTERNS}}
+              {{- if $i}}
+                -or \
+              {{- end}}
+              -path "{{$pattern}}" \
             {{- end}}
           \) \
         {{- end}}
         {{- if .EXTENSION_PATTERNS}}
-          \( \ {{- range $i, $pattern := .EXTENSION_PATTERNS}}
-            {{if $i}}-or {{end -}}
-            -name "{{$pattern}}" \
+          \( \
+            {{- range $i, $pattern := .EXTENSION_PATTERNS}}
+              {{- if $i}}
+                -or \
+              {{- end}}
+              -name "{{$pattern}}" \
             {{- end}}
           \) \
         {{- end}}
-        -print0 \
+        -print0
       | xargs -0 clang-format \
         {{- range .FLAGS}}
-        {{.}} \
+          {{.}} \
         {{- end}}
         -Werror
 
@@ -94,7 +113,7 @@ tasks:
         . "{{.VENV_DIR}}/bin/activate"
         clang-tidy \
           {{- range .FLAGS}}
-          {{.}} \
+            {{.}} \
           {{- end}}
           {{.SOURCE_PATH}} &> "{{.OUTPUT_PATH}}"
 
@@ -139,64 +158,83 @@ tasks:
             ref: ".DIFF_SOURCE_PATHS"
           VENV_DIR: "{{.VENV_DIR}}"
 
-  # Runs clang-tidy on C++ files at the given paths. `INCLUDE_PATTERNS` and `EXCLUDE_PATTERNS` use
-  # the `find` flag `-path` and must match the full path rooted in `ROOT_PATHS`.
-  # `EXTENSION_PATTERNS` use the `find` flag `-name` and only matches the base file name.
+  # Runs `clang-tidy` on files found after searching and filtering. Each path in `ROOT_PATHS` is
+  # recursively searched for files. Paths matching any `EXCLUDE_PATTERNS` are skipped. File paths
+  # matching at least one entry from `INCLUDE_PATTERNS` and at least one entry from
+  # `EXCLUDE_PATTERNS` are passed to `clang-tidy`.
   #
-  # @param {string[]} ROOT_PATHS The paths on which to start `find`. When combined with
-  # EXCLUDE_PATTERNS and INCLUDE_PATTERNS `find` will output a list of files used as the input to
-  # `clang-tidy`.
+  # General parameters
   # @param {string} VENV_DIR Python virtual environment where `clang-tidy` is installed.
-  # @param {string[]} [EXCLUDE_PATTERNS] `-path` wildcard patterns to prune in `find`.
-  # @param {string[]} [EXTENSION_PATTERNS=["*.cpp", "*.h", "*.hpp"]] `-name` wildcard patterns to
-  # match in `find`.
-  # @param {string} [FLAGS] Any flags to pass to `clang-tidy`.
-  # @param {string[]} [INCLUDE_PATTERNS] `-path` wildcard patterns to match in `find`.
+  # @param {string[]} ROOT_PATHS Paths recursively searched for files to run on.
+  # @param {string[]} [FLAGS] Any flags to pass to `clang-tidy`.
   # @param {string} [OUTPUT_DIR="{{.ROOT_DIR}}/lint-clang-tidy"] Directory to store the `clang-tidy`
   # output for each file.
+  #
+  # Pattern parameters
+  # @param {string[]} [EXCLUDE_PATTERNS] Wildcard patterns where any matching paths (relative to
+  # `ROOT_PATHS`) will be excluded. The search will not descend into matching directory paths. By
+  # default no paths match.
+  # @param {string[]} [EXTENSION_PATTERNS=["*.cpp", "*.h", "*.hpp"]] Wildcard patterns matched
+  # against the file name (not the full path) determining files to run on.
+  # @param {string[]} [INCLUDE_PATTERNS] Wildcard patterns where any matching file paths (relative
+  # to `ROOT_PATHS`) will be included. By default all paths match.
   clang-tidy-find:
     internal: true
     label: "{{.TASK}}:{{.OUTPUT_DIR}}"
     vars:
+      # General parameters
+      FLAGS:
+        ref: "default (list) .FLAGS"
+      OUTPUT_DIR: >-
+        {{default "{{.ROOT_DIR}}/lint-clang-tidy" .OUTPUT_DIR}}
+
+      # Pattern parameters
       EXCLUDE_PATTERNS:
         ref: "default (list) .EXCLUDE_PATTERNS"
       EXTENSION_PATTERNS:
         ref: >-
           default (list "*.cpp" "*.h" "*.hpp") .EXTENSION_PATTERNS
-      FLAGS:
-        ref: "default (list) .FLAGS"
       INCLUDE_PATTERNS:
         ref: "default (list) .INCLUDE_PATTERNS"
-      OUTPUT_DIR: >-
-        {{default "{{.ROOT_DIR}}/lint-clang-tidy" .OUTPUT_DIR}}
+
+      # Task variables
       SOURCE_PATHS_:
         # Do not quote `ROOT_PATHS` entries so that wildcards can be evaluated by the shell.
         sh: |-
           find \
             {{- range .ROOT_PATHS}}
-            {{.}} \
+              {{.}} \
             {{- end}}
             {{- if .EXCLUDE_PATTERNS}}
-              \( \ {{- range $i, $pattern := .EXCLUDE_PATTERNS}}
-                {{if $i}}-or {{end -}}
-                 -path "{{$pattern}}" \
+              \( \
+                {{- range $i, $pattern := .EXCLUDE_PATTERNS}}
+                  {{- if $i}}
+                    -or \
+                  {{- end}}
+                  -path "{{$pattern}}" \
                 {{- end}}
               \) \
-            -prune \
-            -or \
+              -prune \
+              -or \
             {{- end}}
             -type f \
             {{- if .INCLUDE_PATTERNS}}
-              \( \ {{- range $i, $pattern := .INCLUDE_PATTERNS}}
-                {{if $i}}-or {{end -}}
-                -path "{{$pattern}}" \
+              \( \
+                {{- range $i, $pattern := .INCLUDE_PATTERNS}}
+                  {{- if $i}}
+                    -or \
+                  {{- end}}
+                  -path "{{$pattern}}" \
                 {{- end}}
               \) \
             {{- end}}
             {{- if .EXTENSION_PATTERNS}}
-              \( \ {{- range $i, $pattern := .EXTENSION_PATTERNS}}
-                {{if $i}}-or {{end -}}
-                -name "{{$pattern}}" \
+              \( \
+                {{- range $i, $pattern := .EXTENSION_PATTERNS}}
+                  {{- if $i}}
+                    -or \
+                  {{- end}}
+                  -name "{{$pattern}}" \
                 {{- end}}
               \) \
             {{- end}}
