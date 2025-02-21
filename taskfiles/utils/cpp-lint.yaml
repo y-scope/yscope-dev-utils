@@ -37,6 +37,8 @@ tasks:
         ref: "default (list) .INCLUDE_PATTERNS"
     requires:
       vars: ["ROOT_PATHS", "VENV_DIR"]
+
+    # NOTE: We don't quote `ROOT_PATHS` entries so that wildcards can be evaluated by the shell.
     cmd: |-
       . "{{.VENV_DIR}}/bin/activate"
       find \
@@ -115,14 +117,14 @@ tasks:
           {{- end}}
           "{{.SOURCE_FILE_PATH}}" &> "{{.OUTPUT_FILE_PATH}}"
 
-  # Runs `clang-tidy` in parallel on C++ source files that differ between HEAD and the target
-  # branch. On failure, `clang-tidy`'s output is printed. The task will fail on the first file which
-  # fails `clang-tidy`'s checks, which will result in some files having incomplete output. Users can
-  # either fix the known errors and run the task again or directly run `clang-tidy` on a file of
-  # interest.
+  # Runs `clang-tidy` in parallel on C++ source files that differ between HEAD and a given git
+  # reference. On failure, `clang-tidy`'s output is printed. The task will fail on the first file
+  # that fails `clang-tidy`'s checks, which will result in some files having incomplete output.
+  # Users can either fix the known errors and run the task again or directly run `clang-tidy` on a
+  # file of interest.
   #
   # @param {string} VENV_DIR Python virtual environment where `clang-tidy` is installed.
-  # @param {string} [GIT_REF="origin/main"] A `git` reference that HEAD is diff'd with.
+  # @param {string} [GIT_REF="origin/main"] The `git` reference to diff against HEAD.
   # @param {string[]} [FLAGS] Any flags to pass to `clang-tidy`.
   # @param {string} [OUTPUT_DIR="{{.ROOT_DIR}}/lint-clang-tidy"]
   clang-tidy-diff:
@@ -193,7 +195,10 @@ tasks:
 
       # Task variables
       SOURCE_FILE_PATHS_:
-        # Do not quote `ROOT_PATHS` entries so that wildcards can be evaluated by the shell.
+        # NOTE:
+        # - We don't quote `ROOT_PATHS` entries so that wildcards can be evaluated by the shell.
+        # - `find`'s `-print0` option adds a null after the last entry, so care must be taken
+        #   when splitting the output using a null as a delimiter.
         sh: |-
           find \
             {{- range .ROOT_PATHS}}
@@ -234,8 +239,7 @@ tasks:
             {{- end}}
             -print0
       SOURCE_FILE_PATHS:
-        # `-print0` output ends in "\x00" causing `splitList` to generate an empty entry, that we
-        # remove using `compact`.
+        # `SOURCE_FILE_PATHS_`'s last entry is an empty string which we remove using `compact`.
         ref: >-
           compact (splitList "\x00" .SOURCE_FILE_PATHS_)
     requires:
