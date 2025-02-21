@@ -157,7 +157,11 @@ tasks:
             ref: ".DIFF_SOURCE_FILE_PATHS"
           VENV_DIR: "{{.VENV_DIR}}"
 
-  # Runs `clang-tidy` on files matching the given filter criteria.
+  # Runs `clang-tidy` in parallel on C++ source files that match the given filter criteria. On
+  # failure, `clang-tidy`'s output is printed. The task will fail on the first file that fails
+  # `clang-tidy`'s checks, which will result in some files having incomplete output. Users can
+  # either fix the known errors and run the task again or directly run `clang-tidy` on a file of
+  # interest.
   #
   # General parameters
   # @param {string} VENV_DIR Python virtual environment where `clang-tidy` is installed.
