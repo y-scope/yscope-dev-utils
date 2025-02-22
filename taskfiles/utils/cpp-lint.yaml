@@ -118,10 +118,14 @@ tasks:
           "{{.SOURCE_FILE_PATH}}" &> "{{.OUTPUT_FILE_PATH}}"
 
   # Runs `clang-tidy` in parallel on C++ source files that differ between HEAD and a given git
-  # reference. On failure, `clang-tidy`'s output is printed. The task will fail on the first file
-  # that fails `clang-tidy`'s checks, which will result in some files having incomplete output.
-  # Users can either fix the known errors and run the task again or directly run `clang-tidy` on a
-  # file of interest.
+  # reference. On failure, `clang-tidy`'s output is printed.
+  #
+  # The task will fail on the first file that fails `clang-tidy`'s checks, which will result in some
+  # files having incomplete output. Users can either fix the known errors and run the task again or
+  # directly run `clang-tidy` on a file of interest.
+  #
+  # Note, that changes to a header file may cause failures in files that include it (directly or
+  # indirectly), making it possible for all modified to pass, but unmodified files to fail.
   #
   # @param {string} VENV_DIR Python virtual environment where `clang-tidy` is installed.
   # @param {string} [GIT_REF="origin/main"] The `git` reference to diff against HEAD.
@@ -158,10 +162,14 @@ tasks:
           VENV_DIR: "{{.VENV_DIR}}"
 
   # Runs `clang-tidy` in parallel on C++ source files that match the given filter criteria. On
-  # failure, `clang-tidy`'s output is printed. The task will fail on the first file that fails
-  # `clang-tidy`'s checks, which will result in some files having incomplete output. Users can
-  # either fix the known errors and run the task again or directly run `clang-tidy` on a file of
-  # interest.
+  # failure, `clang-tidy`'s output is printed.
+  #
+  # The task will fail on the first file that fails `clang-tidy`'s checks, which will result in some
+  # files having incomplete output. Users can either fix the known errors and run the task again or
+  # directly run `clang-tidy` on a file of interest.
+  #
+  # Note, that changes to a header file may cause failures in files that include it (directly or
+  # indirectly), making it possible for all modified to pass, but unmodified files to fail.
   #
   # General parameters
   # @param {string} VENV_DIR Python virtual environment where `clang-tidy` is installed.
