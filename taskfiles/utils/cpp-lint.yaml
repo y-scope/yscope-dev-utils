@@ -78,7 +78,7 @@ tasks:
             {{- end}}
           \) \
         {{- end}}
-        -print0
+        -print0 \
       | xargs -0 clang-format \
         {{- range .FLAGS}}
           {{.}} \
