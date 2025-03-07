@@ -140,7 +140,7 @@ tasks:
       DIFF_SOURCE_FILE_PATHS_:
         sh: >-
           git diff --name-only --ignore-submodules "{{.GIT_REF}}" **/*.{cpp,h,hpp}
-          | xargs --no-run-if-empty realpath
+          | xargs -I{} realpath
       DIFF_SOURCE_FILE_PATHS:
         ref: >-
           compact (splitList "\n" .DIFF_SOURCE_FILE_PATHS_)
