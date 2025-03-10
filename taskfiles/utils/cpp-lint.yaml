@@ -128,7 +128,7 @@ tasks:
   # indirectly), making it possible for all modified files to pass, but unmodified files to fail.
   #
   # @param {string} VENV_DIR Python virtual environment where `clang-tidy` is installed.
-  # @param {string} [GIT_REF="origin/main"] The `git` reference to diff against HEAD.
+  # @param {string} [GIT_REF="origin/HEAD"] The `git` reference to diff against HEAD.
   # @param {string[]} [FLAGS] Any flags to pass to `clang-tidy`.
   # @param {string} [OUTPUT_DIR="{{.ROOT_DIR}}/lint-clang-tidy"]
   clang-tidy-diff:
