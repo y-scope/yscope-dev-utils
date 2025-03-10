@@ -138,6 +138,8 @@ tasks:
       GIT_REF: >-
         {{default "origin/HEAD" .GIT_REF}}
       DIFF_SOURCE_FILE_PATHS_:
+        # NOTE: Although we have pipefail set globally in this file, it doesn't seem to apply here;
+        # so we need to set it again.
         sh: >-
           set -o pipefail;
           git diff --name-only --ignore-submodules "{{.GIT_REF}}" -- **/*.{cpp,h,hpp}
