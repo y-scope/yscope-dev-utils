@@ -136,7 +136,7 @@ tasks:
     label: "{{.TASK}}:{{.OUTPUT_DIR}}"
     vars:
       GIT_REF: >-
-        {{default "origin/main" .GIT_REF}}
+        {{default "origin/HEAD" .GIT_REF}}
       DIFF_SOURCE_FILE_PATHS_:
         sh: >-
           git diff --name-only --ignore-submodules "{{.GIT_REF}}" **/*.{cpp,h,hpp}
