@@ -57,7 +57,7 @@ BreakBeforeBraces: "Custom"
 BreakBeforeConceptDeclarations: "Always"
 BreakBeforeInlineASMColon: "OnlyMultiline"
 BreakBeforeTernaryOperators: true
-BreakBinaryOperations: "RespectPrecedence"
+BreakBinaryOperations: "Never"
 BreakConstructorInitializers: "BeforeColon"
 BreakFunctionDefinitionParameters: false
 BreakInheritanceList: "BeforeColon"
@@ -119,7 +119,7 @@ QualifierOrder:
   - "const"
   - "volatile"
 ReferenceAlignment: "Pointer"
-ReflowComments: true
+ReflowComments: "Always"
 RemoveBracesLLVM: false
 RemoveEmptyLinesInUnwrappedLines: true
 RemoveSemicolon: true
