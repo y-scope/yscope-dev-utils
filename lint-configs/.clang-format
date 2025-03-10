@@ -27,6 +27,7 @@ AllowShortFunctionsOnASingleLine: "Inline"
 AllowShortIfStatementsOnASingleLine: "Never"
 AllowShortLambdasOnASingleLine: "All"
 AllowShortLoopsOnASingleLine: false
+AllowShortNamespacesOnASingleLine: false
 AlwaysBreakBeforeMultilineStrings: false
 BinPackArguments: false
 BinPackParameters: false
@@ -56,6 +57,7 @@ BreakBeforeBraces: "Custom"
 BreakBeforeConceptDeclarations: "Always"
 BreakBeforeInlineASMColon: "OnlyMultiline"
 BreakBeforeTernaryOperators: true
+BreakBinaryOperations: "RespectPrecedence"
 BreakConstructorInitializers: "BeforeColon"
 BreakFunctionDefinitionParameters: false
 BreakInheritanceList: "BeforeColon"
@@ -74,6 +76,7 @@ IncludeBlocks: "Regroup"
 IndentAccessModifiers: false
 IndentCaseBlocks: false
 IndentCaseLabels: true
+IndentExportBlock: true
 IndentExternBlock: "Indent"
 IndentGotoLabels: false
 IndentPPDirectives: "BeforeHash"
@@ -92,6 +95,7 @@ KeepEmptyLines:
   AtEndOfFile: true
   AtStartOfBlock: false
   AtStartOfFile: false
+KeepFormFeed: false
 LambdaBodyIndentation: "Signature"
 LineEnding: "LF"
 MainIncludeChar: "Quote"
@@ -101,6 +105,7 @@ PPIndentWidth: -1
 PackConstructorInitializers: "CurrentLine"
 PenaltyBreakOpenParenthesis: 25
 PenaltyBreakBeforeFirstCallParameter: 25
+PenaltyBreakBeforeMemberAccess: 25
 PenaltyReturnTypeOnItsOwnLine: 100
 PointerAlignment: "Left"
 QualifierAlignment: "Custom"
@@ -116,6 +121,7 @@ QualifierOrder:
 ReferenceAlignment: "Pointer"
 ReflowComments: true
 RemoveBracesLLVM: false
+RemoveEmptyLinesInUnwrappedLines: true
 RemoveSemicolon: true
 RequiresClausePosition: "OwnLine"
 RequiresExpressionIndentation: "OuterScope"
@@ -153,3 +159,4 @@ SpacesInSquareBrackets: false
 Standard: "Latest"
 TabWidth: 4
 UseTab: "Never"
+WrapNamespaceBodyWithEmptyLines: "Never"
