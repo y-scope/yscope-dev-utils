@@ -141,7 +141,7 @@ tasks:
         sh: >-
           set -o pipefail;
           git diff --name-only --ignore-submodules "{{.GIT_REF}}" -- **/*.{cpp,h,hpp}
-          | xargs -I{} realpath
+          | xargs -I{} realpath {}
       DIFF_SOURCE_FILE_PATHS:
         ref: >-
           compact (splitList "\n" .DIFF_SOURCE_FILE_PATHS_)
