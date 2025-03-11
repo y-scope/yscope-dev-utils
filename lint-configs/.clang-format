@@ -105,7 +105,6 @@ PPIndentWidth: -1
 PackConstructorInitializers: "CurrentLine"
 PenaltyBreakOpenParenthesis: 25
 PenaltyBreakBeforeFirstCallParameter: 25
-PenaltyBreakBeforeMemberAccess: 25
 PenaltyReturnTypeOnItsOwnLine: 100
 PointerAlignment: "Left"
 QualifierAlignment: "Custom"
