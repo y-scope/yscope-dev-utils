@@ -293,7 +293,8 @@ tasks:
               {{- $output_path := printf "%s/%s.log" $output_dir (replace "/" "-" .)}}
               if [[ -f "{{$output_path}}" ]] \
                   && [[ "Failed" == "$(tail -n 1 {{$output_path}})" ]]; then
-                tail -v -n +1 "{{$output_path}}"
+                echo "# {{$output_path}}"
+                cat "{{$output_path}}"
               fi
             {{- end}}
           {{- end}}
