@@ -68,6 +68,6 @@ Checks: >-
   -cppcoreguidelines-avoid-non-const-global-variables,
 ```
 
-[.clang-format]: ../lint-configs/.clang-format
-[.clang-tidy]: ../lint-configs/.clang-tidy
-[symlink-cpp-lint-configs.sh]: ../lint-configs/symlink-cpp-lint-configs.sh
+[.clang-format]: ../exports/lint-configs/.clang-format
+[.clang-tidy]: ../exports/lint-configs/.clang-tidy
+[symlink-cpp-lint-configs.sh]: ../exports/lint-configs/symlink-cpp-lint-configs.sh
