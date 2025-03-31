@@ -123,3 +123,65 @@ tasks:
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
+
+  # Runs curl to download the zip file from the given URL and extracts its contents.
+  #
+  # @param {string} OUTPUT_DIR Directory in which to extract the zip file.
+  # @param {string} URL
+  # @param {string} FILE_SHA256 Content hash to verify the downloaded zip file against.
+  # @param {string} [CHECKSUM_FILE={{.OUTPUT_DIR}}.md5] File path to store the checksum of the
+  # downloaded zip file.
+  # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns that should not be extracted.
+  # @param {string[]} [INCLUDE_PATTERNS] Path wildcard patterns to extract.
+  # @param {string} [ZIP_FILE={{.OUTPUT_DIR}}.zip] Path where the zip file should be stored.
+  download-and-extract-zip:
+    internal: true
+    label: "{{.TASK}}-{{.OUTPUT_DIR}}"
+    vars:
+      # Paths
+      CHECKSUM_FILE: >-
+        {{default (printf "%s.md5" .OUTPUT_DIR) .CHECKSUM_FILE}}
+      ZIP_FILE: >-
+        {{default (printf "%s.zip" .OUTPUT_DIR) .ZIP_FILE}}
+
+      # Path patterns
+      EXCLUDE_PATTERNS:
+        ref: "default (list) .EXCLUDE_PATTERNS"
+      INCLUDE_PATTERNS:
+        ref: "default (list) .INCLUDE_PATTERNS"
+
+    requires:
+      vars: ["FILE_SHA256", "OUTPUT_DIR", "URL"]
+    sources: ["{{.TASKFILE}}", "{{.ZIP_FILE}}"]
+    generates: ["{{.CHECKSUM_FILE}}"]
+    deps:
+      - task: "curl"
+        vars:
+          FILE_SHA256: "{{.FILE_SHA256}}"
+          OUTPUT_FILE: "{{.ZIP_FILE}}"
+          URL: "{{.URL}}"
+      - task: "checksum:validate"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
+    cmds:
+      - |-
+        rm -rf "{{.OUTPUT_DIR}}"
+        mkdir -p  "{{.OUTPUT_DIR}}"
+      # NOTE: Options in the unzip command must be in a specific order.
+      - >-
+        unzip
+        -q
+        "{{.ZIP_FILE}}"
+        {{- range .INCLUDE_PATTERNS}}
+        "{{.}}"
+        {{- end}}
+        {{- range .EXCLUDE_PATTERNS}}
+        -x "{{.}}"
+        {{- end}}
+        -d "{{.OUTPUT_DIR}}"
+      # This command must be last
+      - task: "checksum:compute"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
