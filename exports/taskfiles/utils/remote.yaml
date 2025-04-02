@@ -51,7 +51,7 @@ tasks:
           exit 1
         fi
 
-  # Runs curl to download the tar file from the given URL and extracts its contents.
+  # Uses curl to download a tar file from the given URL and extracts its contents.
   #
   # @param {string} OUTPUT_DIR Directory in which to extract the tar file.
   # @param {string} URL
@@ -124,7 +124,7 @@ tasks:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
 
-  # Runs curl to download the zip file from the given URL and extracts its contents.
+  # Uses curl to download a zip file from the given URL and extracts its contents.
   #
   # @param {string} OUTPUT_DIR Directory in which to extract the zip file.
   # @param {string} URL
