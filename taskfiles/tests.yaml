@@ -1,0 +1,19 @@
+version: "3"
+
+includes:
+  remote: "../exports/taskfiles/utils/remote.yaml"
+
+set: ["u", "pipefail"]
+shopt: ["globstar"]
+
+vars:
+  OUTPUT_DIR:
+
+
+# Tests to write:
+# - Download repo zip without any default options specified; validate that at least one of the
+#   expected files exists
+# - Same test, but set checksum file path to something other than the default
+# - Same test, but set exclude patterns to exclude an expected file
+# - Same test, but set include patterns to include a file that is not in the default set
+# - Same test, but set the output zip to a different location
