@@ -168,7 +168,7 @@ tasks:
       - |-
         rm -rf "{{.OUTPUT_DIR}}"
         mkdir -p  "{{.OUTPUT_DIR}}"
-      # NOTE: Options in the unzip command must be in a specific order.
+      # NOTE: Options in the unzip command must be in a specific order. See the docs for details.
       - >-
         unzip
         -q
