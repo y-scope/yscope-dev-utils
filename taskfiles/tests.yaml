@@ -82,7 +82,8 @@ tasks:
       - "test -e '{{.OUTPUT_DIR}}/{{.G_EXTRACTED_ZIP_CODEOWNERS_PATH}}'"
       - "test -e '{{.OUTPUT_DIR}}/{{.G_EXTRACTED_ZIP_PULL_REQUEST_TEMPLATE_PATH}}'"
 
-  # Cleans up the files output by download-and-extract-zip.
+  # Cleans up the files output by download-and-extract-zip (assuming their default paths weren't
+  # changed).
   #
   # @param {string} OUTPUT_DIR Output directory passed to download-and-extract-zip.
   download-and-extract-zip-test-cleaner:
