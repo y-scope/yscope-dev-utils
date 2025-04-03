@@ -6,14 +6,20 @@ includes:
 set: ["u", "pipefail"]
 shopt: ["globstar"]
 
-vars:
-  OUTPUT_DIR:
+tasks:
+  default:
+    cmds:
+      - task: "download-and-extract-zip-basic"
 
-
-# Tests to write:
-# - Download repo zip without any default options specified; validate that at least one of the
-#   expected files exists
-# - Same test, but set checksum file path to something other than the default
-# - Same test, but set exclude patterns to exclude an expected file
-# - Same test, but set include patterns to include a file that is not in the default set
-# - Same test, but set the output zip to a different location
+  download-and-extract-zip-test-basic:
+    vars:
+      OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK}}"
+    cmds:
+      - task: "remote:download-and-extract-zip"
+        vars:
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+          URL: "https://github.com/y-scope/yscope-dev-utils/archive/refs/heads/main.zip"
+          FILE_SHA256: "2c9a21f83484e004c41c28be759451dbdc787190eb044365ba58f7bb846418f6"
+      - "diff -q '{{.OUTPUT_DIR}}/yscope-dev-utils-main/LICENSE' '{{.ROOT_DIR}}/LICENSE'"
+      - "test -e '{{.OUTPUT_DIR}}.md5'"
+      - "test -e '{{.OUTPUT_DIR}}.zip'"
