@@ -1,0 +1,19 @@
+version: "3"
+
+includes:
+  tests: "./taskfiles/tests.yaml"
+
+set: ["u", "pipefail"]
+shopt: ["globstar"]
+
+vars:
+  G_OUTPUT_DIR: "{{.ROOT_DIR}}/build"
+
+tasks:
+  clean:
+    cmds:
+      - "rm -rf '{{.G_OUTPUT_DIR}}'"
+
+  test:
+    cmds:
+      - task: "tests:download-and-extract-zip-basic"
