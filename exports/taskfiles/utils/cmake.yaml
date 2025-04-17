@@ -92,7 +92,8 @@ tasks:
   # @param {string} BUILD_DIR Directory containing the completed build to use.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
   # @param {string} NAME CMake project name (used in directory names and CMake settings).
-  # @param {string} [CMAKE_SETTINGS_DIR] Directory to write the project's CMake settings file in.
+  # @param {string} [CMAKE_SETTINGS_DIR] If set, the directory to write the project's CMake settings
+  # file in.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the install command.
   install:
     internal: true
@@ -148,8 +149,8 @@ tasks:
   # @param {string[]} [TARGETS] A list of specific targets to build instead of the default target.
   #
   # CMake install parameters
-  # @param {string} [CMAKE_SETTINGS_DIR={{.WORK_DIR}}/cmake-settings] Directory to write the
-  # project's CMake settings file in.
+  # @param {string} [CMAKE_SETTINGS_DIR={{.WORK_DIR}}/cmake-settings] If set, the directory to write
+  # the project's CMake settings file in.
   # @param {string[]} [INSTALL_ARGS] Any additional arguments to pass to the CMake install command.
   # @param {string} [INSTALL_PREFIX={{.WORK_DIR}}/{{.NAME}}-install] Path prefix of where the
   # project should be installed.
@@ -230,6 +231,8 @@ tasks:
   #   - Dependencies must write their settings file to CMAKE_SETTINGS_DIR to be included into the
   #   combined settings file (CMAKE_SETTINGS_FILE).
   # @param {string} [CMAKE_SETTINGS_FILE]
+  # @param {string} [CMAKE_SETTINGS_FILE={{.CMAKE_SETTINGS_DIR}}/settings.cmake] The file to write
+  # that includes each dependency's settings file.
   setup-deps:
     internal: true
     label: "{{.TASK}}:{{.CMAKE_SETTINGS_DIR}}-{{.DEP_TASK}}"
