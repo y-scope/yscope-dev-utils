@@ -1,6 +1,7 @@
 version: "3"
 
 includes:
+  misc: "misc.yaml"
   remote: "remote.yaml"
 
 set: ["u", "pipefail"]
@@ -86,19 +87,24 @@ tasks:
 
   # Runs the CMake install step for the given build directory. The caller must have previously
   # called `build` on `BUILD_DIR` for this task to succeed. We purposely omit `sources` and
-  # `generates` as we defer to `cmake` to decide whether it should perform any actions.
+  # `generates` as we defer to `cmake` to decide whether it should perform any actions. If
+  # `CMAKE_SETTINGS_DIR` exists a file containing the CMake project_ROOT variable will be written.
   #
   # @param {string} BUILD_DIR Directory containing the completed build to use.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
+  # @param {string} NAME CMake project name (used in directory names and CMake settings).
+  # @param {string} [CMAKE_SETTINGS_DIR] Directory to write the project's CMake settings file in.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the install command.
   install:
     internal: true
     label: "{{.TASK}}:{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}-{{.EXTRA_ARGS}}"
     vars:
+      CMAKE_SETTINGS_DIR: >-
+        {{default "" .CMAKE_SETTINGS_DIR}}
       EXTRA_ARGS:
         ref: "default (list) .EXTRA_ARGS"
     requires:
-      vars: ["BUILD_DIR", "INSTALL_PREFIX"]
+      vars: ["BUILD_DIR", "INSTALL_PREFIX", "NAME"]
     cmds:
       - >-
         cmake
@@ -106,6 +112,14 @@ tasks:
         --prefix "{{.INSTALL_PREFIX}}"
         {{- range .EXTRA_ARGS}}
         "{{.}}"
+        {{- end}}
+      - >-
+        {{- if .CMAKE_SETTINGS_DIR}}
+          echo "set({{.NAME}}_ROOT
+            \"{{.INSTALL_PREFIX}}\"
+            CACHE PATH
+            \"Path to {{.NAME}} settings.\"
+          )" >> "{{.CMAKE_SETTINGS_DIR}}/{{.NAME}}.cmake"
         {{- end}}
 
   # Downloads a CMake project tar file from `URL` and then generates, builds, and installs the
@@ -135,6 +149,8 @@ tasks:
   # @param {string[]} [TARGETS] A list of specific targets to build instead of the default target.
   #
   # CMake install parameters
+  # @param {string} [CMAKE_SETTINGS_DIR={{.WORK_DIR}}/cmake-settings] Directory to write the
+  # project's CMake settings file in.
   # @param {string[]} [INSTALL_ARGS] Any additional arguments to pass to the CMake install command.
   # @param {string} [INSTALL_PREFIX={{.WORK_DIR}}/{{.NAME}}-install] Path prefix of where the
   # project should be installed.
@@ -163,6 +179,8 @@ tasks:
         ref: "default (list) .TARGETS"
 
       # CMake install parameters
+      CMAKE_SETTINGS_DIR: >-
+        {{default (printf "%s/cmake-settings" .WORK_DIR) .CMAKE_SETTINGS_DIR}}
       INSTALL_ARGS:
         ref: "default (list) .INSTALL_ARGS"
       INSTALL_PREFIX: >-
@@ -193,6 +211,41 @@ tasks:
       - task: "install"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
+          CMAKE_SETTINGS_DIR: "{{.CMAKE_SETTINGS_DIR}}"
           EXTRA_ARGS:
             ref: ".INSTALL_ARGS"
           INSTALL_PREFIX: "{{.INSTALL_PREFIX}}"
+          NAME: "{{.NAME}}"
+
+  # Setup all CMake dependencies for a project by:
+  #   1. Create a directory to contain all CMake settings files (CMAKE_SETTINGS_DIR).
+  #   2. Install all dependencies by running DEP_TASK.
+  #   3. Include each dependency's settings file in a combined settings file (CMAKE_SETTINGS_FILE)
+  #      for use inside a CMake project.
+  #
+  # @param {string} CMAKE_SETTINGS_DIR A directory path to write CMake settings files to.
+  # @param {string} DEP_TASK A task to run that will install all dependencies.
+  #   - The task name must be qualified from the root of the project.
+  #   - The task must not require any arguments (to use a task with arguments create a new task that
+  #   calls the original with any arguments set).
+  #   - Dependencies must write their settings file to CMAKE_SETTINGS_DIR to be included into the
+  #   combined settings file (CMAKE_SETTINGS_FILE).
+  # @param {string} [CMAKE_SETTINGS_FILE]
+  setup-deps:
+    internal: true
+    label: "{{.TASK}}:{{.CMAKE_SETTINGS_DIR}}-{{.DEP_TASK}}"
+    vars:
+      CMAKE_SETTINGS_FILE: >-
+        {{default (printf "%s/settings.cmake" .CMAKE_SETTINGS_DIR) .CMAKE_SETTINGS_FILE}}
+    requires:
+      vars: ["CMAKE_SETTINGS_DIR", "DEP_TASK"]
+    cmds:
+      - "rm -rf {{.CMAKE_SETTINGS_DIR}}"
+      - "mkdir -p {{.CMAKE_SETTINGS_DIR}}"
+      - task: "::{{.DEP_TASK}}"
+      - >-
+        for file in {{.CMAKE_SETTINGS_DIR}}/*.cmake; do
+          if [ "$file" != "{{.CMAKE_SETTINGS_FILE}}" ]; then
+            echo "include(\"$file\")" >> "{{.CMAKE_SETTINGS_FILE}}";
+          fi
+        done
