@@ -85,15 +85,18 @@ tasks:
         {{- end}}
 
   # Runs the CMake install step for the given build directory. The caller must have previously
-  # called `build` on `BUILD_DIR` for this task to succeed. We purposely omit `sources` and
-  # `generates` as we defer to `cmake` to decide whether it should perform any actions. If
-  # `CMAKE_SETTINGS_DIR` exists a file containing the CMake project_ROOT variable will be written.
+  # called `build` on `BUILD_DIR` for this task to succeed. If `CMAKE_SETTINGS_DIR` is set, a
+  # settings file will be created in that directory, containing a `{{.NAME}}_ROOT` CMake variable
+  # that points to `INSTALL_PREFIX`.
+  #
+  # NOTE: We purposely omit `sources` and `generates` as we defer to `cmake` to decide whether it
+  # should perform any actions.
   #
   # @param {string} BUILD_DIR Directory containing the completed build to use.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
-  # @param {string} NAME CMake project name (used in directory names and CMake settings).
-  # @param {string} [CMAKE_SETTINGS_DIR] If set, the directory to write the project's CMake settings
-  # file in.
+  # @param {string} NAME CMake project name (used in directory names and the CMake settings file).
+  # @param {string} [CMAKE_SETTINGS_DIR] If set, the directory where the project's CMake settings
+  # file should be stored.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the install command.
   install:
     internal: true
