@@ -118,9 +118,11 @@ tasks:
         {{- end}}
       - >-
         {{- if .CMAKE_SETTINGS_DIR}}
-          cat <<EOF >> "{{.CMAKE_SETTINGS_DIR}}/{{.NAME}}.cmake"
-          set({{.NAME}}_ROOT "{{.INSTALL_PREFIX}}" CACHE PATH "Package root for {{.NAME}}.")
-          EOF
+          echo "set({{.NAME}}_ROOT
+            \"{{.INSTALL_PREFIX}}\"
+            CACHE PATH
+            \"Package root for {{.NAME}}.\"
+          )" >> "{{.CMAKE_SETTINGS_DIR}}/{{.NAME}}.cmake"
         {{- end}}
 
   # Downloads a CMake project tar file from `URL` and then generates, builds, and installs the
