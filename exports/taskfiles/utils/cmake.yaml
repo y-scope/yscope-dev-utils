@@ -118,11 +118,9 @@ tasks:
         {{- end}}
       - >-
         {{- if .CMAKE_SETTINGS_DIR}}
-          echo "set({{.NAME}}_ROOT
-            \"{{.INSTALL_PREFIX}}\"
-            CACHE PATH
-            \"Path to {{.NAME}} settings.\"
-          )" >> "{{.CMAKE_SETTINGS_DIR}}/{{.NAME}}.cmake"
+          cat <<EOF >> "{{.CMAKE_SETTINGS_DIR}}/{{.NAME}}.cmake"
+          set({{.NAME}}_ROOT "{{.INSTALL_PREFIX}}" CACHE PATH "Package root for {{.NAME}}.")
+          EOF
         {{- end}}
 
   # Downloads a CMake project tar file from `URL` and then generates, builds, and installs the
@@ -236,7 +234,7 @@ tasks:
   #   included in CMAKE_SETTINGS_FILE.
   # @param {string} [CMAKE_SETTINGS_FILE={{.CMAKE_SETTINGS_DIR}}/all.cmake] The file in which to
   # combine each dependency's settings file.
-  setup-deps:
+  install-deps-and-generate-settings:
     internal: true
     label: "{{.TASK}}:{{.CMAKE_SETTINGS_DIR}}-{{.DEP_TASK}}"
     vars:
