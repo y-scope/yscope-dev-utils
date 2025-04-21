@@ -241,7 +241,7 @@ tasks:
     label: "{{.TASK}}:{{.CMAKE_SETTINGS_DIR}}-{{.DEP_TASK}}"
     vars:
       CMAKE_SETTINGS_FILE: >-
-        {{default (printf "%s/settings.cmake" .CMAKE_SETTINGS_DIR) .CMAKE_SETTINGS_FILE}}
+        {{default (printf "%s/all.cmake" .CMAKE_SETTINGS_DIR) .CMAKE_SETTINGS_FILE}}
     requires:
       vars: ["CMAKE_SETTINGS_DIR", "DEP_TASK"]
     cmds:
