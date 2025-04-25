@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <string>
 
@@ -9,7 +8,6 @@
 #include <boost/program_options/variables_map.hpp>
 
 namespace {
-
 auto parse_args(int argc, char** argv) -> boost::program_options::variables_map {
     boost::program_options::options_description desc;
     desc.add_options()("help", "Boost task test. Check the string against its size.");
@@ -24,9 +22,10 @@ auto parse_args(int argc, char** argv) -> boost::program_options::variables_map 
     boost::program_options::notify(variables);
     return variables;
 }
+
 constexpr int cCmdArgParseErr = 1;
 constexpr int cSizeErr = 2;
-}
+}  // namespace
 
 auto main(int argc, char** argv) -> int {
     boost::program_options::variables_map const args = parse_args(argc, argv);

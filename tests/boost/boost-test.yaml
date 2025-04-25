@@ -36,7 +36,7 @@ tasks:
     silent: true
     run: "once"
     cmds:
-        - "mkdir -p {{.G_BUILD_DIR}}"
+      - "mkdir -p {{.G_BUILD_DIR}}"
 
   install-boost:
     internal: true
