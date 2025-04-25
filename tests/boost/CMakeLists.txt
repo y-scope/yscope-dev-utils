@@ -18,10 +18,7 @@ find_package(Boost 1.74 REQUIRED COMPONENTS headers program_options system)
 if(Boost_FOUND)
     message(STATUS "Found Boost ${Boost_VERSION}")
 else()
-    message(
-        FATAL_ERROR
-        "Could not find ${SPIDER_LIBS_STRING} libraries for Boost"
-    )
+    message(FATAL_ERROR "Could not find libraries for Boost")
 endif()
 
 add_executable(boost-test)
