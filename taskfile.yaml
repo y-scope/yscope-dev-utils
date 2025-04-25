@@ -2,6 +2,7 @@ version: "3"
 
 includes:
   tests: "./taskfiles/tests.yaml"
+  boost-test: "./tests/boost/boost-test.yaml"
 
 set: ["u", "pipefail"]
 shopt: ["globstar"]
@@ -17,3 +18,4 @@ tasks:
   test:
     cmds:
       - task: "tests:download-and-extract-zip-basic"
+      - task: "boost-test:boost-test"

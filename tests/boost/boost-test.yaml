@@ -1,0 +1,82 @@
+version: "3"
+
+includes:
+  utils: "../../exports/taskfiles/utils/utils.yaml"
+
+vars:
+  G_BUILD_DIR: "{{.TASKFILE_DIR}}/build"
+  G_DEPS_DIR: "{{.G_BUILD_DIR}}/deps"
+  G_DEPS_CMAKE_SETTINGS_DIR: "{{.G_DEPS_DIR}}/cmake-settings"
+  G_DEPS_CMAKE_SETTINGS_FILE: "{{.G_DEPS_CMAKE_SETTINGS_DIR}}/settings.cmake"
+
+  G_BUILD_BOOST_TEST_DIR: "{{.G_BUILD_DIR}}/boost-test"
+  G_BOOST_TEST_CMAKE_CACHE: "{{.G_BUILD_BOOST_TEST_DIR}}/CMakeCache.txt"
+  G_BOOST_TEST_COMPILE_COMMANDS_DB: "{{.G_BUILD_BOOST_TEST_DIR}}/compile_commands.json"
+  G_BOOST_TEST_EXECUTABLE: "{{.G_BUILD_BOOST_TEST_DIR}}/boost-test"
+
+tasks:
+  clean:
+    internal: true
+    cmds:
+      - "rm -rf {{.G_BUILD_DIR}}"
+
+  config-cmake-project:
+    internal: true
+    sources:
+      - "{{.TASKFILE}}"
+      - "CMakeLists.txt"
+    generates:
+      - "{{.G_BOOST_TEST_CMAKE_CACHE}}"
+      - "{{.G_BOOST_TEST_COMPILE_COMMANDS_DB}}"
+    cmds:
+      - "cmake -S '{{.TASKFILE_DIR}}' -B '{{.G_BUILD_BOOST_TEST_DIR}}'"
+
+  init:
+    internal: true
+    silent: true
+    run: "once"
+    cmds:
+        - "mkdir -p {{.G_BUILD_DIR}}"
+
+  install-boost:
+    internal: true
+    run: "once"
+    cmds:
+      - task: "utils:boost:boost-download-and-install"
+        vars:
+          WORK_DIR: "{{.G_DEPS_DIR}}/boost"
+          FILE_SHA256: "2128a4c96862b5c0970c1e34d76b1d57e4a1016b80df85ad39667f30b1deba26"
+          URL: "https://github.com/boostorg/boost/releases/download/boost-1.86.0/\
+            boost-1.86.0-b2-nodocs.tar.gz"
+          CMAKE_SETTINGS_DIR: "{{.G_DEPS_CMAKE_SETTINGS_DIR}}"
+          TARGETS:
+            - "program_options"
+            - "system"
+
+  build-boost-test:
+    internal: true
+    sources:
+      - "{{.TASKFILE}}"
+      - "CMakeLists.txt"
+      - "boost-test.cpp"
+    cmds:
+      - "cmake --build '{{.G_BUILD_BOOST_TEST_DIR}}' --target all"
+
+  run-boost-test:
+    internal: true
+    sources:
+      - "{{.G_BOOST_TEST_EXECUTABLE}}"
+    cmds:
+      - "{{.G_BOOST_TEST_EXECUTABLE}} --input 'testtest' --size 8"
+
+  boost-test:
+    cmds:
+      - task: "init"
+      - task: "utils:cmake:install-deps-and-generate-settings"
+        vars:
+          CMAKE_SETTINGS_DIR: "{{.G_DEPS_CMAKE_SETTINGS_DIR}}"
+          DEP_TASK: "install-boost"
+      - task: "config-cmake-project"
+      - task: "build-boost-test"
+      - task: "run-boost-test"
+      - task: "clean"
