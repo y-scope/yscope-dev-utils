@@ -35,12 +35,12 @@ auto main(int argc, char** argv) -> int {
     int size = 0;
 
     try {
-        if (!args.contains("input")) {
+        if (false == args.contains("input")) {
             std::cerr << "Error: Missing input argument.\n";
             return cCmdArgParseErr;
         }
         input = args["input"].as<std::string>();
-        if (!args.contains("size")) {
+        if (false == args.contains("size")) {
             std::cerr << "Error: Missing size argument.\n";
             return cCmdArgParseErr;
         }
