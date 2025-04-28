@@ -15,6 +15,24 @@ vars:
   G_BOOST_TEST_EXECUTABLE: "{{.G_BUILD_BOOST_TEST_DIR}}/boost-test"
 
 tasks:
+  test:
+    internal: true
+    cmds:
+      - task: "init"
+      - task: "utils:cmake:install-deps-and-generate-settings"
+        vars:
+          CMAKE_SETTINGS_DIR: "{{.G_DEPS_CMAKE_SETTINGS_DIR}}"
+          DEP_TASK: "install-boost"
+      - task: "utils:cmake:generate"
+        vars:
+          SOURCE_DIR: "{{.TASKFILE_DIR}}"
+          BUILD_DIR: "{{.G_BUILD_BOOST_TEST_DIR}}"
+      - task: "utils:cmake:build"
+        vars:
+          BUILD_DIR: "{{.G_BUILD_BOOST_TEST_DIR}}"
+      - task: "run-boost-test"
+      - task: "clean"
+
   clean:
     internal: true
     cmds:
@@ -48,20 +66,3 @@ tasks:
       - "{{.G_BOOST_TEST_EXECUTABLE}}"
     cmds:
       - "{{.G_BOOST_TEST_EXECUTABLE}} --input 'testtest' --size 8"
-
-  boost-test:
-    cmds:
-      - task: "init"
-      - task: "utils:cmake:install-deps-and-generate-settings"
-        vars:
-          CMAKE_SETTINGS_DIR: "{{.G_DEPS_CMAKE_SETTINGS_DIR}}"
-          DEP_TASK: "install-boost"
-      - task: "utils:cmake:generate"
-        vars:
-          SOURCE_DIR: "{{.TASKFILE_DIR}}"
-          BUILD_DIR: "{{.G_BUILD_BOOST_TEST_DIR}}"
-      - task: "utils:cmake:build"
-        vars:
-          BUILD_DIR: "{{.G_BUILD_BOOST_TEST_DIR}}"
-      - task: "run-boost-test"
-      - task: "clean"
