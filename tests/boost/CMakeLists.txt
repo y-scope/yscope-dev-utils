@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.22.1)
 
 project(boost-test LANGUAGES CXX VERSION 0.1.0)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS
     ON
     CACHE BOOL
@@ -22,6 +19,7 @@ else()
 endif()
 
 add_executable(boost-test)
+target_compile_features(boost-test PRIVATE cxx_std_20)
 target_sources(boost-test PRIVATE boost-test.cpp)
 target_link_libraries(
     boost-test
