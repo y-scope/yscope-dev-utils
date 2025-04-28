@@ -16,9 +16,7 @@ include("build/deps/cmake-settings/all.cmake")
 
 find_package(Boost 1.74 REQUIRED COMPONENTS headers program_options system)
 if(Boost_FOUND)
-    message(STATUS "Found Boost ${Boost_VERSION}")
-else()
-    message(FATAL_ERROR "Could not find libraries for Boost")
+    message(STATUS "Found Boost ${Boost_VERSION}.")
 endif()
 
 add_executable(boost-test)
