@@ -57,8 +57,14 @@ tasks:
             boost-1.86.0-b2-nodocs.tar.gz"
           CMAKE_SETTINGS_DIR: "{{.G_DEPS_CMAKE_SETTINGS_DIR}}"
           TARGETS:
+            - "filesystem"
+            - "headers"
+            - "iostreams"
+            - "process"
             - "program_options"
+            - "regex"
             - "system"
+            - "url"
 
   run-boost-test:
     internal: true

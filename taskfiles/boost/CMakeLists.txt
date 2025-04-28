@@ -11,7 +11,20 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS
 
 include("build/deps/cmake-settings/all.cmake")
 
-find_package(Boost 1.83 REQUIRED COMPONENTS headers program_options system)
+find_package(
+    Boost
+    1.83
+    REQUIRED
+    COMPONENTS
+        filesystem
+        headers
+        iostreams
+        process
+        program_options
+        regex
+        system
+        url
+)
 if(Boost_FOUND)
     message(STATUS "Found Boost ${Boost_VERSION}.")
 endif()
