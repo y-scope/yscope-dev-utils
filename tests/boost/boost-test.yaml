@@ -20,17 +20,6 @@ tasks:
     cmds:
       - "rm -rf {{.G_BUILD_DIR}}"
 
-  config-cmake-project:
-    internal: true
-    sources:
-      - "{{.TASKFILE}}"
-      - "CMakeLists.txt"
-    generates:
-      - "{{.G_BOOST_TEST_CMAKE_CACHE}}"
-      - "{{.G_BOOST_TEST_COMPILE_COMMANDS_DB}}"
-    cmds:
-      - "cmake -S '{{.TASKFILE_DIR}}' -B '{{.G_BUILD_BOOST_TEST_DIR}}'"
-
   init:
     internal: true
     silent: true
@@ -53,15 +42,6 @@ tasks:
             - "program_options"
             - "system"
 
-  build-boost-test:
-    internal: true
-    sources:
-      - "{{.TASKFILE}}"
-      - "CMakeLists.txt"
-      - "boost-test.cpp"
-    cmds:
-      - "cmake --build '{{.G_BUILD_BOOST_TEST_DIR}}' --target all"
-
   run-boost-test:
     internal: true
     sources:
@@ -76,7 +56,12 @@ tasks:
         vars:
           CMAKE_SETTINGS_DIR: "{{.G_DEPS_CMAKE_SETTINGS_DIR}}"
           DEP_TASK: "install-boost"
-      - task: "config-cmake-project"
-      - task: "build-boost-test"
+      - task: "utils:cmake:generate"
+        vars:
+          SOURCE_DIR: "{{.TASKFILE_DIR}}"
+          BUILD_DIR: "{{.G_BUILD_BOOST_TEST_DIR}}"
+      - task: "utils:cmake:build"
+        vars:
+          BUILD_DIR: "{{.G_BUILD_BOOST_TEST_DIR}}"
       - task: "run-boost-test"
       - task: "clean"
