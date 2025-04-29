@@ -1,7 +1,7 @@
 version: "3"
 
 includes:
-  remote: "{{.ROOT_DIR}}/exports/taskfiles/utils/remote.yaml"
+  remote: "../../exports/taskfiles/utils/remote.yaml"
 
 vars:
   G_EXTRACTED_ZIP_CODEOWNERS_PATH: "yscope-dev-utils-main/.github/CODEOWNERS"

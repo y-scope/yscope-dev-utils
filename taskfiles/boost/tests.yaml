@@ -1,7 +1,7 @@
 version: "3"
 
 includes:
-  utils: "{{.ROOT_DIR}}/exports/taskfiles/utils/utils.yaml"
+  utils: "../../exports/taskfiles/utils/utils.yaml"
 
 vars:
   G_BUILD_DIR: "{{.TASKFILE_DIR}}/build"
