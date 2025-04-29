@@ -34,5 +34,13 @@ target_compile_features(boost-test PRIVATE cxx_std_20)
 target_sources(boost-test PRIVATE boost-test.cpp)
 target_link_libraries(
     boost-test
-    PRIVATE Boost::headers Boost::program_options Boost::system
+    PRIVATE
+        Boost::filesystem
+        Boost::headers
+        Boost::iostreams
+        Boost::process
+        Boost::program_options
+        Boost::regex
+        Boost::system
+        Boost::url
 )
