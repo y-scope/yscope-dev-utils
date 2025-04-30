@@ -1,9 +1,9 @@
 #include <chrono>
+#include <exception>
 #include <future>
 #include <iostream>
 #include <string>
 #include <string_view>
-#include <thread>
 
 #include <boost/any/bad_any_cast.hpp>
 #include <boost/asio/io_context.hpp>
@@ -17,7 +17,9 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/value_semantic.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/regex.hpp>
+#include <boost/regex/v5/regex.hpp>  // IWYU pragma: keep
+#include <boost/regex/v5/regex_match.hpp>
+#include <boost/system/result.hpp>
 #include <boost/url/parse.hpp>
 #include <boost/url/url_view.hpp>
 
@@ -44,31 +46,45 @@ auto test_filesystem() -> bool {
 
 auto test_iostreams() -> bool {
     std::string result;
-    boost::iostreams::filtering_ostream out{boost::iostreams::back_inserter(result)};
-    out << "Hello World!";
-    out.flush();
+    try {
+        boost::iostreams::filtering_ostream out{boost::iostreams::back_inserter(result)};
+        out << "Hello World!";
+        out.flush();
+    } catch (std::exception const& e) {
+        return false;
+    }
     return result == "Hello World!";
 }
 
 constexpr int cWaitTime = 10;
 
 auto test_process() -> bool {
-    boost::asio::io_context io_context;
-    boost::process::v2::process process{io_context, "/bin/true", {}};
-    std::future<int> result = process.async_wait(boost::asio::use_future);
-    io_context.run_for(std::chrono::milliseconds(cWaitTime));
-    if (std::future_status::ready != result.wait_for(std::chrono::milliseconds(cWaitTime))) {
+    try {
+        boost::asio::io_context io_context;
+        boost::process::v2::process process{io_context, "/bin/true", {}};
+        std::future<int> result = process.async_wait(boost::asio::use_future);
+        io_context.run_for(std::chrono::milliseconds(cWaitTime));
+        if (std::future_status::ready != result.wait_for(std::chrono::milliseconds(cWaitTime))) {
+            return false;
+        }
+        return 0 == result.get();
+    } catch (std::exception const& e) {
         return false;
     }
-    return 0 == result.get();
 }
 
 constexpr std::string_view cRegex = "(\\d{4}[- ]){3}\\d{4}";
 constexpr std::string_view cMatch = "1234-5678 9012-3456";
 
 auto test_regex() -> bool {
-    boost::regex const e{std::string{cRegex}};
-    return boost::regex_match(std::string{cMatch}, e);
+    try {
+        // NOLINTNEXTLINE(misc-include-cleaner)
+        boost::regex const e{std::string{cRegex}};
+        // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+        return boost::regex_match(std::string{cMatch}, e);
+    } catch (std::exception const& e) {
+        return false;
+    }
 }
 
 constexpr std::string_view cUrl
@@ -80,7 +96,7 @@ auto test_url() -> bool {
     if (result.has_error()) {
         return false;
     }
-    boost::urls::url_view url_view = result.value();
+    boost::urls::url_view const url_view = result.value();
     return "example.com" == url_view.encoded_host_address();
 }
 
