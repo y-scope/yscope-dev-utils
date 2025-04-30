@@ -46,6 +46,10 @@ CheckOptions:
   # them. Instead, we explicitly specify all rules (except those that should have reasonable
   # defaults, e.g., `""` for `ClassPrefix`).
 
+  # This is necessary for code that can only use macros to achieve certain functionality, like
+  # Catch2's `REQUIRE` and ystdlib's `YSTDLIB_ERROR_HANDLING_TRYX`.
+  readability-function-cognitive-complexity.IgnoreMacros: true
+
   # Macro naming rules
   readability-identifier-naming.MacroDefinitionCase: "UPPER_CASE"
 
