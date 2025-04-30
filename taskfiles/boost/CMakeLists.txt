@@ -31,7 +31,7 @@ endif()
 
 add_executable(boost-test)
 target_compile_features(boost-test PRIVATE cxx_std_20)
-target_sources(boost-test PRIVATE boost-test.cpp)
+target_sources(boost-test PRIVATE test_boost.cpp)
 target_link_libraries(
     boost-test
     PRIVATE
