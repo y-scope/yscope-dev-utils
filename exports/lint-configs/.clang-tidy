@@ -46,6 +46,9 @@ CheckOptions:
   # them. Instead, we explicitly specify all rules (except those that should have reasonable
   # defaults, e.g., `""` for `ClassPrefix`).
 
+  # Function cognitive complexity rules
+  readability-function-cognitive-complexity.IgnoreMacros: true
+
   # Macro naming rules
   readability-identifier-naming.MacroDefinitionCase: "UPPER_CASE"
 
