@@ -15,6 +15,10 @@ config:
     tables: false
   MD024:
     siblings_only: true
+
+  # TODO Improve comment
+  # We use HTML tags in Mermaid diagrams.
+  MD033: false
   MD035:
     style: "---"
   MD046:
@@ -24,6 +28,11 @@ config:
   MD049:
     # We choose an asterisk to avoid confusion when emphasizing text that includes underscores.
     style: "asterisk"
+
+  # TODO Improve comment
+  # Sphinx should validate links and markdownlint doesn't support the MyST syntax for specifying
+  # arbitrary links.
+  MD051: false
   MD052:
     shortcut_syntax: true
   MD055:
