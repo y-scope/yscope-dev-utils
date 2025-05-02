@@ -9,7 +9,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS
     FORCE
 )
 
-include("build/deps/cmake-settings/all.cmake")
+if(PROJECT_IS_TOP_LEVEL)
+    # Include dependency setting if the project isn't being included as a subproject.
+    # NOTE: We mark the file as optional not required if the user happens to have the dependencies
+    # installed already
+    include("build/deps/cmake-settings/all.cmake" OPTIONAL)
+endif()
 
 find_package(
     Boost
