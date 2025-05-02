@@ -4,15 +4,12 @@ includes:
   utils: "../../exports/taskfiles/utils/utils.yaml"
 
 vars:
-  G_BUILD_DIR: "{{.TASKFILE_DIR}}/build"
-  G_DEPS_DIR: "{{.G_BUILD_DIR}}/deps"
-  G_DEPS_CMAKE_SETTINGS_DIR: "{{.G_DEPS_DIR}}/cmake-settings"
-  G_DEPS_CMAKE_SETTINGS_FILE: "{{.G_DEPS_CMAKE_SETTINGS_DIR}}/settings.cmake"
+  G_BOOST_BUILD_DIR: "{{.ROOT_DIR}}/build"
+  G_BOOST_DEPS_DIR: "{{.G_BOOST_BUILD_DIR}}/deps"
+  G_BOOST_DEPS_CMAKE_SETTINGS_DIR: "{{.G_BOOST_DEPS_DIR}}/cmake-settings"
 
-  G_BUILD_BOOST_TEST_DIR: "{{.G_BUILD_DIR}}/boost-test"
-  G_BOOST_TEST_CMAKE_CACHE: "{{.G_BUILD_BOOST_TEST_DIR}}/CMakeCache.txt"
-  G_BOOST_TEST_COMPILE_COMMANDS_DB: "{{.G_BUILD_BOOST_TEST_DIR}}/compile_commands.json"
-  G_BOOST_TEST_EXECUTABLE: "{{.G_BUILD_BOOST_TEST_DIR}}/boost-test"
+  G_BOOST_TEST_BUILD_DIR: "{{.G_BOOST_BUILD_DIR}}/boost-test"
+  G_BOOST_TEST_EXECUTABLE: "{{.G_BOOST_TEST_BUILD_DIR}}/boost-test"
 
 tasks:
   test:
