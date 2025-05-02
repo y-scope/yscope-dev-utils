@@ -31,7 +31,6 @@ tasks:
         vars:
           BUILD_DIR: "{{.G_BUILD_BOOST_TEST_DIR}}"
       - task: "run-boost-test"
-      - task: "clean"
 
   clean:
     internal: true
