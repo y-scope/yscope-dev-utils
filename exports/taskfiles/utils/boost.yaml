@@ -70,7 +70,7 @@ tasks:
         {{- end}}
       - >-
         {{- if .CMAKE_SETTINGS_DIR}}
-          echo "set(BOOST_ROOT
+          echo "set(Boost_ROOT
             \"{{.INSTALL_PREFIX}}\"
             CACHE PATH
             \"Package root for boost.\"
