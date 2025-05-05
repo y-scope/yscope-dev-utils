@@ -10,9 +10,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS
 )
 
 if(PROJECT_IS_TOP_LEVEL)
-    # Include dependency setting if the project isn't being included as a subproject.
-    # NOTE: We mark the file as optional not required if the user happens to have the dependencies
-    # installed already
+    # Include dependency settings if the project isn't being included as a subproject.
+    # NOTE: We mark the file optional because if the user happens to have the dependencies
+    # installed, this file is not necessary.
     include(
         "${CMAKE_CURRENT_SOURCE_DIR}/../../build/deps/cmake-settings/all.cmake"
         OPTIONAL
