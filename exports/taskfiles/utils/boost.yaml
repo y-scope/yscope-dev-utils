@@ -91,13 +91,10 @@ tasks:
         {{- end}}
       - >-
         {{- if .CMAKE_SETTINGS_DIR}}
-          echo "set(Boost_ROOT
-            \"{{.INSTALL_PREFIX}}\"
-            CACHE PATH
-            \"Package root for boost.\"
-          )" >> "{{.CMAKE_SETTINGS_DIR}}/boost.cmake"
+          cat <<EOF >> "{{.CMAKE_SETTINGS_DIR}}/boost.cmake"
+          set(Boost_ROOT "{{.INSTALL_PREFIX}}" CACHE PATH "Package root for boost.")
+          EOF
         {{- end}}
-
   # Downloads boost from `URL` and installs boost.
   #
   # General parameters
