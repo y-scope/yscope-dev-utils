@@ -17,6 +17,11 @@ tasks:
   generate:
     internal: true
     dir: "{{.SOURCE_DIR}}"
+    vars:
+      EXTRA_ARGS:
+        ref: "default (list) .EXTRA_ARGS"
+    requires:
+      vars: ["SOURCE_DIR", "INSTALL_PREFIX", "TARGETS"]
     cmds:
       - >-
         ./bootstrap.sh
@@ -38,6 +43,13 @@ tasks:
   build:
     internal: true
     dir: "{{.SOURCE_DIR}}"
+    vars:
+      EXTRA_ARGS:
+        ref: "default (list) .EXTRA_ARGS"
+      JOBS: >-
+        {{default "" .JOBS}}
+    requires:
+      vars: ["SOURCE_DIR"]
     cmds:
       - >-
         ./b2
@@ -61,6 +73,15 @@ tasks:
   install:
     internal: true
     dir: "{{.SOURCE_DIR}}"
+    vars:
+      EXTRA_ARGS:
+        ref: "default (list) .EXTRA_ARGS"
+      INSTALL_PREFIX: >-
+        {{default "" .INSTALL_PREFIX}}
+      CMAKE_SETTINGS_DIR: >-
+        {{default "" .CMAKE_SETTINGS_DIR}}
+    requires:
+      vars: ["SOURCE_DIR", "INSTALL_PREFIX"]
     cmds:
       - >-
         ./b2
