@@ -29,7 +29,7 @@ tasks:
         --exec-prefix="{{.INSTALL_PREFIX}}"
         --with-libraries={{(join "," .TARGETS)}}
         {{- range .EXTRA_ARGS}}
-        "{{.}}"
+          "{{.}}"
         {{- end}}
 
   # Runs the b2 build step for boost. The caller must have previously called `generate` on
@@ -54,10 +54,10 @@ tasks:
       - >-
         ./b2
         {{- range .EXTRA_ARGS}}
-        "{{.}}"
+          "{{.}}"
         {{- end}}
         {{- if .JOBS}}
-        "-j{{.JOBS}}"
+          "-j{{.JOBS}}"
         {{- end}}
 
   # Runs the b2 install step for boost. The caller must have previously called `build` on
@@ -87,13 +87,15 @@ tasks:
         ./b2
         install
         {{- range .EXTRA_ARGS}}
-        "{{.}}"
+          "{{.}}"
         {{- end}}
-      - |
+      - >-
         {{- if .CMAKE_SETTINGS_DIR}}
-        cat <<EOF >> "{{.CMAKE_SETTINGS_DIR}}/boost.cmake"
-        set(Boost_ROOT "{{.INSTALL_PREFIX}}" CACHE PATH "Package root for boost.")
-        EOF
+          echo "set(Boost_ROOT
+            \"{{.INSTALL_PREFIX}}\"
+            CACHE PATH
+            \"Package root for boost.\"
+          )" >> "{{.CMAKE_SETTINGS_DIR}}/boost.cmake"
         {{- end}}
   # Downloads boost from `URL` and installs boost.
   #
