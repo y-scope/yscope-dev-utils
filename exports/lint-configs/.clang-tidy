@@ -5,7 +5,7 @@ FormatStyle: "file"
 # without facade headers.
 WarningsAsErrors: >-
   *,
-  -misc-include-cleaner
+  -misc-include-cleaner,
 
 # Disabled checks:
 # - `bugprone-easily-swappable-parameters` because it's difficult to mitigate.
