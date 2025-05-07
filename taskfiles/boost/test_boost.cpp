@@ -126,7 +126,8 @@ auto main(int argc, char** argv) -> int {
     }
 
     if (size != input.size()) {
-        std::cerr << "Error: Size mismatch. Expected " << input.size() << ", got " << size << ".\n";
+        std::cerr << "Error: Size mismatch. Expected size: " << size
+                  << ", actual string length: " << input.size() << ".\n";
         return cSizeErr;
     }
 
