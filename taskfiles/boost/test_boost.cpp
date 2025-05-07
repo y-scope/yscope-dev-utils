@@ -132,22 +132,27 @@ auto main(int argc, char** argv) -> int {
     }
 
     if (false == test_filesystem()) {
+        std::cerr << "Error: Filesystem test failed. Could not verify parent path.\n";
         return cFileSystemErr;
     }
 
     if (false == test_iostreams()) {
+        std::cerr << "Error: IoStreams test failed. Could not write and verify string.\n";
         return cIoStreamsErr;
     }
 
     if (false == test_process()) {
+        std::cerr << "Error: Process test failed. Could not execute process or verify exit code.\n";
         return cProcessErr;
     }
 
     if (false == test_regex()) {
+        std::cerr << "Error: Regex test failed. Could not match pattern.\n";
         return cRegexErr;
     }
 
     if (false == test_url()) {
+        std::cerr << "Error: URL test failed. Could not parse URL or verify host.\n";
         return cUrlErr;
     }
 
