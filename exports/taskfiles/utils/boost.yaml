@@ -100,7 +100,7 @@ tasks:
   # Downloads boost from `URL` and installs boost.
   #
   # General parameters
-  # @param {string} [WORK_DIR={{.TASK_DIR}}] Base directory to store the install and src
+  # @param {string} [WORK_DIR={{.ROOT_DIR}}] Base directory to store the install and src
   # directories inside.
   # @param {string} [SOURCE_DIR={{.WORK_DIR}}/boost-src] Directory in which to extract the tar
   # file.
@@ -131,7 +131,7 @@ tasks:
     vars:
       # General parameters
       WORK_DIR: >-
-        {{default .TASK_DIR .WORK_DIR}}
+        {{default .ROOT_DIR .WORK_DIR}}
       SOURCE_DIR: >-
         {{default (printf "%s/boost-src" .WORK_DIR) .SOURCE_DIR}}
 
