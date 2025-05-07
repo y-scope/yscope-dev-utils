@@ -1,10 +1,10 @@
 FormatStyle: "file"
 
 # Left as warnings:
-# - `misc-include-cleaner` because it's difficult to resolve iwyu issues for external libraries
+# - `misc-include-cleaner` because it's difficult to resolve IWYU issues for external libraries
 # without facade headers.
 WarningsAsErrors: >-
-  *
+  *,
   -misc-include-cleaner
 
 # Disabled checks:
