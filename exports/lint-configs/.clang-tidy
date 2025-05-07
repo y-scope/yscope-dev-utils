@@ -1,5 +1,11 @@
 FormatStyle: "file"
-WarningsAsErrors: "*,-misc-include-cleaner"
+
+# Left as warnings:
+# - `misc-include-cleaner` because it's difficult to resolve iwyu issues for external libraries
+# without facade headers.
+WarningsAsErrors: >-
+  *
+  -misc-include-cleaner
 
 # Disabled checks:
 # - `bugprone-easily-swappable-parameters` because it's difficult to mitigate.
