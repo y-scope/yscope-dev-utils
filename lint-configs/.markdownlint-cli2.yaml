@@ -1,0 +1,37 @@
+config:
+  MD003:
+    style: "atx"
+  MD004:
+    style: "asterisk"
+  MD009:
+    list_item_empty_lines: true
+    strict: true
+  MD010:
+    code_blocks: false
+    spaces_per_tab: 4
+  MD013:
+    line_length: 100
+    stern: true
+    tables: false
+  MD024:
+    siblings_only: true
+
+  # `false` since we sometimes need to use HTML tags (e.g., in Mermaid diagrams, etc.).
+  MD033: false
+  MD035:
+    style: "---"
+  MD046:
+    style: "fenced"
+  MD048:
+    style: "backtick"
+  MD049:
+    # We choose an asterisk to avoid confusion when emphasizing text that includes underscores.
+    style: "asterisk"
+
+  # `false` since Sphinx validate links, and markdownlint doesn't support MyST-Parser's syntax for
+  # specifying explicit targets.
+  MD051: false
+  MD052:
+    shortcut_syntax: true
+  MD055:
+    style: "leading_and_trailing"
