@@ -5,23 +5,16 @@
 #include <string>
 #include <string_view>
 
-#include <boost/any/bad_any_cast.hpp>
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/use_future.hpp>
-#include <boost/filesystem/path.hpp>
+#include <boost/any.hpp>
+#include <boost/asio.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
-#include <boost/process/v2/process.hpp>
-#include <boost/program_options/errors.hpp>
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/value_semantic.hpp>
-#include <boost/program_options/variables_map.hpp>
-#include <boost/regex/v5/regex.hpp>  // IWYU pragma: keep
-#include <boost/regex/v5/regex_match.hpp>
-#include <boost/system/result.hpp>
-#include <boost/url/parse.hpp>
-#include <boost/url/url_view.hpp>
+#include <boost/process/v2.hpp>
+#include <boost/program_options.hpp>
+#include <boost/regex.hpp>
+#include <boost/system.hpp>
+#include <boost/url.hpp>
 
 namespace {
 auto parse_args(int argc, char** argv) -> boost::program_options::variables_map {
