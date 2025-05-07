@@ -31,7 +31,6 @@ auto parse_args(int argc, char** argv) -> boost::program_options::variables_map 
     desc.add_options()("size", boost::program_options::value<int>(), "Size of the string.");
     boost::program_options::variables_map variables;
     boost::program_options::store(
-            // NOLINTNEXTLINE(misc-include-cleaner)
             boost::program_options::parse_command_line(argc, argv, desc),
             variables
     );
@@ -78,7 +77,6 @@ constexpr std::string_view cMatch = "1234-5678 9012-3456";
 
 auto test_regex() -> bool {
     try {
-        // NOLINTNEXTLINE(misc-include-cleaner)
         boost::regex const e{std::string{cRegex}};
         // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
         return boost::regex_match(std::string{cMatch}, e);
