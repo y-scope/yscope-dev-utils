@@ -1,6 +1,7 @@
 version: "3"
 
 includes:
+  boost: boost.yaml
   checksum: checksum.yaml
   cmake: cmake.yaml
   cpp-lint: cpp-lint.yaml

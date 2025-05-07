@@ -1,0 +1,70 @@
+version: "3"
+
+includes:
+  utils: "../../exports/taskfiles/utils/utils.yaml"
+
+vars:
+  G_BOOST_BUILD_DIR: "{{.ROOT_DIR}}/build"
+  G_BOOST_DEPS_DIR: "{{.G_BOOST_BUILD_DIR}}/deps"
+  G_BOOST_DEPS_CMAKE_SETTINGS_DIR: "{{.G_BOOST_DEPS_DIR}}/cmake-settings"
+
+  G_BOOST_TEST_BUILD_DIR: "{{.G_BOOST_BUILD_DIR}}/boost-test"
+  G_BOOST_TEST_EXECUTABLE: "{{.G_BOOST_TEST_BUILD_DIR}}/boost-test"
+
+tasks:
+  test:
+    internal: true
+    cmds:
+      - task: "init"
+      - task: "utils:cmake:install-deps-and-generate-settings"
+        vars:
+          CMAKE_SETTINGS_DIR: "{{.G_BOOST_DEPS_CMAKE_SETTINGS_DIR}}"
+          DEP_TASK: "install-boost"
+      - task: "utils:cmake:generate"
+        vars:
+          SOURCE_DIR: "{{.TASKFILE_DIR}}"
+          BUILD_DIR: "{{.G_BOOST_TEST_BUILD_DIR}}"
+      - task: "utils:cmake:build"
+        vars:
+          BUILD_DIR: "{{.G_BOOST_TEST_BUILD_DIR}}"
+      - task: "run-boost-test"
+
+  clean:
+    internal: true
+    cmds:
+      - "rm -rf {{.G_BOOST_TEST_BUILD_DIR}}"
+
+  init:
+    internal: true
+    silent: true
+    run: "once"
+    cmds:
+      - "mkdir -p {{.G_BOOST_TEST_BUILD_DIR}}"
+
+  install-boost:
+    internal: true
+    run: "once"
+    cmds:
+      - task: "utils:boost:download-and-install"
+        vars:
+          WORK_DIR: "{{.G_BOOST_DEPS_DIR}}/boost"
+          FILE_SHA256: "2128a4c96862b5c0970c1e34d76b1d57e4a1016b80df85ad39667f30b1deba26"
+          URL: "https://github.com/boostorg/boost/releases/download/boost-1.86.0/\
+            boost-1.86.0-b2-nodocs.tar.gz"
+          CMAKE_SETTINGS_DIR: "{{.G_BOOST_DEPS_CMAKE_SETTINGS_DIR}}"
+          TARGETS:
+            - "filesystem"
+            - "headers"
+            - "iostreams"
+            - "process"
+            - "program_options"
+            - "regex"
+            - "system"
+            - "url"
+
+  run-boost-test:
+    internal: true
+    sources:
+      - "{{.G_BOOST_TEST_EXECUTABLE}}"
+    cmds:
+      - "{{.G_BOOST_TEST_EXECUTABLE}} --input 'testtest' --size 8"

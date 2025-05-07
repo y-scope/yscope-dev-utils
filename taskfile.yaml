@@ -16,4 +16,4 @@ tasks:
 
   test:
     cmds:
-      - task: "tests:download-and-extract-zip-basic"
+      - task: "tests:all"
