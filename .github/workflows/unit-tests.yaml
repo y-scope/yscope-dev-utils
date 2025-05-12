@@ -1,0 +1,58 @@
+name: "unit-tests"
+
+on:
+  pull_request:
+  push:
+  schedule:
+    # Run daily at 16:05 UTC
+    - cron: "05 16 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: "${{github.workflow}}-${{github.ref}}"
+
+  # Cancel in-progress jobs for efficiency
+  cancel-in-progress: true
+
+jobs:
+  build-ystdlib-cpp:
+    strategy:
+      matrix:
+        os:
+          - "macos-14"
+          - "macos-15"
+          - "ubuntu-22.04"
+          - "ubuntu-24.04"
+    runs-on: "${{matrix.os}}"
+    steps:
+      - uses: "actions/checkout@v4"
+        with:
+          submodules: "recursive"
+
+      - uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.11"
+
+      - name: "Install task"
+        shell: "bash"
+        run: "npm install -g @go-task/cli"
+
+      - if: "'macos-14' == matrix.os"
+        name: "Install macOS 14 deps: coreutils (for md5sum) and Apple Clang 16 (for C++20)"
+        run: |-
+          brew install coreutils
+          brew install llvm@16
+
+      - name: "Run unit tests"
+        env: >-
+          ${{
+          'macos-14' == matrix.os
+          && fromJson('{
+          "CC": "/opt/homebrew/opt/llvm@16/bin/clang",
+          "CXX": "/opt/homebrew/opt/llvm@16/bin/clang++"
+          }')
+          || fromJson('{}')
+          }}
+        run: "task test"
