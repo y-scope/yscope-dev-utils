@@ -1,0 +1,41 @@
+name: "unit-tests"
+
+on:
+  pull_request:
+  push:
+  schedule:
+    # Run daily at 00:20 UTC
+    - cron: "20 0 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: "${{github.workflow}}-${{github.ref}}"
+
+  # Cancel in-progress jobs for efficiency
+  cancel-in-progress: true
+
+jobs:
+  build-ystdlib-cpp:
+    strategy:
+      matrix:
+        os:
+          - "ubuntu-22.04"
+          - "ubuntu-24.04"
+    runs-on: "${{matrix.os}}"
+    steps:
+      - uses: "actions/checkout@v4"
+        with:
+          submodules: "recursive"
+
+      - uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.11"
+
+      - name: "Install task"
+        shell: "bash"
+        run: "npm install -g @go-task/cli"
+
+      - name: "Run unit tests"
+        run: "task test"
