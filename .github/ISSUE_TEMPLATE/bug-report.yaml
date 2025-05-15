@@ -7,8 +7,8 @@ body:
       value: |
         Use this form to report any functional or performance bugs you've found in the software.
 
-        Be sure to check if your [issue](https://github.com/y-scope/yscope-dev-utils/issues) has already
-        been reported.
+        Be sure to check if your [issue](https://github.com/y-scope/yscope-dev-utils/issues)
+        has already been reported.
 
   - type: "textarea"
     attributes:
