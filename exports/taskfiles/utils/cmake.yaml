@@ -129,71 +129,63 @@ tasks:
   # project. We purposely omit `sources` and `generates` as we defer to `cmake` to decide whether it
   # should perform any actions. However, the download and extraction will be skipped if unnecessary.
   #
-  # General parameters
-  # @param {string} NAME Project name (used in directory names).
-  # @param {string} [SOURCE_DIR={{.WORK_DIR}}/{{.NAME}}-src] Directory in which to extract the tar
-  # file.
-  # @param {string} [WORK_DIR={{.TASK_DIR}}] Base directory to store the build, install, and src
-  # directories inside.
+  # Required parameters
+  # @param {string} NAME Project name that must match the CMake package name.
+  # @param {string} TAR_SHA256 Content hash to verify the downloaded tar file against.
+  # @param {string} TAR_URL
+  # @param {string} WORK_DIR Base directory to store the build, install, and src directories inside.
   #
-  # Download parameters
-  # @param {string} FILE_SHA256 Content hash to verify the downloaded tar file against.
-  # @param {string} URL
-  #
-  # CMake generate parameters
-  # @param {string[]} [GEN_ARGS] Any additional arguments to pass to the CMake generate command.
-  #
-  # CMake build parameters
-  # @param {string[]} [BUILD_ARGS] Any additional arguments to pass to the CMake build command.
-  # @param {string} [BUILD_DIR={{.WORK_DIR}}/{{.NAME}}-build] Directory in which to generate the
-  # build system and perform the build.
-  # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
+  # CMake parameters
+  # @param {string[]} [CMAKE_BUILD_ARGS] Any additional arguments to pass to the CMake build command.
+  # @param {string[]} [CMAKE_GEN_ARGS] Any additional arguments to pass to the CMake generate command.
+  # @param {string[]} [CMAKE_INSTALL_ARGS] Any additional arguments to pass to the CMake install
+  # command.
+  # @param {int} [CMAKE_JOBS] The maximum number of concurrent processes to use when building. If
   # omitted, the native build tool's default number is used. See `man cmake`.
-  # @param {string[]} [TARGETS] A list of specific targets to build instead of the default target.
-  #
-  # CMake install parameters
   # @param {string} [CMAKE_SETTINGS_DIR={{.WORK_DIR}}/cmake-settings] The directory where the
   # project's CMake settings file should be stored.
-  # @param {string[]} [INSTALL_ARGS] Any additional arguments to pass to the CMake install command.
+  # @param {string[]} [CMAKE_TARGETS] A list of specific targets to build instead of the default
+  # target.
+  #
+  # Directory parameters
+  # @param {string} [BUILD_DIR={{.WORK_DIR}}/{{.NAME}}-build] Directory in which to generate the
+  # build system and perform the build.
   # @param {string} [INSTALL_PREFIX={{.WORK_DIR}}/{{.NAME}}-install] Path prefix of where the
   # project should be installed.
+  # @param {string} [SOURCE_DIR={{.WORK_DIR}}/{{.NAME}}-src] Directory in which to extract the tar
+  # file.
   install-remote-tar:
     internal: true
     label: "{{.TASK}}:{{.NAME}}-{{.URL}}-{{.INSTALL_PREFIX}}"
     vars:
-      # General parameters
-      WORK_DIR: >-
-        {{default .ROOT_DIR .WORK_DIR}}
+      # CMake parameters
+      CMAKE_BUILD_ARGS:
+        ref: "default (list) .BUILD_ARGS"
+      CMAKE_GEN_ARGS:
+        ref: "default (list) .GEN_ARGS"
+      CMAKE_INSTALL_ARGS:
+        ref: "default (list) .CMAKE_INSTALL_ARGS"
+      CMAKE_JOBS: >-
+        {{default "" .JOBS}}
+      CMAKE_SETTINGS_DIR: >-
+        {{default (printf "%s/cmake-settings" .WORK_DIR) .CMAKE_SETTINGS_DIR}}
+      CMAKE_TARGETS:
+        ref: "default (list) .TARGETS"
+
+      # Directory parameters
+      BUILD_DIR: >-
+        {{default (printf "%s/%s-build" .WORK_DIR .NAME) .BUILD_DIR}}
+      INSTALL_PREFIX: >-
+        {{default (printf "%s/%s-install" .WORK_DIR .NAME) .INSTALL_PREFIX}}
       SOURCE_DIR: >-
         {{default (printf "%s/%s-src" .WORK_DIR .NAME) .SOURCE_DIR}}
 
-      # CMake generate parameters
-      GEN_ARGS:
-        ref: "default (list) .GEN_ARGS"
-
-      # CMake build parameters
-      BUILD_ARGS:
-        ref: "default (list) .BUILD_ARGS"
-      BUILD_DIR: >-
-        {{default (printf "%s/%s-build" .WORK_DIR .NAME) .BUILD_DIR}}
-      JOBS: >-
-        {{default "" .JOBS}}
-      TARGETS:
-        ref: "default (list) .TARGETS"
-
-      # CMake install parameters
-      CMAKE_SETTINGS_DIR: >-
-        {{default (printf "%s/cmake-settings" .WORK_DIR) .CMAKE_SETTINGS_DIR}}
-      INSTALL_ARGS:
-        ref: "default (list) .INSTALL_ARGS"
-      INSTALL_PREFIX: >-
-        {{default (printf "%s/%s-install" .WORK_DIR .NAME) .INSTALL_PREFIX}}
     requires:
-      vars: ["FILE_SHA256", "NAME", "URL"]
+      vars: ["NAME", "TAR_SHA256", "TAR_URL", "WORK_DIR"]
     deps:
       - task: "remote:download-and-extract-tar"
         vars:
-          FILE_SHA256: "{{.FILE_SHA256}}"
+          FILE_SHA256: "{{.TAR_SHA256}}"
           OUTPUT_DIR: "{{.SOURCE_DIR}}"
           URL: "{{.URL}}"
     cmds:
@@ -216,7 +208,7 @@ tasks:
           BUILD_DIR: "{{.BUILD_DIR}}"
           CMAKE_SETTINGS_DIR: "{{.CMAKE_SETTINGS_DIR}}"
           EXTRA_ARGS:
-            ref: ".INSTALL_ARGS"
+            ref: ".CMAKE_INSTALL_ARGS"
           INSTALL_PREFIX: "{{.INSTALL_PREFIX}}"
           NAME: "{{.NAME}}"
 
