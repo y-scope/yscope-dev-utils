@@ -10,10 +10,6 @@ shopt: ["globstar"]
 
 vars:
   G_OUTPUT_DIR: "{{.ROOT_DIR}}/build"
-  # ugly aliases
-  G_CPP_SRC_DIR: "taskfiles"
-  G_BUILD_DIR: "{{.G_OUTPUT_DIR}}"
-  ROOT_PATHS: ["{{.ROOT_DIR}}"]
 
 tasks:
   clean:
