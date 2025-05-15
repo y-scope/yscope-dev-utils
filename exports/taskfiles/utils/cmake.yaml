@@ -132,7 +132,7 @@ tasks:
   # Required parameters
   # @param {string} NAME Project name that must match the CMake package name.
   # @param {string} TAR_SHA256 Content hash to verify the downloaded tar file against.
-  # @param {string} TAR_URL
+  # @param {string} TAR_URL URL of the tarball to download.
   # @param {string} WORK_DIR Base directory to store the build, install, and src directories inside.
   #
   # CMake parameters
@@ -156,21 +156,21 @@ tasks:
   # file.
   install-remote-tar:
     internal: true
-    label: "{{.TASK}}:{{.NAME}}-{{.URL}}-{{.INSTALL_PREFIX}}"
+    label: "{{.TASK}}:{{.NAME}}-{{.TAR_URL}}-{{.INSTALL_PREFIX}}"
     vars:
       # CMake parameters
       CMAKE_BUILD_ARGS:
-        ref: "default (list) .BUILD_ARGS"
+        ref: "default (list) .CMAKE_BUILD_ARGS"
       CMAKE_GEN_ARGS:
-        ref: "default (list) .GEN_ARGS"
+        ref: "default (list) .CMAKE_GEN_ARGS"
       CMAKE_INSTALL_ARGS:
         ref: "default (list) .CMAKE_INSTALL_ARGS"
       CMAKE_JOBS: >-
-        {{default "" .JOBS}}
+        {{default "" .CMAKE_JOBS}}
       CMAKE_SETTINGS_DIR: >-
         {{default (printf "%s/cmake-settings" .WORK_DIR) .CMAKE_SETTINGS_DIR}}
       CMAKE_TARGETS:
-        ref: "default (list) .TARGETS"
+        ref: "default (list) .CMAKE_TARGETS"
 
       # Directory parameters
       BUILD_DIR: >-
@@ -187,7 +187,7 @@ tasks:
         vars:
           FILE_SHA256: "{{.TAR_SHA256}}"
           OUTPUT_DIR: "{{.SOURCE_DIR}}"
-          URL: "{{.URL}}"
+          URL: "{{.TAR_URL}}"
     cmds:
       - task: "generate"
         vars:
