@@ -29,10 +29,6 @@ jobs:
         with:
           submodules: "recursive"
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "18"
-
       - name: "Install task"
         shell: "bash"
         run: "npm install -g @go-task/cli"
