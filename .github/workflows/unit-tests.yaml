@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-ystdlib-cpp:
+  unit-tests:
     strategy:
       matrix:
         os:
@@ -28,10 +28,6 @@ jobs:
       - uses: "actions/checkout@v4"
         with:
           submodules: "recursive"
-
-      - uses: "actions/setup-python@v5"
-        with:
-          python-version: "3.11"
 
       - name: "Install task"
         shell: "bash"
