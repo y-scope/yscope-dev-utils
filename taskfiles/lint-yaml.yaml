@@ -1,0 +1,27 @@
+version: "3"
+
+tasks:
+  yaml:
+    aliases:
+      - "yaml-check"
+      - "yaml-fix"
+    desc: "Runs the YAML linters. Only checks for warnings and violations."
+    sources:
+      - "{{.G_LINT_VENV_CHECKSUM_FILE}}"
+      - "{{.ROOT_DIR}}/**/*.yaml"
+      - "{{.ROOT_DIR}}/**/*.yml"
+      - "{{.TASKFILE}}"
+      - exclude: "{{.ROOT_DIR}}/**/build/*"
+    dir: "{{.ROOT_DIR}}"
+    deps:
+      - "venv"
+    cmds:
+      - |-
+        . "{{.G_LINT_VENV_DIR}}/bin/activate"
+        find . \
+          \( -path '**/build' -o -path '**/tools' \) -prune -o \
+          \( -iname "*.yaml" -o -iname "*.yml" \) \
+          -print0 | \
+            xargs -0 yamllint \
+              --config-file "exports/lint-configs/.yamllint.yml" \
+              --strict

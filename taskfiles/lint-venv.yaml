@@ -1,0 +1,32 @@
+version: "3"
+
+tasks:
+  venv:
+    internal: true
+    vars:
+      CHECKSUM_FILE: "{{.G_LINT_VENV_CHECKSUM_FILE}}"
+      OUTPUT_DIR: "{{.G_LINT_VENV_DIR}}"
+    sources:
+      - "{{.ROOT_DIR}}/taskfile.yaml"
+      - "{{.TASKFILE}}"
+      - "{{.ROOT_DIR}}/lint-requirements.txt"
+    generates:
+      - "{{.CHECKSUM_FILE}}"
+    run: "once"
+    deps:
+      - ":init"
+      - task: ":utils:checksum:validate"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
+    cmds:
+      - task: ":utils:misc:create-venv"
+        vars:
+          LABEL: "lint"
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+          REQUIREMENTS_FILE: "{{.ROOT_DIR}}/lint-requirements.txt"
+      # This command must be last
+      - task: ":utils:checksum:compute"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]

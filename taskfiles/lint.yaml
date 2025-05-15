@@ -1,0 +1,26 @@
+version: "3"
+
+includes:
+  venv:
+    flatten: true
+    taskfile: "./lint-venv.yaml"
+  yaml:
+    flatten: true
+    taskfile: "./lint-yaml.yaml"
+
+vars:
+  G_LINT_CPP_DIRS:
+    - "{{.G_CPP_SRC_DIR}}"
+  G_LINT_VENV_DIR: "{{.G_BUILD_DIR}}/lint-venv"
+  G_LINT_VENV_CHECKSUM_FILE: "{{.G_BUILD_DIR}}/lint#venv.md5"
+
+tasks:
+  check:
+    desc: "Runs the full suite of linters to identify warnings and violations."
+    cmds:
+      - task: "yaml-check"
+
+  fix:
+    desc: "Runs the full suite of linters and fixes some violations."
+    cmds:
+      - task: "yaml-fix"
