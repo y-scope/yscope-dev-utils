@@ -125,7 +125,7 @@ tasks:
           )" >> "{{.CMAKE_SETTINGS_DIR}}/{{.NAME}}.cmake"
         {{- end}}
 
-  # Downloads a CMake project tar file from `URL` and then generates, builds, and installs the
+  # Downloads a CMake project tar file from `TAR_URL` and then generates, builds, and installs the
   # project. We purposely omit `sources` and `generates` as we defer to `cmake` to decide whether it
   # should perform any actions. However, the download and extraction will be skipped if unnecessary.
   #
