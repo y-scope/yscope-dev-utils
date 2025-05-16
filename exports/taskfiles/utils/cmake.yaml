@@ -148,14 +148,6 @@ tasks:
   # project's CMake settings file should be stored.
   # @param {string[]} [CMAKE_TARGETS] A list of specific targets to build instead of the default
   # target.
-  #
-  # Directory parameters
-  # @param {string} [BUILD_DIR={{.WORK_DIR}}/{{.NAME}}-build] Directory in which to generate the
-  # build system and perform the build.
-  # @param {string} [INSTALL_PREFIX={{.WORK_DIR}}/{{.NAME}}-install] Path prefix of where the
-  # project should be installed.
-  # @param {string} [SOURCE_DIR={{.WORK_DIR}}/{{.NAME}}-src] Directory in which to extract the tar
-  # file.
   install-remote-tar:
     internal: true
     label: "{{.TASK}}:{{.NAME}}-{{.TAR_URL}}-{{.INSTALL_PREFIX}}"
@@ -175,12 +167,9 @@ tasks:
         ref: "default (list) .CMAKE_TARGETS"
 
       # Directory parameters
-      BUILD_DIR: >-
-        {{default (printf "%s/%s-build" .WORK_DIR .NAME) .BUILD_DIR}}
-      INSTALL_PREFIX: >-
-        {{default (printf "%s/%s-install" .WORK_DIR .NAME) .INSTALL_PREFIX}}
-      SOURCE_DIR: >-
-        {{default (printf "%s/%s-src" .WORK_DIR .NAME) .SOURCE_DIR}}
+      BUILD_DIR: "{{.WORK_DIR}}/{{.NAME}}-build"
+      INSTALL_PREFIX: "{{.WORK_DIR}}/{{.NAME}}-install"
+      SOURCE_DIR: "{{.WORK_DIR}}/{{.NAME}}-src"
 
     requires:
       vars: ["NAME", "TAR_SHA256", "TAR_URL", "WORK_DIR"]
