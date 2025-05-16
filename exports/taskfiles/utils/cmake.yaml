@@ -201,7 +201,7 @@ tasks:
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
-            ref: ".BUILD_ARGS"
+            ref: ".CMAKE_BUILD_ARGS"
           JOBS: "{{.CMAKE_JOBS}}"
           TARGETS:
             ref: ".CMAKE_TARGETS"
