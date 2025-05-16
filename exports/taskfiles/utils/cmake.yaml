@@ -195,16 +195,16 @@ tasks:
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
-            ref: ".GEN_ARGS"
+            ref: ".CMAKE_GEN_ARGS"
           SOURCE_DIR: "{{.SOURCE_DIR}}"
       - task: "build"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
             ref: ".BUILD_ARGS"
-          JOBS: "{{.JOBS}}"
+          JOBS: "{{.CMAKE_JOBS}}"
           TARGETS:
-            ref: ".TARGETS"
+            ref: ".CMAKE_TARGETS"
       - task: "install"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
