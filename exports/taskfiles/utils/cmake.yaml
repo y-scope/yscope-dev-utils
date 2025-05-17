@@ -94,10 +94,10 @@ tasks:
   #
   # @param {string} BUILD_DIR Directory containing the completed build to use.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
-  # @param {string} NAME CMake project name (used in directory names and the CMake settings file).
   # @param {string} [CMAKE_SETTINGS_DIR] If set, the directory where the project's CMake settings
   # file should be stored.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the install command.
+  # @param {string} [NAME] CMake project name (used in directory names and the CMake settings file).
   install:
     internal: true
     label: "{{.TASK}}:{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}-{{.EXTRA_ARGS}}"
@@ -107,7 +107,15 @@ tasks:
       EXTRA_ARGS:
         ref: "default (list) .EXTRA_ARGS"
     requires:
-      vars: ["BUILD_DIR", "INSTALL_PREFIX", "NAME"]
+      vars: ["BUILD_DIR", "INSTALL_PREFIX"]
+    preconditions:
+      - sh: >-
+          {{if .CMAKE_SETTINGS_DIR}}
+            {{not (empty .NAME)}}
+          {{end}}
+        msg: |-
+          NAME must be set if CMAKE_SETTINGS_DIR is set.
+          CMAKE_SETTINGS_DIR: {{.CMAKE_SETTINGS_DIR}}
     cmds:
       - >-
         cmake
@@ -162,7 +170,7 @@ tasks:
       CMAKE_JOBS: >-
         {{default "" .CMAKE_JOBS}}
       CMAKE_SETTINGS_DIR: >-
-        {{default (printf "%s/cmake-settings" .WORK_DIR) .CMAKE_SETTINGS_DIR}}
+        {{default "" .CMAKE_SETTINGS_DIR}}
       CMAKE_TARGETS:
         ref: "default (list) .CMAKE_TARGETS"
 
