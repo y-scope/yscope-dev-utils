@@ -94,11 +94,11 @@ tasks:
   #
   # @param {string} BUILD_DIR Directory containing the completed build to use.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
+  # @param {string} [CMAKE_PACKAGE_NAME] CMake project name (used in directory names and the CMake
+  # settings file). Required if `CMAKE_SETTINGS_DIR` is set.
   # @param {string} [CMAKE_SETTINGS_DIR] If set, the directory where the project's CMake settings
   # file should be stored.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the install command.
-  # @param {string} [CMAKE_PACKAGE_NAME] CMake project name (used in directory names and the CMake
-  # settings file).  Required if `CMAKE_SETTINGS_DIR` is set.
   install:
     internal: true
     label: "{{.TASK}}:{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}-{{.EXTRA_ARGS}}"
@@ -206,11 +206,11 @@ tasks:
       - task: "install"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
+          CMAKE_PACKAGE_NAME: "{{.CMAKE_PACKAGE_NAME}}"
           CMAKE_SETTINGS_DIR: "{{.CMAKE_SETTINGS_DIR}}"
           EXTRA_ARGS:
             ref: ".CMAKE_INSTALL_ARGS"
           INSTALL_PREFIX: "{{.INSTALL_PREFIX}}"
-          CMAKE_PACKAGE_NAME: "{{.CMAKE_PACKAGE_NAME}}"
 
   # Sets up all CMake dependencies for a project by:
   #
