@@ -19,8 +19,3 @@ tasks:
     desc: "Runs the full suite of linters to identify warnings and violations."
     cmds:
       - task: "yaml-check"
-
-  fix:
-    desc: "Runs the full suite of linters and fixes some violations."
-    cmds:
-      - task: "yaml-fix"
