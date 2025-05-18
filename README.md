@@ -13,6 +13,7 @@ task clean
 ```
 
 To run all linting checks:
+
 ```bash
 task lint:check
 ```
