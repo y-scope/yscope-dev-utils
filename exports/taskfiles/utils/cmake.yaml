@@ -86,15 +86,16 @@ tasks:
 
   # Runs the CMake install step for the given build directory. The caller must have previously
   # called `build` on `BUILD_DIR` for this task to succeed. If `CMAKE_SETTINGS_DIR` is set, a
-  # settings file will be created in that directory, containing a `{{.NAME}}_ROOT` CMake variable
-  # that points to `INSTALL_PREFIX`.
+  # settings file will be created in that directory, containing a `{{.CMAKE_PACKAGE_NAME}}_ROOT`
+  # CMake variable that points to `INSTALL_PREFIX`.
   #
   # NOTE: We purposely omit `sources` and `generates` as we defer to `cmake` to decide whether it
   # should perform any actions.
   #
   # @param {string} BUILD_DIR Directory containing the completed build to use.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
-  # @param {string} NAME CMake project name (used in directory names and the CMake settings file).
+  # @param {string} [CMAKE_PACKAGE_NAME] CMake project name (used in directory names and the CMake
+  # settings file). Required if `CMAKE_SETTINGS_DIR` is set.
   # @param {string} [CMAKE_SETTINGS_DIR] If set, the directory where the project's CMake settings
   # file should be stored.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the install command.
@@ -107,7 +108,15 @@ tasks:
       EXTRA_ARGS:
         ref: "default (list) .EXTRA_ARGS"
     requires:
-      vars: ["BUILD_DIR", "INSTALL_PREFIX", "NAME"]
+      vars: ["BUILD_DIR", "INSTALL_PREFIX"]
+    preconditions:
+      - sh: >-
+          {{if .CMAKE_SETTINGS_DIR}}
+            {{not (empty .CMAKE_PACKAGE_NAME)}}
+          {{end}}
+        msg: |-
+          CMAKE_PACKAGE_NAME must be set if CMAKE_SETTINGS_DIR is set.
+          CMAKE_SETTINGS_DIR: {{.CMAKE_SETTINGS_DIR}}
     cmds:
       - >-
         cmake
@@ -118,11 +127,11 @@ tasks:
         {{- end}}
       - >-
         {{- if .CMAKE_SETTINGS_DIR}}
-          echo "set({{.NAME}}_ROOT
+          echo "set({{.CMAKE_PACKAGE_NAME}}_ROOT
             \"{{.INSTALL_PREFIX}}\"
             CACHE PATH
-            \"Package root for {{.NAME}}.\"
-          )" >> "{{.CMAKE_SETTINGS_DIR}}/{{.NAME}}.cmake"
+            \"Package root for {{.CMAKE_PACKAGE_NAME}}.\"
+          )" >> "{{.CMAKE_SETTINGS_DIR}}/{{.CMAKE_PACKAGE_NAME}}.cmake"
         {{- end}}
 
   # Downloads a CMake project tar file from `TAR_URL` and then generates, builds, and installs the
@@ -130,7 +139,7 @@ tasks:
   # should perform any actions. However, the download and extraction will be skipped if unnecessary.
   #
   # Required parameters
-  # @param {string} NAME CMake package name.
+  # @param {string} CMAKE_PACKAGE_NAME CMake package name.
   # @param {string} TAR_SHA256 Content hash to verify the downloaded tar file against.
   # @param {string} TAR_URL URL of the tar file to download.
   # @param {string} WORK_DIR Directory in which to store the build, install, and source directories.
@@ -144,13 +153,13 @@ tasks:
   # command.
   # @param {int} [CMAKE_JOBS] The maximum number of concurrent processes to use when building. If
   # omitted, the native build tool's default number is used. See `man cmake`.
-  # @param {string} [CMAKE_SETTINGS_DIR={{.WORK_DIR}}/cmake-settings] The directory where the
-  # project's CMake settings file should be stored.
+  # @param {string} [CMAKE_SETTINGS_DIR] The directory where the project's CMake settings file
+  # should be stored.
   # @param {string[]} [CMAKE_TARGETS] A list of specific targets to build instead of the default
   # target.
   install-remote-tar:
     internal: true
-    label: "{{.TASK}}:{{.NAME}}-{{.TAR_URL}}-{{.INSTALL_PREFIX}}"
+    label: "{{.TASK}}:{{.CMAKE_PACKAGE_NAME}}-{{.TAR_URL}}-{{.INSTALL_PREFIX}}"
     vars:
       # CMake parameters
       CMAKE_BUILD_ARGS:
@@ -162,17 +171,17 @@ tasks:
       CMAKE_JOBS: >-
         {{default "" .CMAKE_JOBS}}
       CMAKE_SETTINGS_DIR: >-
-        {{default (printf "%s/cmake-settings" .WORK_DIR) .CMAKE_SETTINGS_DIR}}
+        {{default "" .CMAKE_SETTINGS_DIR}}
       CMAKE_TARGETS:
         ref: "default (list) .CMAKE_TARGETS"
 
       # Directory parameters
-      BUILD_DIR: "{{.WORK_DIR}}/{{.NAME}}-build"
-      INSTALL_PREFIX: "{{.WORK_DIR}}/{{.NAME}}-install"
-      SOURCE_DIR: "{{.WORK_DIR}}/{{.NAME}}-src"
+      BUILD_DIR: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-build"
+      INSTALL_PREFIX: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-install"
+      SOURCE_DIR: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-src"
 
     requires:
-      vars: ["NAME", "TAR_SHA256", "TAR_URL", "WORK_DIR"]
+      vars: ["CMAKE_PACKAGE_NAME", "TAR_SHA256", "TAR_URL", "WORK_DIR"]
     deps:
       - task: "remote:download-and-extract-tar"
         vars:
@@ -197,11 +206,11 @@ tasks:
       - task: "install"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
+          CMAKE_PACKAGE_NAME: "{{.CMAKE_PACKAGE_NAME}}"
           CMAKE_SETTINGS_DIR: "{{.CMAKE_SETTINGS_DIR}}"
           EXTRA_ARGS:
             ref: ".CMAKE_INSTALL_ARGS"
           INSTALL_PREFIX: "{{.INSTALL_PREFIX}}"
-          NAME: "{{.NAME}}"
 
   # Sets up all CMake dependencies for a project by:
   #
