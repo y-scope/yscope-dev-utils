@@ -1,9 +1,7 @@
 version: "3"
 
 tasks:
-  yaml:
-    aliases:
-      - "yaml-check"
+  check-yaml:
     desc: "Runs the YAML linters."
     sources:
       - "{{.G_LINT_VENV_CHECKSUM_FILE}}"

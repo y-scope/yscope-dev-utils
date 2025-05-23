@@ -1,6 +1,21 @@
 version: "3"
 
+includes:
+  utils: "../../exports/taskfiles/utils/utils.yaml"
+  yaml:
+    flatten: true
+    taskfile: "./yaml.yaml"
+
+vars:
+  G_LINT_VENV_DIR: "{{.G_OUTPUT_DIR}}/lint-venv"
+  G_LINT_VENV_CHECKSUM_FILE: "{{.G_OUTPUT_DIR}}/lint#venv.md5"
+
 tasks:
+  check:
+    desc: "Runs all linters to identify any violations."
+    cmds:
+      - task: "check-yaml"
+
   venv:
     internal: true
     vars:
@@ -14,19 +29,19 @@ tasks:
     run: "once"
     deps:
       - ":init"
-      - task: ":utils:checksum:validate"
+      - task: "utils:checksum:validate"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
     cmds:
-      - task: ":utils:misc:create-venv"
+      - task: "utils:misc:create-venv"
         vars:
           LABEL: "lint"
           OUTPUT_DIR: "{{.OUTPUT_DIR}}"
           REQUIREMENTS_FILE: "{{.ROOT_DIR}}/lint-requirements.txt"
 
       # This command must be last
-      - task: ":utils:checksum:compute"
+      - task: "utils:checksum:compute"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]

@@ -1,9 +1,8 @@
 version: "3"
 
 includes:
-  lint: "./taskfiles/lint.yaml"
+  lint: "./taskfiles/lint/main.yaml"
   tests: "./taskfiles/tests.yaml"
-  utils: "./exports/taskfiles/utils/utils.yaml"
 
 set: ["u", "pipefail"]
 shopt: ["globstar"]
