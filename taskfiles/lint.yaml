@@ -14,6 +14,6 @@ vars:
 
 tasks:
   check:
-    desc: "Runs the full suite of linters to identify warnings and violations."
+    desc: "Runs all linters to identify any violations."
     cmds:
       - task: "yaml-check"

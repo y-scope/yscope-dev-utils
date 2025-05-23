@@ -4,7 +4,7 @@ tasks:
   yaml:
     aliases:
       - "yaml-check"
-    desc: "Runs the YAML linters. Only checks for warnings and violations."
+    desc: "Runs the YAML linters."
     sources:
       - "{{.G_LINT_VENV_CHECKSUM_FILE}}"
       - "{{.ROOT_DIR}}/**/*.yaml"
@@ -12,8 +12,7 @@ tasks:
       - "{{.TASKFILE}}"
       - exclude: "{{.ROOT_DIR}}/**/build/*"
     dir: "{{.ROOT_DIR}}"
-    deps:
-      - "venv"
+    deps: ["venv"]
     cmds:
       - |-
         . "{{.G_LINT_VENV_DIR}}/bin/activate"
@@ -21,6 +20,7 @@ tasks:
           \( -path '**/build' \) -prune -o \
           \( -iname "*.yaml" -o -iname "*.yml" \) \
           -print0 | \
-            xargs -0 yamllint \
-              --config-file "exports/lint-configs/.yamllint.yml" \
-              --strict
+            xargs -0 \
+              yamllint \
+                --config-file "exports/lint-configs/.yamllint.yml" \
+                --strict

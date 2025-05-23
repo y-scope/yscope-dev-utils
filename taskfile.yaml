@@ -1,8 +1,8 @@
 version: "3"
 
 includes:
-  tests: "./taskfiles/tests.yaml"
   lint: "./taskfiles/lint.yaml"
+  tests: "./taskfiles/tests.yaml"
   utils: "./exports/taskfiles/utils/utils.yaml"
 
 set: ["u", "pipefail"]
