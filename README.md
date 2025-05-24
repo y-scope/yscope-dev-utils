@@ -26,7 +26,7 @@ task lint:check
 To clean up test files:
 
 ```bash
-task lint:check
+task clean
 ```
 
 You can also run specific unit tests with `task tests:*`
