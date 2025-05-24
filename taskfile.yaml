@@ -1,6 +1,7 @@
 version: "3"
 
 includes:
+  lint: "./taskfiles/lint/main.yaml"
   tests: "./taskfiles/tests.yaml"
 
 set: ["u", "pipefail"]
@@ -13,6 +14,13 @@ tasks:
   clean:
     cmds:
       - "rm -rf '{{.G_OUTPUT_DIR}}'"
+
+  init:
+    internal: true
+    silent: true
+    run: "once"
+    cmds:
+      - "mkdir -p '{{.G_OUTPUT_DIR}}'"
 
   test:
     cmds:

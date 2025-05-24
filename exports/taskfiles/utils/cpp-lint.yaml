@@ -327,7 +327,7 @@ tasks:
     requires:
       vars: ["SOURCE_FILE_PATHS", "VENV_DIR"]
     deps:
-      - for: { var: SOURCE_FILE_PATHS }
+      - for: {var: "SOURCE_FILE_PATHS"}
         task: "clang-tidy"
         vars:
           FLAGS:
