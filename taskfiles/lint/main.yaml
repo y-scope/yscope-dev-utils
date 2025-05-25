@@ -8,7 +8,7 @@ includes:
 
 vars:
   G_LINT_VENV_DIR: "{{.G_OUTPUT_DIR}}/lint-venv"
-  G_LINT_VENV_CHECKSUM_FILE: "{{.G_OUTPUT_DIR}}/lint#venv.md5"
+  G_LINT_VENV_CHECKSUM_FILE: "{{.G_LINT_VENV_DIR}}.md5"
 
 tasks:
   check:

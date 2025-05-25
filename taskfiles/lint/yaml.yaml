@@ -6,8 +6,6 @@ tasks:
     sources:
       - "{{.G_LINT_VENV_CHECKSUM_FILE}}"
       - "{{.ROOT_DIR}}/**/*.yaml"
-      - "{{.ROOT_DIR}}/**/*.yml"
-      - "{{.TASKFILE}}"
       - exclude: "{{.ROOT_DIR}}/**/build/*"
     dir: "{{.ROOT_DIR}}"
     deps: ["venv"]
@@ -16,7 +14,7 @@ tasks:
         . "{{.G_LINT_VENV_DIR}}/bin/activate"
         find . \
           \( -path '*/build/*' \) -prune -o \
-          \( -iname "*.yaml" -o -iname "*.yml" \) \
+          \( -iname "*.yaml" \) \
           -print0 | \
             xargs -0 \
               yamllint \
