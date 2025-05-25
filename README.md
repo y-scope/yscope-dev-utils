@@ -42,4 +42,4 @@ To clean up any generated files:
 task clean
 ```
 
-[Task]: <https://taskfile.dev/>
+[Task]: https://taskfile.dev/
