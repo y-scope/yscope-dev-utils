@@ -9,6 +9,7 @@ includes:
 vars:
   G_LINT_VENV_DIR: "{{.G_OUTPUT_DIR}}/lint-venv"
   G_LINT_VENV_CHECKSUM_FILE: "{{.G_LINT_VENV_DIR}}.md5"
+  G_LINT_REQUIREMENTS_FILE: "{{.ROOT_DIR}}/lint-requirements.txt"
 
 tasks:
   check:
@@ -22,7 +23,7 @@ tasks:
       CHECKSUM_FILE: "{{.G_LINT_VENV_CHECKSUM_FILE}}"
       OUTPUT_DIR: "{{.G_LINT_VENV_DIR}}"
     sources:
-      - "{{.ROOT_DIR}}/lint-requirements.txt"
+      - "{{.G_LINT_REQUIREMENTS_FILE}}"
       - "{{.ROOT_DIR}}/taskfile.yaml"
       - "{{.TASKFILE}}"
     generates: ["{{.CHECKSUM_FILE}}"]
@@ -38,7 +39,7 @@ tasks:
         vars:
           LABEL: "lint"
           OUTPUT_DIR: "{{.OUTPUT_DIR}}"
-          REQUIREMENTS_FILE: "{{.ROOT_DIR}}/lint-requirements.txt"
+          REQUIREMENTS_FILE: "{{.G_LINT_REQUIREMENTS_FILE}}"
 
       # This command must be last
       - task: "utils:checksum:compute"
