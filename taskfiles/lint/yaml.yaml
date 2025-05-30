@@ -14,7 +14,7 @@ tasks:
         . "{{.G_LINT_VENV_DIR}}/bin/activate"
         find . \
           \( -path "*/build/*" \) -prune -o \
-          \( -iname "*.yaml" -o -iname "*.yml" \) \
+          \( -iname "*.yaml" \) \
           -print0 | \
             xargs -0 \
               yamllint \
