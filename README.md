@@ -1,11 +1,10 @@
 # Contributing
 
-Before you submit a pull request, ensure you follow the testing and linting
-instructions below.
+Before you submit a pull request, ensure you follow the testing and linting instructions below.
 
 > [!NOTE]
-> We use [Task] to automate our development workflow. You can use `task --list-all`
-> to see all available tasks.
+> We use [Task] to automate our development workflow. You can use `task --list-all` to see all
+> available tasks.
 
 ## Requirements
 
@@ -20,8 +19,8 @@ To run all tests:
 task test
 ```
 
-You can also run specific unit tests with `task tests:<test>`, where `<test>`
-is the name of the test you want to run.
+You can also run specific unit tests with `task tests:<test>`, where `<test>` is the name of the
+test you want to run.
 
 ## Linting
 
@@ -31,8 +30,8 @@ To run all linting checks:
 task lint:check
 ```
 
-You can also run specific linting checks with `task lint:<check>`, where `<check>`
-is the name of check you want to run.
+You can also run specific linting checks with `task lint:<check>`, where `<check>` is the name of
+check you want to run.
 
 ## Cleaning
 
