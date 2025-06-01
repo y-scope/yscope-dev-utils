@@ -20,8 +20,8 @@ tasks:
     internal: true
     vars:
       CHECKSUM_FILE: "{{.G_LINT_VENV_CHECKSUM_FILE}}"
-      OUTPUT_DIR: "{{.G_LINT_VENV_DIR}}"
       LINT_REQUIREMENTS_FILE: "{{.ROOT_DIR}}/lint-requirements.txt"
+      OUTPUT_DIR: "{{.G_LINT_VENV_DIR}}"
     sources:
       - "{{.LINT_REQUIREMENTS_FILE}}"
       - "{{.ROOT_DIR}}/exports/taskfiles/**/*.yaml"
