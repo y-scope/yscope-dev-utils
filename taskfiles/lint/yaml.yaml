@@ -1,0 +1,22 @@
+version: "3"
+
+tasks:
+  check-yaml:
+    desc: "Runs the YAML linters."
+    sources:
+      - "{{.G_LINT_VENV_CHECKSUM_FILE}}"
+      - "{{.ROOT_DIR}}/**/*.yaml"
+      - exclude: "{{.ROOT_DIR}}/**/build/*"
+    dir: "{{.ROOT_DIR}}"
+    deps: ["venv"]
+    cmds:
+      - |-
+        . "{{.G_LINT_VENV_DIR}}/bin/activate"
+        find . \
+          \( -path "*/build/*" \) -prune -o \
+          \( -iname "*.yaml" \) \
+          -print0 | \
+            xargs -0 \
+              yamllint \
+                --config-file "exports/lint-configs/.yamllint.yml" \
+                --strict
