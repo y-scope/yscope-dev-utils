@@ -1,0 +1,130 @@
+version: "3"
+
+vars:
+  G_FIND_PY: "{{.ROOT_DIR}}/exports/scripts/find.py"
+  G_TEST_DIR: "{{.TASKFILE_DIR}}/tmp"
+
+tasks:
+  default:
+    cmds:
+      - task: "setup"
+      - task: "test-default"
+      - task: "test-file-name"
+      - task: "test-include"
+      - task: "test-exclude"
+      - task: "test-complex"
+      - task: "clean"
+
+  clean:
+    cmd: "rm -rf '{{.G_TEST_DIR}}'"
+
+  test-complex:
+    internal: true
+    cmds:
+      - task: "test-template"
+        vars:
+          EXPECTED_OUTPUT: |-
+            {{.G_TEST_DIR}}/a/aa/aaa/a.b
+          FIND_EXCLUDE_PATTERNS:
+            - "b/**/*"
+          FIND_FILENAME_PATTERNS:
+            - "*.*"
+          FIND_INCLUDE_PATTERNS:
+            - "**/*.b"
+          FIND_ROOT_PATHS:
+            - "{{.G_TEST_DIR}}"
+
+  test-default:
+    internal: true
+    cmds:
+      - task: "test-template"
+        vars:
+          EXPECTED_OUTPUT: |-
+            a
+            a/aa
+            a/aa/aaa
+            a/aa/aaa/a.a
+            a/aa/aaa/a.b
+            b
+            b/bb
+            b/bb/bbb
+            b/bb/bbb/b.b
+
+  test-exclude:
+    internal: true
+    cmds:
+      - task: "test-template"
+        vars:
+          EXPECTED_OUTPUT: |-
+            a
+            a/aa
+            a/aa/aaa
+            a/aa/aaa/a.a
+            a/aa/aaa/a.b
+            b
+            b/bb
+          FIND_EXCLUDE_PATTERNS:
+            - "**/bb/**/*"
+
+  test-file-name:
+    internal: true
+    cmds:
+      - task: "test-template"
+        vars:
+          EXPECTED_OUTPUT: |-
+            a/aa/aaa/a.b
+            b/bb/bbb/b.b
+          FIND_FILENAME_PATTERNS:
+            - "*.b"
+
+  test-include:
+    internal: true
+    cmds:
+      - task: "test-template"
+        vars:
+          EXPECTED_OUTPUT: |-
+            a/aa/aaa
+            a/aa/aaa/a.a
+            a/aa/aaa/a.b
+            b/bb/bbb
+          FIND_INCLUDE_PATTERNS:
+            - "**/aa/**/*"
+            - "**/bbb/**"
+
+  test-template:
+    internal: true
+    vars:
+      FIND_OUTPUT:
+        sh: |-
+          cd "{{.G_TEST_DIR}}"
+          "{{.G_FIND_PY}}"\
+            {{- range .FIND_ROOT_PATHS}}
+              "{{.}}"\
+            {{- end}}
+            {{- range .FIND_INCLUDE_PATTERNS}}
+              --include "{{.}}"\
+            {{- end}}
+            {{- range .FIND_EXCLUDE_PATTERNS}}
+              --exclude "{{.}}"\
+            {{- end}}
+            {{- range .FIND_FILENAME_PATTERNS}}
+              --file-name "{{.}}"\
+            {{- end}}
+    requires:
+      vars: ["EXPECTED_OUTPUT"]
+    cmds:
+      - |-
+        diff \
+        <(echo "{{.FIND_OUTPUT}}" | sort) \
+        <(echo "{{.EXPECTED_OUTPUT}}")
+
+  setup:
+    internal: true
+    deps: ["clean"]
+    cmds:
+      - |-
+        mkdir -p "{{.G_TEST_DIR}}/a/aa/aaa"
+        mkdir -p "{{.G_TEST_DIR}}/b/bb/bbb"
+        touch "{{.G_TEST_DIR}}/a/aa/aaa/a.a"
+        touch "{{.G_TEST_DIR}}/a/aa/aaa/a.b"
+        touch "{{.G_TEST_DIR}}/b/bb/bbb/b.b"

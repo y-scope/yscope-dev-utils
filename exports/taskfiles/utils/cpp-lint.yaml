@@ -186,18 +186,18 @@ tasks:
       # Task variables
       SOURCE_FILE_PATHS_:
         sh: |-
-          "{{.TASKFILE_DIR}}/../../scripts/find.py" \
+          "{{.TASKFILE_DIR}}/../../scripts/find.py"\
             {{- range .ROOT_PATHS}}
-              "{{.}}" \
+              "{{.}}"\
             {{- end}}
             {{- range .INCLUDE_PATTERNS}}
-              --include "{{.}}" \
+              --include "{{.}}"\
             {{- end}}
             {{- range .EXCLUDE_PATTERNS}}
-              --exclude "{{.}}" \
+              --exclude "{{.}}"\
             {{- end}}
             {{- range .INCLUDE_FILENAME_PATTERNS}}
-              --file-name "{{.}}" \
+              --file-name "{{.}}"\
             {{- end}}
       SOURCE_FILE_PATHS:
         ref: >-

@@ -13,10 +13,7 @@ from pathlib import Path
 def _glob_paths(root_path: Path, patterns: list[str]) -> set[Path]:
     paths: set[Path] = set()
     for p in patterns:
-        pattern: str = p
-        if pattern.endswith("/**"):
-            pattern += "/*"
-        for path in root_path.glob(pattern):
+        for path in root_path.glob(p):
             paths.add(path)
     return paths
 
@@ -37,7 +34,7 @@ def _find(
         excluded_paths: set[Path] = _glob_paths(root_path, exclude_patterns)
 
         for path in included_paths - excluded_paths:
-            if any(fnmatchcase(path.name, p) for p in file_name_patterns):
+            if not file_name_patterns or any(fnmatchcase(path.name, p) for p in file_name_patterns):
                 sys.stdout.write(f"{path}\n")
     return 0
 
@@ -54,8 +51,6 @@ def _main() -> int:
             "  3. the path's file name is matched by at least one `file-name` pattern.\n"
             "Path patterns are matched against the entire path and file name patterns are matched "
             "against the entire name (no preceding path). All pattern matching is case sensitive."
-            "Path patterns ending with '/**' are changed to '/**/*' to match all paths not just "
-            "directories."
         ),
     )
     parser.add_argument(
