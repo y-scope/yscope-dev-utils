@@ -2,6 +2,14 @@ line-length = 100
 
 [lint]
 select = ["ALL"]
+ignore = [
+    # Redundant and conflicts with ruff format
+    "COM812",
+    # No blank line before docstrings (D211)
+    "D203",
+    # Docstring summary line on the next line after quotes (D213)
+    "D212",
+]
 isort.order-by-type = false
 
 [format]
