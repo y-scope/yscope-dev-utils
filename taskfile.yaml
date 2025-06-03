@@ -11,13 +11,6 @@ vars:
   G_OUTPUT_DIR: "{{.ROOT_DIR}}/build"
 
 tasks:
-  init:
-    internal: true
-    silent: true
-    run: "once"
-    cmds:
-      - "mkdir -p '{{.G_OUTPUT_DIR}}'"
-
   clean:
     cmds:
       - "rm -rf '{{.G_OUTPUT_DIR}}'"
@@ -25,3 +18,10 @@ tasks:
   test:
     cmds:
       - task: "tests:all"
+
+  init:
+    internal: true
+    silent: true
+    run: "once"
+    cmds:
+      - "mkdir -p '{{.G_OUTPUT_DIR}}'"
