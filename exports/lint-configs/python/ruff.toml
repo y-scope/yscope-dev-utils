@@ -1,0 +1,9 @@
+line-length = 100
+
+[lint]
+select = ["ALL"]
+isort.order-by-type = false
+
+[format]
+docstring-code-format = true
+docstring-code-line-length = 100

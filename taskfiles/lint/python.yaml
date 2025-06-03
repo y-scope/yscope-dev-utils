@@ -1,0 +1,29 @@
+version: "3"
+
+vars:
+  PY_LINT_DIR: "{{.ROOT_DIR}}/exports/lint-configs/python"
+
+tasks:
+  check-py:
+    cmds:
+      - task: "py"
+        vars:
+          RUFF_FORMAT_FLAGS: "--diff"
+
+  fix-py:
+    cmds:
+      - task: "py"
+        vars:
+          RUFF_CHECK_FLAGS: "--fix"
+
+  py:
+    internal: true
+    deps: ["venv"]
+    cmds:
+      - for:
+          - "{{.ROOT_DIR}}/exports/scripts"
+        cmd: |-
+          . "{{.G_LINT_VENV_DIR}}/bin/activate"
+          mypy --config-file "{{.PY_LINT_DIR}}/mypy.ini" {{.MYPY_FLAGS}} "{{.ROOT_DIR}}"
+          ruff --config "{{.PY_LINT_DIR}}/ruff.toml" check {{.RUFF_CHECK_FLAGS}} "{{.ROOT_DIR}}"
+          ruff --config "{{.PY_LINT_DIR}}/ruff.toml" format {{.RUFF_FORMAT_FLAGS}} "{{.ROOT_DIR}}"
