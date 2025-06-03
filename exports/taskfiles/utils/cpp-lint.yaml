@@ -41,45 +41,20 @@ tasks:
     # NOTE: We don't quote `ROOT_PATHS` entries so that wildcards can be evaluated by the shell.
     cmd: |-
       . "{{.VENV_DIR}}/bin/activate"
-      find \
+      "{{.TASKFILE_DIR}}/../../scripts/find.py" \
         {{- range .ROOT_PATHS}}
-          {{.}} \
+          "{{.}}" \
         {{- end}}
-        {{- if .EXCLUDE_PATTERNS}}
-          \( \
-            {{- range $i, $pattern := .EXCLUDE_PATTERNS}}
-              {{- if $i}}
-                -or \
-              {{- end}}
-              -path "{{$pattern}}" \
-            {{- end}}
-          \) \
-          -prune \
-          -or \
+        {{- range .INCLUDE_PATTERNS}}
+          --include "{{.}}" \
         {{- end}}
-        -type f \
-        {{- if .INCLUDE_PATTERNS}}
-          \( \
-            {{- range $i, $pattern := .INCLUDE_PATTERNS}}
-              {{- if $i}}
-                -or \
-              {{- end}}
-              -path "{{$pattern}}" \
-            {{- end}}
-          \) \
+        {{- range .EXCLUDE_PATTERNS}}
+          --exclude "{{.}}" \
         {{- end}}
-        {{- if .INCLUDE_FILENAME_PATTERNS}}
-          \( \
-            {{- range $i, $pattern := .INCLUDE_FILENAME_PATTERNS}}
-              {{- if $i}}
-                -or \
-              {{- end}}
-              -name "{{$pattern}}" \
-            {{- end}}
-          \) \
+        {{- range .INCLUDE_FILENAME_PATTERNS}}
+          --file-name "{{.}}" \
         {{- end}}
-        -print0 \
-      | xargs -0 clang-format \
+      | xargs clang-format \
         {{- range .FLAGS}}
           {{.}} \
         {{- end}}
@@ -210,53 +185,23 @@ tasks:
 
       # Task variables
       SOURCE_FILE_PATHS_:
-        # NOTE:
-        # - We don't quote `ROOT_PATHS` entries so that wildcards can be evaluated by the shell.
-        # - `find`'s `-print0` option adds a null after the last entry, so care must be taken
-        #   when splitting the output using a null as a delimiter.
         sh: |-
-          find \
+          "{{.TASKFILE_DIR}}/../../scripts/find.py" \
             {{- range .ROOT_PATHS}}
-              {{.}} \
+              "{{.}}" \
             {{- end}}
-            {{- if .EXCLUDE_PATTERNS}}
-              \( \
-                {{- range $i, $pattern := .EXCLUDE_PATTERNS}}
-                  {{- if $i}}
-                    -or \
-                  {{- end}}
-                  -path "{{$pattern}}" \
-                {{- end}}
-              \) \
-              -prune \
-              -or \
+            {{- range .INCLUDE_PATTERNS}}
+              --include "{{.}}" \
             {{- end}}
-            -type f \
-            {{- if .INCLUDE_PATTERNS}}
-              \( \
-                {{- range $i, $pattern := .INCLUDE_PATTERNS}}
-                  {{- if $i}}
-                    -or \
-                  {{- end}}
-                  -path "{{$pattern}}" \
-                {{- end}}
-              \) \
+            {{- range .EXCLUDE_PATTERNS}}
+              --exclude "{{.}}" \
             {{- end}}
-            {{- if .INCLUDE_FILENAME_PATTERNS}}
-              \( \
-                {{- range $i, $pattern := .INCLUDE_FILENAME_PATTERNS}}
-                  {{- if $i}}
-                    -or \
-                  {{- end}}
-                  -name "{{$pattern}}" \
-                {{- end}}
-              \) \
+            {{- range .INCLUDE_FILENAME_PATTERNS}}
+              --file-name "{{.}}" \
             {{- end}}
-            -print0
       SOURCE_FILE_PATHS:
-        # `SOURCE_FILE_PATHS_`'s last entry is an empty string which we remove using `compact`.
         ref: >-
-          compact (splitList "\x00" .SOURCE_FILE_PATHS_)
+          splitList "\n" .SOURCE_FILE_PATHS_
     requires:
       vars: ["ROOT_PATHS", "VENV_DIR"]
     cmds:
