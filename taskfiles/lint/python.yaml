@@ -1,7 +1,7 @@
 version: "3"
 
 vars:
-  PY_LINT_DIR: "{{.ROOT_DIR}}/exports/lint-configs/python"
+  G_LINT_PY_DIR: "{{.ROOT_DIR}}/exports/lint-configs/python"
 
 tasks:
   check-py:
@@ -19,11 +19,22 @@ tasks:
   py:
     internal: true
     deps: ["venv"]
+    vars:
+      SRC_FILES_:
+        sh: |-
+          "{{.ROOT_DIR}}/exports/scripts/find.py"\
+            "{{.ROOT_DIR}}" \
+            --exclude "build/**/*" \
+            --file-name "*.py" \
+            --file-name "*.pyi"
+      SRC_FILES:
+        ref: >-
+          splitList "\n" .SRC_FILES_
     cmds:
       - for:
-          - "{{.ROOT_DIR}}/exports/scripts"
+          var: "SRC_FILES"
         cmd: |-
           . "{{.G_LINT_VENV_DIR}}/bin/activate"
-          mypy --config-file "{{.PY_LINT_DIR}}/mypy.ini" {{.MYPY_FLAGS}} "{{.ROOT_DIR}}"
-          ruff --config "{{.PY_LINT_DIR}}/ruff.toml" check {{.RUFF_CHECK_FLAGS}} "{{.ROOT_DIR}}"
-          ruff --config "{{.PY_LINT_DIR}}/ruff.toml" format {{.RUFF_FORMAT_FLAGS}} "{{.ROOT_DIR}}"
+          mypy --config-file "{{.G_LINT_PY_DIR}}/mypy.ini" {{.MYPY_FLAGS}} "{{.ITEM}}"
+          ruff --config "{{.G_LINT_PY_DIR}}/ruff.toml" check {{.RUFF_CHECK_FLAGS}} "{{.ITEM}}"
+          ruff --config "{{.G_LINT_PY_DIR}}/ruff.toml" format {{.RUFF_FORMAT_FLAGS}} "{{.ITEM}}"
