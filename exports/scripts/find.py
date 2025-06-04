@@ -5,41 +5,44 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import sys
 from fnmatch import fnmatchcase
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 
 def _glob_paths(root_path: Path, patterns: list[str]) -> set[Path]:
     paths: set[Path] = set()
-    for p in patterns:
-        for path in root_path.glob(p):
+    for pattern in patterns:
+        for path in root_path.glob(pattern):
             paths.add(path)
     return paths
 
 
 def _find(
-    roots: list[str],
+    root_paths: list[str],
     include_patterns: list[str],
     exclude_patterns: list[str],
-    file_name_patterns: list[str],
-) -> int:
-    for root in roots:
+    filename_patterns: list[str],
+) -> bool:
+    for root in root_paths:
         root_path = Path(root)
         if not root_path.exists():
-            sys.stderr.write(f"[error] Path does not exist: '{root_path}'\n")
-            return 1
+            logger.error("[error] Path does not exist: '%s'", root_path)
+            return False
 
         included_paths: set[Path] = _glob_paths(root_path, include_patterns)
         excluded_paths: set[Path] = _glob_paths(root_path, exclude_patterns)
 
         for path in included_paths - excluded_paths:
-            if not file_name_patterns or any(fnmatchcase(path.name, p) for p in file_name_patterns):
+            if not filename_patterns or any(fnmatchcase(path.name, p) for p in filename_patterns):
                 sys.stdout.write(f"{path}\n")
-    return 0
+    return True
 
 
-def _main() -> int:
+def _main() -> bool:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=(
@@ -48,7 +51,7 @@ def _main() -> int:
             " printed only if:\n\n"
             "  1. the path is matched by at least one `include` pattern.\n"
             "  2. the path is not matched by any `exclude` patterns.\n"
-            "  3. the path's file name is matched by at least one `file-name` pattern.\n\n"
+            "  3. the path's file name is matched by at least one `filename` pattern.\n\n"
             "Path patterns are matched against the entire path, and file name patterns are matched"
             " against the entire name (the directory path is ignored). All pattern matching is case"
             " sensitive.\n\n"
@@ -59,7 +62,10 @@ def _main() -> int:
         "root_paths",
         nargs="*",
         default=["."],
-        help="Root directories where the search should be started. (default: Current directory)",
+        help=(
+            "Paths to start the search from. If a path is to a file there is no searching to "
+            "perform and filtering is applied directly. (default: Current directory)"
+        ),
     )
     parser.add_argument(
         "--include",
@@ -80,7 +86,7 @@ def _main() -> int:
         ),
     )
     parser.add_argument(
-        "--file-name",
+        "--filename",
         action="append",
         default=[],
         help=(
@@ -96,8 +102,8 @@ def _main() -> int:
     # default values in the list when using action="append").
     if len(args.include) > 1:
         args.include.pop(0)
-    return _find(args.root_paths, args.include, args.exclude, args.file_name)
+    return _find(args.root_paths, args.include, args.exclude, args.filename)
 
 
 if __name__ == "__main__":
-    sys.exit(_main())
+    sys.exit(0 if _main() else 1)

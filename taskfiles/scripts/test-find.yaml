@@ -7,9 +7,9 @@ vars:
 tasks:
   default:
     cmds:
-      - task: "setup"
+      - task: "init"
       - task: "test-default"
-      - task: "test-file-name"
+      - task: "test-filename"
       - task: "test-include"
       - task: "test-exclude"
       - task: "test-complex"
@@ -24,13 +24,17 @@ tasks:
       - task: "test-template"
         vars:
           EXPECTED_OUTPUT: |-
-            {{.G_TEST_DIR}}/a/aa/aaa/a.b
+            {{.G_TEST_DIR}}/a/aa.2
+            {{.G_TEST_DIR}}/b.1
           FIND_EXCLUDE_PATTERNS:
-            - "b/**/*"
+            - "**/bb/*"
           FIND_FILENAME_PATTERNS:
-            - "*.*"
+            - "b.*"
+            - "*.2"
           FIND_INCLUDE_PATTERNS:
-            - "**/*.b"
+            - "*"
+            - "a/**"
+            - "a/**/*"
           FIND_ROOT_PATHS:
             - "{{.G_TEST_DIR}}"
 
@@ -41,14 +45,17 @@ tasks:
         vars:
           EXPECTED_OUTPUT: |-
             a
+            a.1
             a/aa
+            a/aa.2
             a/aa/aaa
-            a/aa/aaa/a.a
-            a/aa/aaa/a.b
+            a/aa/aaa.3
             b
+            b.1
             b/bb
+            b/bb.2
             b/bb/bbb
-            b/bb/bbb/b.b
+            b/bb/bbb.3
 
   test-exclude:
     internal: true
@@ -57,25 +64,28 @@ tasks:
         vars:
           EXPECTED_OUTPUT: |-
             a
+            a.1
             a/aa
-            a/aa/aaa
-            a/aa/aaa/a.a
-            a/aa/aaa/a.b
+            a/aa.2
             b
-            b/bb
+            b.1
           FIND_EXCLUDE_PATTERNS:
-            - "**/bb/**/*"
+            - "**/aa/**/*"
+            - "b/**/*"
 
-  test-file-name:
+  test-filename:
     internal: true
     cmds:
       - task: "test-template"
         vars:
           EXPECTED_OUTPUT: |-
-            a/aa/aaa/a.b
-            b/bb/bbb/b.b
+            a.1
+            a/aa.2
+            a/aa/aaa.3
+            b/bb/bbb.3
           FIND_FILENAME_PATTERNS:
-            - "*.b"
+            - "*a.*"
+            - "bbb.3"
 
   test-include:
     internal: true
@@ -84,8 +94,7 @@ tasks:
         vars:
           EXPECTED_OUTPUT: |-
             a/aa/aaa
-            a/aa/aaa/a.a
-            a/aa/aaa/a.b
+            a/aa/aaa.3
             b/bb/bbb
           FIND_INCLUDE_PATTERNS:
             - "**/aa/**/*"
@@ -108,7 +117,8 @@ tasks:
               --exclude "{{.}}" \
             {{- end}}
             {{- range .FIND_FILENAME_PATTERNS}}
-              --file-name "{{.}}" \
+              --filename "{{.}}" \
+            {{- end}}
     requires:
       vars: ["EXPECTED_OUTPUT"]
     cmds:
@@ -117,13 +127,16 @@ tasks:
         <(echo "{{.FIND_OUTPUT}}" | sort) \
         <(echo "{{.EXPECTED_OUTPUT}}")
 
-  setup:
+  init:
     internal: true
     deps: ["clean"]
     cmds:
       - |-
         mkdir -p "{{.G_TEST_DIR}}/a/aa/aaa"
         mkdir -p "{{.G_TEST_DIR}}/b/bb/bbb"
-        touch "{{.G_TEST_DIR}}/a/aa/aaa/a.a"
-        touch "{{.G_TEST_DIR}}/a/aa/aaa/a.b"
-        touch "{{.G_TEST_DIR}}/b/bb/bbb/b.b"
+        touch "{{.G_TEST_DIR}}/a.1"
+        touch "{{.G_TEST_DIR}}/b.1"
+        touch "{{.G_TEST_DIR}}/a/aa.2"
+        touch "{{.G_TEST_DIR}}/b/bb.2"
+        touch "{{.G_TEST_DIR}}/a/aa/aaa.3"
+        touch "{{.G_TEST_DIR}}/b/bb/bbb.3"
