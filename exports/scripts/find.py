@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""See help fields inside _main or run find.py --help for information."""
+"""See help fields inside _main or run `find.py --help` for information."""
 
 from __future__ import annotations
 
@@ -44,28 +44,30 @@ def _main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=(
             "Recursively search and print file paths similar to the `find` utility.\n\n"
-            "Paths are searched recursively starting each path in `root_paths`. A path is printed"
-            "only if:\n"
+            "Paths are searched recursively starting from each path in `root_paths`. A path is"
+            " printed only if:\n\n"
             "  1. the path is matched by at least one `include` pattern.\n"
             "  2. the path is not matched by any `exclude` patterns.\n"
-            "  3. the path's file name is matched by at least one `file-name` pattern.\n"
-            "Path patterns are matched against the entire path and file name patterns are matched "
-            "against the entire name (no preceding path). All pattern matching is case sensitive."
+            "  3. the path's file name is matched by at least one `file-name` pattern.\n\n"
+            "Path patterns are matched against the entire path, and file name patterns are matched"
+            " against the entire name (the directory path is ignored). All pattern matching is case"
+            " sensitive.\n\n"
+            "NOTE: The pattern `**` will only match files starting from Python 3.13."
         ),
     )
     parser.add_argument(
         "root_paths",
         nargs="*",
         default=["."],
-        help="Root directories to search from. (default: current directory)",
+        help="Root directories where the search should be started. (default: Current directory)",
     )
     parser.add_argument(
         "--include",
         action="append",
         default=["**/*"],
         help=(
-            "Wildcard patterns where any matching file paths (relative to `root_paths`) will be "
-            "included. (default: all paths match)"
+            "Wildcard patterns where any matching file paths (relative to `root_paths`) will be"
+            " included. (default: All paths included)"
         ),
     )
     parser.add_argument(
@@ -73,8 +75,8 @@ def _main() -> int:
         action="append",
         default=[],
         help=(
-            "Wildcard patterns where any matching paths (relative to `root_paths`) will be "
-            "excluded. (default: nothing is excluded)"
+            "Wildcard patterns where any matching paths (relative to `root_paths`) will be"
+            " excluded. (default: No paths excluded)"
         ),
     )
     parser.add_argument(
@@ -83,15 +85,17 @@ def _main() -> int:
         default=[],
         help=(
             "Wildcard patterns where only files whose name (not the full path) matches a pattern "
-            "will be included. This is useful for specifying the extensions of files (e.g. '*.py')."
-            " (default: all file names match)"
+            " will be included. This is useful for specifying the extensions of files (e.g."
+            " '*.py'). (default: All file names match)"
         ),
     )
 
     args = parser.parse_args()
-    # By default argparse will keep default values in the list when using action="append".
+
+    # If the user specified an include, remove the default value from the list (argparse will keep
+    # default values in the list when using action="append").
     if len(args.include) > 1:
-        args.include = args.include[1:]
+        args.include.pop(0)
     return _find(args.root_paths, args.include, args.exclude, args.file_name)
 
 

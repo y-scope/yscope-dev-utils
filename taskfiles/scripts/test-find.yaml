@@ -2,7 +2,7 @@ version: "3"
 
 vars:
   G_FIND_PY: "{{.ROOT_DIR}}/exports/scripts/find.py"
-  G_TEST_DIR: "{{.TASKFILE_DIR}}/tmp"
+  G_TEST_DIR: "{{.G_OUTPUT_DIR}}/tests-find"
 
 tasks:
   default:
@@ -95,21 +95,20 @@ tasks:
     internal: true
     vars:
       FIND_OUTPUT:
-        sh: |-
+        sh: |
           cd "{{.G_TEST_DIR}}"
-          "{{.G_FIND_PY}}"\
+          "{{.G_FIND_PY}}" \
             {{- range .FIND_ROOT_PATHS}}
-              "{{.}}"\
+              "{{.}}" \
             {{- end}}
             {{- range .FIND_INCLUDE_PATTERNS}}
-              --include "{{.}}"\
+              --include "{{.}}" \
             {{- end}}
             {{- range .FIND_EXCLUDE_PATTERNS}}
-              --exclude "{{.}}"\
+              --exclude "{{.}}" \
             {{- end}}
             {{- range .FIND_FILENAME_PATTERNS}}
-              --file-name "{{.}}"\
-            {{- end}}
+              --file-name "{{.}}" \
     requires:
       vars: ["EXPECTED_OUTPUT"]
     cmds:
