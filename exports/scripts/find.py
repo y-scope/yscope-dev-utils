@@ -30,7 +30,7 @@ def _find(
     for root in root_paths:
         root_path = Path(root)
         if not root_path.exists():
-            logger.error("[error] Path does not exist: '%s'", root_path)
+            logger.error("root path does not exist: '%s'", root_path)
             return False
 
         included_paths: set[Path] = _glob_paths(root_path, include_patterns)
