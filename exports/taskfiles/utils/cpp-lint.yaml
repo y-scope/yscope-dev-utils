@@ -40,8 +40,7 @@ tasks:
 
     # NOTE: We don't quote `ROOT_PATHS` entries so that wildcards can be evaluated by the shell.
     cmd: |-
-      . "{{.VENV_DIR}}/bin/activate"
-      "{{.TASKFILE_DIR}}/../../scripts/find.py" \
+      uv run --project "{{.TASKFILE_DIR}}/../../ystdlib-py" find \
         {{- range .ROOT_PATHS}}
           "{{.}}" \
         {{- end}}
@@ -52,7 +51,7 @@ tasks:
           --exclude "{{.}}" \
         {{- end}}
         {{- range .INCLUDE_FILENAME_PATTERNS}}
-          --file-name "{{.}}" \
+          --filename "{{.}}" \
         {{- end}}
       | xargs clang-format \
         {{- range .FLAGS}}
@@ -186,7 +185,7 @@ tasks:
       # Task variables
       SOURCE_FILE_PATHS_:
         sh: |
-          "{{.TASKFILE_DIR}}/../../scripts/find.py" \
+          uv run --project "{{.TASKFILE_DIR}}/../../ystdlib-py" find \
             {{- range .ROOT_PATHS}}
               "{{.}}" \
             {{- end}}
@@ -197,7 +196,7 @@ tasks:
               --exclude "{{.}}" \
             {{- end}}
             {{- range .INCLUDE_FILENAME_PATTERNS}}
-              --file-name "{{.}}" \
+              --filename "{{.}}" \
             {{- end}}
       SOURCE_FILE_PATHS:
         ref: >-
