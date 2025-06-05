@@ -38,7 +38,6 @@ tasks:
     requires:
       vars: ["ROOT_PATHS", "VENV_DIR"]
 
-    # NOTE: We don't quote `ROOT_PATHS` entries so that wildcards can be evaluated by the shell.
     cmd: |-
       uv run --project "{{.TASKFILE_DIR}}/../../ystdlib-py" find \
         {{- range .ROOT_PATHS}}
