@@ -23,19 +23,21 @@ tasks:
       - task: "test-template"
         vars:
           EXPECTED_OUTPUT: |-
-            {{.G_TEST_DIR}}/a/aa.2
-            {{.G_TEST_DIR}}/b.1
+            {{.G_TEST_DIR}}/a/aa/aaa.3
+            {{.G_TEST_DIR}}/b/bb.2
+            {{.G_TEST_DIR}}/b/bb/bbb
           FIND_EXCLUDE_PATTERNS:
-            - "**/bb/*"
+            - "**/bb"
           FIND_FILENAME_PATTERNS:
-            - "b.*"
-            - "*.2"
+            - "*.3"
+            - "b*"
           FIND_INCLUDE_PATTERNS:
             - "*"
-            - "a/**"
-            - "a/**/*"
+            - "**/bbb/**"
+            - "aaa/**"
           FIND_ROOT_PATHS:
-            - "{{.G_TEST_DIR}}"
+            - "{{.G_TEST_DIR}}/a/aa"
+            - "{{.G_TEST_DIR}}/b"
 
   test-default:
     internal: true
