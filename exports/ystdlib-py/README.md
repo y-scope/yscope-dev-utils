@@ -2,13 +2,12 @@
 
 Python utilities developed and used at YScope.
 
-## Modules
-
-How to get started with the modules inside ystdlib-py.
+## Usage
 
 ### find.py
 
-List all Python files exported from yscope-dev-utils, but excluding anything from a virtual env:
+Example: *List all Python files exported from yscope-dev-utils, excluding anything from a virtual
+environment.*
 
 ```shell
 uv run find yscope-dev-utils --include "**/exports/**" --exclude "**/.venv/**" --filename "*.py"
@@ -45,17 +44,17 @@ Testing is run through the yscope-dev-utils taskfile. To run all tests:
 task tests:ystdlib-py
 ```
 
-To see how to run a subset of tests run:
+To run a subset of tests, list all tests:
 
 ```shell
 task -a
 ```
 
-Look for all tasks under the `tests` namespace (identified by the `tests:` prefix).
+Then look for all tasks under the `tests` namespace (identified by the `tests:` prefix).
 
 ### Linting
 
-Before submitting a pull request, ensure you’ve run the linting commands below and have fixed all
+Before submitting a pull request, ensure you've run the linting commands below and have fixed all
 violations and suppressed all warnings.
 
 Linting is run through the yscope-dev-utils taskfile. To run all linting checks:
@@ -70,13 +69,13 @@ To run all linting checks AND fix some violations:
 task lint:fix
 ```
 
-To see how to run a subset of linters for a specific file type run:
+To run a subset of linters for a specific file type, list all tasks:
 
 ```shell
 task -a
 ```
 
-Look for all tasks under the `lint` namespace (identified by the `lint:` prefix).
+Then look for all tasks under the `lint` namespace (identified by the `lint:` prefix).
 
 [Task]: https://taskfile.dev
 [uv]: https://docs.astral.sh/uv

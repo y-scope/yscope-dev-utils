@@ -18,15 +18,19 @@ def find(
     filename_patterns: list[str] | None = None,
 ) -> set[Path]:
     """
-    Recursively search paths starting from each path in `root_paths`. A path is only returned if:
+    Recursively searches for paths matching the given predicates, starting from each path in
+    `root_paths`. A path is only returned if:
+
     1. the path is matched by at least one `include` pattern.
     2. the path is not matched by any `exclude` patterns.
     3. the path's filename is matched by at least one `filename` pattern.
 
-    :param root_paths: Paths to recursively search from.
-    :param include_patterns: pathlib patterns to include paths. Default: All paths included
-    :param exclude_patterns: pathlib patterns to exclude paths. Default: No paths excluded
-    :param filename_patterns: fnmatch patterns to include filenames. Default: All filenames included
+    :param include_patterns: pathlib patterns to include paths. `None` or an empty list indicates
+    all paths should be included.
+    :param exclude_patterns: pathlib patterns to exclude paths. `None` or an empty list indicates no
+    paths should be excluded.
+    :param filename_patterns: fnmatch patterns to include filenames. `None` or an empty list
+    indicates all filenames should be included.
     :return: Matched paths.
     """
     results: set[Path] = set()
@@ -58,14 +62,15 @@ def _main() -> int:
             "Recursively search and print file paths similar to the `find` utility.\n\n"
             "Paths are searched recursively starting from each path in `root_paths`. A path is"
             " printed only if:\n\n"
-            "  1. the path is matched by at least one `include` pattern.\n"
-            "  2. the path is not matched by any `exclude` patterns.\n"
-            "  3. the path's filename is matched by at least one `filename` pattern.\n\n"
+            "1. the path is matched by at least one `include` pattern.\n"
+            "2. the path is not matched by any `exclude` patterns.\n"
+            "3. the path's filename is matched by at least one `filename` pattern.\n\n"
             "Path patterns are matched against the entire path, and filename patterns are matched"
             " against the entire name (the directory path is ignored). All pattern matching is case"
-            " sensitive. For more information on the supported pattern syntax see:\n"
-            "https://docs.python.org/3.13/library/fnmatch.html\n"
-            "https://docs.python.org/3.13/library/pathlib.html#pathlib-pattern-language\n"
+            " sensitive. For:\n\n"
+            "* include/exclude pattern syntax, see"
+            " https://docs.python.org/3.13/library/pathlib.html#pathlib-pattern-language\n"
+            "* filename pattern syntax, see https://docs.python.org/3.13/library/fnmatch.html\n"
         ),
     )
     parser.add_argument(
@@ -73,8 +78,8 @@ def _main() -> int:
         nargs="*",
         default=["."],
         help=(
-            "Paths to start the search from. If a path is to a file there is no searching to "
-            "perform and filtering is applied directly. (default: Current directory)"
+            "Paths to start the search from. If a 'root_path' points to a file, filtering is"
+            " applied directly. (default: Current directory)"
         ),
     )
     parser.add_argument(
@@ -105,11 +110,12 @@ def _main() -> int:
             " '*.py'). (default: All filenames included)"
         ),
     )
-
     args = parser.parse_args()
+
     results = find(args.root_paths, args.include, args.exclude, args.filename)
     for result in results:
         sys.stdout.write(f"{result}\n")
+
     return 0
 
 

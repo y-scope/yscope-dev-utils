@@ -35,7 +35,7 @@ jobs:
 
       - name: "Install uv"
         shell: "bash"
-        run: "curl -LsSf https://astral.sh/uv/install.sh | sh"
+        run: "curl --fail --location --silent ---show-error https://astral.sh/uv/install.sh | sh"
 
       - name: "Run unit tests"
         run: "task test"
