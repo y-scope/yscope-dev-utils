@@ -1,13 +1,14 @@
-#!/usr/bin/env python3
-
 """See help fields inside _main or run `find.py --help` for information."""
 
 from __future__ import annotations
 
 import argparse
+import logging
 import sys
 from fnmatch import fnmatchcase
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 def find(
@@ -17,7 +18,7 @@ def find(
     filename_patterns: list[str] | None = None,
 ) -> set[Path]:
     """
-    Recursively search paths starting from each path in `root_paths`. A path is only retunred if:
+    Recursively search paths starting from each path in `root_paths`. A path is only returned if:
     1. the path is matched by at least one `include` pattern.
     2. the path is not matched by any `exclude` patterns.
     3. the path's filename is matched by at least one `filename` pattern.
@@ -40,7 +41,7 @@ def find(
         for include_pattern in include_patterns:
             for path in root_path.glob(include_pattern):
                 if not exclude_patterns or not any(
-                    path.full_match(exlcude_pattern) for exlcude_pattern in exclude_patterns
+                    path.full_match(exclude_pattern) for exclude_pattern in exclude_patterns
                 ):
                     if not filename_patterns or any(
                         fnmatchcase(path.name, pattern) for pattern in filename_patterns
@@ -112,4 +113,9 @@ def _main() -> int:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s.%(msecs)03d %(levelname)s [%(module)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
     sys.exit(_main())
