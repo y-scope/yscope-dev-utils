@@ -63,8 +63,9 @@ def _main() -> int:
             "  3. the path's filename is matched by at least one `filename` pattern.\n\n"
             "Path patterns are matched against the entire path, and filename patterns are matched"
             " against the entire name (the directory path is ignored). All pattern matching is case"
-            " sensitive.\n\n"
-            "https://docs.python.org/3.13/library/pathlib.html#pathlib-pattern-language"
+            " sensitive. For more information on the supported pattern syntax see:\n"
+            "https://docs.python.org/3.13/library/fnmatch.html\n"
+            "https://docs.python.org/3.13/library/pathlib.html#pathlib-pattern-language\n"
         ),
     )
     parser.add_argument(
