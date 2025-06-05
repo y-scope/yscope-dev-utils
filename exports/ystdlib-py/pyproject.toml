@@ -42,7 +42,6 @@ ignore = [
     "SIM102",  # Allow collapsible if statements for readability
     "TD002",  # Author unnecessary for todo statement
     "TD003",  # Issue link unnecessary for todo statement
-    "TD004",  # Colon unnecessary for todo statement
     "UP015",  # Explicit open modes are helpful
 ]
 isort.order-by-type = false
