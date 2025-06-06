@@ -1,7 +1,9 @@
 version: "3"
 
 vars:
-  G_LINT_PY_DIR: "{{.ROOT_DIR}}/exports/lint-configs/python"
+  G_EXPORTS_DIR: "{{.ROOT_DIR}}/exports"
+  G_LINT_PY_DIR: "{{.G_EXPORTS_DIR}}/lint-configs/python"
+  G_YSTDLIB_PY: "{{.G_EXPORTS_DIR}}/ystdlib-py"
 
 tasks:
   check-py:
@@ -22,11 +24,11 @@ tasks:
     vars:
       SRC_FILES_:
         sh: |-
-          "{{.ROOT_DIR}}/exports/scripts/find.py"\
-            "{{.ROOT_DIR}}" \
-            --exclude "build/**/*" \
-            --file-name "*.py" \
-            --file-name "*.pyi"
+          uv run --project "{{.G_YSTDLIB_PY}}" find \
+            "{{.G_EXPORTS_DIR}}" \
+            --exclude "**/.venv/**" \
+            --filename "*.py" \
+            --filename "*.pyi"
       SRC_FILES:
         ref: >-
           splitList "\n" .SRC_FILES_
@@ -34,7 +36,6 @@ tasks:
       - for:
           var: "SRC_FILES"
         cmd: |-
-          . "{{.G_LINT_VENV_DIR}}/bin/activate"
-          mypy --config-file "{{.G_LINT_PY_DIR}}/mypy.ini" {{.MYPY_FLAGS}} "{{.ITEM}}"
-          ruff --config "{{.G_LINT_PY_DIR}}/ruff.toml" check {{.RUFF_CHECK_FLAGS}} "{{.ITEM}}"
-          ruff --config "{{.G_LINT_PY_DIR}}/ruff.toml" format {{.RUFF_FORMAT_FLAGS}} "{{.ITEM}}"
+          uv run --project "{{.G_YSTDLIB_PY}}" mypy {{.MYPY_FLAGS}} "{{.ITEM}}"
+          uv run --project "{{.G_YSTDLIB_PY}}" ruff check {{.RUFF_CHECK_FLAGS}} "{{.ITEM}}"
+          uv run --project "{{.G_YSTDLIB_PY}}" ruff format {{.RUFF_FORMAT_FLAGS}} "{{.ITEM}}"
