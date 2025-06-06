@@ -33,10 +33,10 @@ def find(
     indicates all filenames should be included.
     :return: Matched paths.
     """
-    results: set[Path] = set()
     if not include_patterns:
         include_patterns = ["**/*"]
 
+    results: set[Path] = set()
     for root in root_paths:
         root_path = Path(root)
         if not root_path.exists():
@@ -44,11 +44,9 @@ def find(
 
         for include_pattern in include_patterns:
             for path in root_path.glob(include_pattern):
-                if not exclude_patterns or not any(
-                    path.full_match(exclude_pattern) for exclude_pattern in exclude_patterns
-                ):
+                if not exclude_patterns or not any(path.full_match(p) for p in exclude_patterns):
                     if not filename_patterns or any(
-                        fnmatchcase(path.name, pattern) for pattern in filename_patterns
+                        fnmatchcase(path.name, p) for p in filename_patterns
                     ):
                         results.add(path)
 

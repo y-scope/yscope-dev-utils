@@ -6,17 +6,17 @@ Python utilities developed and used at YScope.
 
 ### find.py
 
+Display detailed information for the command:
+
+```shell
+uv run find --help
+```
+
 Example: *List all Python files exported from yscope-dev-utils, excluding anything from a virtual
 environment.*
 
 ```shell
 uv run find yscope-dev-utils --include "**/exports/**" --exclude "**/.venv/**" --filename "*.py"
-```
-
-Display detailed information for the command:
-
-```shell
-uv run find --help
 ```
 
 ## Contributing
