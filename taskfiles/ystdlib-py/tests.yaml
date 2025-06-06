@@ -1,0 +1,10 @@
+version: "3"
+
+includes:
+  find: "./test-find.yaml"
+
+tasks:
+  default:
+    internal: true
+    cmds:
+      - task: "find"

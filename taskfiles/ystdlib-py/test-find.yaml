@@ -1,0 +1,143 @@
+version: "3"
+
+vars:
+  G_TEST_DIR: "{{.G_OUTPUT_DIR}}/tests-find"
+
+tasks:
+  default:
+    cmds:
+      - task: "init"
+      - task: "test-default"
+      - task: "test-filename"
+      - task: "test-include"
+      - task: "test-exclude"
+      - task: "test-complex"
+      - task: "clean"
+
+  clean:
+    cmd: "rm -rf '{{.G_TEST_DIR}}'"
+
+  test-complex:
+    internal: true
+    cmds:
+      - task: "test-template"
+        vars:
+          EXPECTED_OUTPUT: |-
+            {{.G_TEST_DIR}}/a/aa/aaa.3
+            {{.G_TEST_DIR}}/b/bb.2
+            {{.G_TEST_DIR}}/b/bb/bbb
+          FIND_EXCLUDE_PATTERNS:
+            - "**/bb"
+          FIND_FILENAME_PATTERNS:
+            - "*.3"
+            - "b*"
+          FIND_INCLUDE_PATTERNS:
+            - "*"
+            - "**/bbb/**"
+            - "aaa/**"
+          FIND_ROOT_PATHS:
+            - "{{.G_TEST_DIR}}/a/aa"
+            - "{{.G_TEST_DIR}}/b"
+
+  test-default:
+    internal: true
+    cmds:
+      - task: "test-template"
+        vars:
+          EXPECTED_OUTPUT: |-
+            a
+            a.1
+            a/aa
+            a/aa.2
+            a/aa/aaa
+            a/aa/aaa.3
+            b
+            b.1
+            b/bb
+            b/bb.2
+            b/bb/bbb
+            b/bb/bbb.3
+
+  test-exclude:
+    internal: true
+    cmds:
+      - task: "test-template"
+        vars:
+          EXPECTED_OUTPUT: |-
+            a
+            a.1
+            a/aa
+            a/aa.2
+            b
+            b.1
+          FIND_EXCLUDE_PATTERNS:
+            - "**/aa/**/*"
+            - "b/**/*"
+
+  test-filename:
+    internal: true
+    cmds:
+      - task: "test-template"
+        vars:
+          EXPECTED_OUTPUT: |-
+            a.1
+            a/aa.2
+            a/aa/aaa.3
+            b/bb/bbb.3
+          FIND_FILENAME_PATTERNS:
+            - "*a.*"
+            - "bbb.3"
+
+  test-include:
+    internal: true
+    cmds:
+      - task: "test-template"
+        vars:
+          EXPECTED_OUTPUT: |-
+            a/aa/aaa
+            a/aa/aaa.3
+            b/bb/bbb
+          FIND_INCLUDE_PATTERNS:
+            - "**/aa/**/*"
+            - "**/bbb/**"
+
+  test-template:
+    internal: true
+    vars:
+      FIND_OUTPUT:
+        sh: |
+          cd "{{.G_TEST_DIR}}"
+          uv run --project "{{.ROOT_DIR}}/exports/ystdlib-py" find \
+            {{- range .FIND_ROOT_PATHS}}
+              "{{.}}" \
+            {{- end}}
+            {{- range .FIND_INCLUDE_PATTERNS}}
+              --include "{{.}}" \
+            {{- end}}
+            {{- range .FIND_EXCLUDE_PATTERNS}}
+              --exclude "{{.}}" \
+            {{- end}}
+            {{- range .FIND_FILENAME_PATTERNS}}
+              --filename "{{.}}" \
+            {{- end}}
+    requires:
+      vars: ["EXPECTED_OUTPUT"]
+    cmds:
+      - |-
+        diff \
+        <(echo "{{.FIND_OUTPUT}}" | sort) \
+        <(echo "{{.EXPECTED_OUTPUT}}")
+
+  init:
+    internal: true
+    deps: ["clean"]
+    cmds:
+      - |-
+        mkdir -p "{{.G_TEST_DIR}}/a/aa/aaa"
+        mkdir -p "{{.G_TEST_DIR}}/b/bb/bbb"
+        touch "{{.G_TEST_DIR}}/a.1"
+        touch "{{.G_TEST_DIR}}/b.1"
+        touch "{{.G_TEST_DIR}}/a/aa.2"
+        touch "{{.G_TEST_DIR}}/b/bb.2"
+        touch "{{.G_TEST_DIR}}/a/aa/aaa.3"
+        touch "{{.G_TEST_DIR}}/b/bb/bbb.3"

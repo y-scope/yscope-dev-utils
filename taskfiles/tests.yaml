@@ -3,7 +3,7 @@ version: "3"
 includes:
   boost: "boost/tests.yaml"
   remote: "remote/tests.yaml"
-  scripts: "scripts/tests.yaml"
+  ystdlib-py: "ystdlib-py/tests.yaml"
 
 tasks:
   all:
@@ -11,7 +11,7 @@ tasks:
     cmds:
       - task: "boost"
       - task: "remote"
-      - task: "scripts"
+      - task: "ystdlib-py"
 
   boost:
     cmds:
@@ -21,6 +21,6 @@ tasks:
     cmds:
       - task: "remote:default"
 
-  scripts:
+  ystdlib-py:
     cmds:
-      - task: "scripts:default"
+      - task: "ystdlib-py:default"

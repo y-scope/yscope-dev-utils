@@ -9,7 +9,8 @@ Before you submit a pull request, ensure you follow the testing and linting inst
 ## Requirements
 
 * Python 3.10 or higher
-* [Task] 3.38 or higher
+* [Task] 3.40 or higher
+* [uv] 0.7.10 or higher
 
 ## Testing
 
@@ -42,3 +43,4 @@ task clean
 ```
 
 [Task]: https://taskfile.dev/
+[uv]: https://docs.astral.sh/uv
