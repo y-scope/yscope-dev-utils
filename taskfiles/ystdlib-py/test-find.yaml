@@ -27,7 +27,7 @@ tasks:
             {{.G_TEST_DIR}}/b/bb.2
             {{.G_TEST_DIR}}/b/bb/bbb
           FIND_EXCLUDE_PATTERNS:
-            - "**/bb"
+            - "bb"
           FIND_FILENAME_PATTERNS:
             - "*.3"
             - "b*"
