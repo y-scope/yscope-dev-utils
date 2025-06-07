@@ -4,20 +4,22 @@ Python utilities developed and used at YScope.
 
 ## Usage
 
-### find.py
+### pyfind
 
 Display detailed information for the command:
 
 ```shell
-uv run find --help
+uv run pyfind --help
 ```
 
 Example: *List all Python files exported from yscope-dev-utils, excluding anything from a virtual
 environment.*
 
 ```shell
-uv run find yscope-dev-utils --include "**/exports/**" --exclude "**/.venv/**" --filename "*.py"
+uv run pyfind yscope-dev-utils --include "**/exports/**" --exclude "**/.venv/**" --filename "*.py"
 ```
+
+Source location: exports/ystdlib-py/src/pyfind.py
 
 ## Contributing
 

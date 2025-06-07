@@ -107,7 +107,7 @@ tasks:
       FIND_OUTPUT:
         sh: |
           cd "{{.G_TEST_DIR}}"
-          uv run --project "{{.ROOT_DIR}}/exports/ystdlib-py" find \
+          uv run --project "{{.ROOT_DIR}}/exports/ystdlib-py" pyfind \
             {{- range .FIND_ROOT_PATHS}}
               "{{.}}" \
             {{- end}}
