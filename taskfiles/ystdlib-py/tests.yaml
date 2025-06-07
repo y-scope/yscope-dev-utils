@@ -1,7 +1,7 @@
 version: "3"
 
 includes:
-  find: "./test-find.yaml"
+  find: "./test-pyfind.yaml"
 
 tasks:
   default:
