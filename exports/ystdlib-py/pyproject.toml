@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 
 [project.scripts]
-find = "ystdlib.find:_main"
+pyfind = "ystdlib.pyfind:_main"
 
 [build-system]
 requires = ["hatchling"]
