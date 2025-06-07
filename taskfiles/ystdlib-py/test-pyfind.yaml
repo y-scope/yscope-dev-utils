@@ -1,7 +1,7 @@
 version: "3"
 
 vars:
-  G_TEST_DIR: "{{.G_OUTPUT_DIR}}/tests-find"
+  G_TEST_DIR: "{{.G_OUTPUT_DIR}}/tests-pyfind"
 
 tasks:
   default:

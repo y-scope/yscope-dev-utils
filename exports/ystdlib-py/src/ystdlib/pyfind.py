@@ -1,4 +1,4 @@
-"""See help fields inside _main or run `find.py --help` for information."""
+"""See help fields inside _main or run the script with `--help` for information."""
 
 from __future__ import annotations
 
