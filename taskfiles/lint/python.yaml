@@ -26,7 +26,7 @@ tasks:
         sh: |-
           uv run --project "{{.G_YSTDLIB_PY}}" find \
             "{{.G_EXPORTS_DIR}}" \
-            --exclude "**/.venv/**" \
+            --exclude "ystdlib-py/.venv/**" \
             --filename "*.py" \
             --filename "*.pyi"
       SRC_FILES:
