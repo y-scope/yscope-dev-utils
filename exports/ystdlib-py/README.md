@@ -19,7 +19,7 @@ environment.*
 uv run pyfind yscope-dev-utils --include "**/exports/**" --exclude "**/.venv/**" --filename "*.py"
 ```
 
-Source location: [pyfind]
+Source location: [`src/pyfind.py`](src/pyfind.py)
 
 ## Contributing
 
@@ -79,6 +79,5 @@ task -a
 
 Then look for all tasks under the `lint` namespace (identified by the `lint:` prefix).
 
-[pyfind]: src/pyfind.py
 [Task]: https://taskfile.dev
 [uv]: https://docs.astral.sh/uv
