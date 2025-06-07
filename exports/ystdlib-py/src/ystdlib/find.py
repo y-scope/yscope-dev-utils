@@ -25,6 +25,8 @@ def find(
     2. the path is not matched by any `exclude` patterns.
     3. the path's filename is matched by at least one `filename` pattern.
 
+    :param root_paths: Paths to start the search from. If pointing to a file, filtering is applied
+    directly.
     :param include_patterns: pathlib patterns to include paths. `None` or an empty list indicates
     all paths should be included.
     :param exclude_patterns: pathlib patterns to exclude paths. `None` or an empty list indicates no
@@ -33,6 +35,8 @@ def find(
     indicates all filenames should be included.
     :return: Matched paths.
     """
+    _validate_patterns_are_relative(include_patterns)
+    _validate_patterns_are_relative(exclude_patterns)
     if not include_patterns:
         include_patterns = ["**/*"]
 
@@ -44,13 +48,23 @@ def find(
 
         for include_pattern in include_patterns:
             for path in root_path.glob(include_pattern):
-                if not exclude_patterns or not any(path.full_match(p) for p in exclude_patterns):
+                if not exclude_patterns or not any(
+                    path.full_match(root_path / p) for p in exclude_patterns
+                ):
                     if not filename_patterns or any(
                         fnmatchcase(path.name, p) for p in filename_patterns
                     ):
                         results.add(path)
 
     return results
+
+
+def _validate_patterns_are_relative(patterns: list[str] | None) -> None:
+    if patterns:
+        for p in patterns:
+            if Path(p).is_absolute():
+                msg = f"Non-relative patterns are unsupported: {p}"
+                raise NotImplementedError(msg)
 
 
 def _main() -> int:
