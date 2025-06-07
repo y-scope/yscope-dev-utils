@@ -24,7 +24,7 @@ tasks:
     vars:
       SRC_FILES_:
         sh: |-
-          uv run --project "{{.G_YSTDLIB_PY}}" find \
+          uv run --project "{{.G_YSTDLIB_PY}}" pyfind \
             "{{.G_EXPORTS_DIR}}" \
             --exclude "ystdlib-py/.venv/**" \
             --filename "*.py" \
