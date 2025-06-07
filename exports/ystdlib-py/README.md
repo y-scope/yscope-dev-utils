@@ -19,7 +19,7 @@ environment.*
 uv run pyfind yscope-dev-utils --include "**/exports/**" --exclude "**/.venv/**" --filename "*.py"
 ```
 
-Source location: [exports/ystdlib-py/src/pyfind.py]
+Source location: [](exports/ystdlib-py/src/pyfind.py)
 
 ## Contributing
 
