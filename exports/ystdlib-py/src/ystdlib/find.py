@@ -33,8 +33,8 @@ def find(
     indicates all filenames should be included.
     :return: Matched paths.
     """
-    _validate_patterns_are_relative(exclude_patterns)
     _validate_patterns_are_relative(include_patterns)
+    _validate_patterns_are_relative(exclude_patterns)
     if not include_patterns:
         include_patterns = ["**/*"]
 
