@@ -44,7 +44,9 @@ def find(
 
         for include_pattern in include_patterns:
             for path in root_path.glob(include_pattern):
-                if not exclude_patterns or not any(path.full_match(p) for p in exclude_patterns):
+                if not exclude_patterns or not any(
+                    path.full_match(root_path / p) for p in exclude_patterns
+                ):
                     if not filename_patterns or any(
                         fnmatchcase(path.name, p) for p in filename_patterns
                     ):
