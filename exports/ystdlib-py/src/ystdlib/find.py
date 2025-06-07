@@ -25,6 +25,8 @@ def find(
     2. the path is not matched by any `exclude` patterns.
     3. the path's filename is matched by at least one `filename` pattern.
 
+    :param root_paths: Paths to start the search from. If pointing to a file, filtering is applied
+    directly.
     :param include_patterns: pathlib patterns to include paths. `None` or an empty list indicates
     all paths should be included.
     :param exclude_patterns: pathlib patterns to exclude paths. `None` or an empty list indicates no
