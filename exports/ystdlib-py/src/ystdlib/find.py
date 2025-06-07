@@ -33,6 +33,8 @@ def find(
     indicates all filenames should be included.
     :return: Matched paths.
     """
+    _validate_patterns_are_relative(exclude_patterns)
+    _validate_patterns_are_relative(include_patterns)
     if not include_patterns:
         include_patterns = ["**/*"]
 
@@ -53,6 +55,14 @@ def find(
                         results.add(path)
 
     return results
+
+
+def _validate_patterns_are_relative(patterns: list[str] | None) -> None:
+    if patterns:
+        for p in patterns:
+            if Path(p).is_absolute():
+                msg = f"Non-relative patterns are unsupported: {p}"
+                raise NotImplementedError(msg)
 
 
 def _main() -> int:
