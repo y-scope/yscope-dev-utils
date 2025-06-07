@@ -1,10 +1,10 @@
 version: "3"
 
 includes:
-  find: "./test-find.yaml"
+  pyfind: "./test-pyfind.yaml"
 
 tasks:
   default:
     internal: true
     cmds:
-      - task: "find"
+      - task: "pyfind"

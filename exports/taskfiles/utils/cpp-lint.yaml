@@ -39,7 +39,7 @@ tasks:
       vars: ["ROOT_PATHS", "VENV_DIR"]
 
     cmd: |-
-      uv run --project "{{.TASKFILE_DIR}}/../../ystdlib-py" find \
+      uv run --project "{{.TASKFILE_DIR}}/../../ystdlib-py" pyfind \
         {{- range .ROOT_PATHS}}
           "{{.}}" \
         {{- end}}
@@ -184,7 +184,7 @@ tasks:
       # Task variables
       SOURCE_FILE_PATHS_:
         sh: |
-          uv run --project "{{.TASKFILE_DIR}}/../../ystdlib-py" find \
+          uv run --project "{{.TASKFILE_DIR}}/../../ystdlib-py" pyfind \
             {{- range .ROOT_PATHS}}
               "{{.}}" \
             {{- end}}
