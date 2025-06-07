@@ -1,0 +1,41 @@
+version: "3"
+
+vars:
+  G_EXPORTS_DIR: "{{.ROOT_DIR}}/exports"
+  G_LINT_PY_DIR: "{{.G_EXPORTS_DIR}}/lint-configs/python"
+  G_YSTDLIB_PY: "{{.G_EXPORTS_DIR}}/ystdlib-py"
+
+tasks:
+  check-py:
+    cmds:
+      - task: "py"
+        vars:
+          RUFF_FORMAT_FLAGS: "--diff"
+
+  fix-py:
+    cmds:
+      - task: "py"
+        vars:
+          RUFF_CHECK_FLAGS: "--fix"
+
+  py:
+    internal: true
+    deps: ["venv"]
+    vars:
+      SRC_FILES_:
+        sh: |-
+          uv run --project "{{.G_YSTDLIB_PY}}" pyfind \
+            "{{.G_EXPORTS_DIR}}" \
+            --exclude "ystdlib-py/.venv/**" \
+            --filename "*.py" \
+            --filename "*.pyi"
+      SRC_FILES:
+        ref: >-
+          splitList "\n" .SRC_FILES_
+    cmds:
+      - for:
+          var: "SRC_FILES"
+        cmd: |-
+          uv run --project "{{.G_YSTDLIB_PY}}" mypy {{.MYPY_FLAGS}} "{{.ITEM}}"
+          uv run --project "{{.G_YSTDLIB_PY}}" ruff check {{.RUFF_CHECK_FLAGS}} "{{.ITEM}}"
+          uv run --project "{{.G_YSTDLIB_PY}}" ruff format {{.RUFF_FORMAT_FLAGS}} "{{.ITEM}}"

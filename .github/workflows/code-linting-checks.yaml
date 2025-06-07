@@ -2,9 +2,15 @@ name: "code-linting-checks"
 
 on:
   pull_request:
-    paths: ["**/*.yaml"]
+    paths:
+      - "**/*.py"
+      - "**/*.pyi"
+      - "**/*.yaml"
   push:
-    paths: ["**/*.yaml"]
+    paths:
+      - "**/*.py"
+      - "**/*.pyi"
+      - "**/*.yaml"
   schedule:
     # Run daily at 00:15 UTC (the 15 is to avoid periods of high load)
     - cron: "15 0 * * *"

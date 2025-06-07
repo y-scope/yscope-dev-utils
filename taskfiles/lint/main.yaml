@@ -1,6 +1,9 @@
 version: "3"
 
 includes:
+  py:
+    flatten: true
+    taskfile: "./python.yaml"
   utils: "../../exports/taskfiles/utils/utils.yaml"
   yaml:
     flatten: true
@@ -14,6 +17,7 @@ tasks:
   check:
     desc: "Runs all linters to identify any violations."
     cmds:
+      - task: "check-py"
       - task: "check-yaml"
 
   venv:
