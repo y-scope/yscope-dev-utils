@@ -164,11 +164,6 @@ tasks:
           FILE_SHA256: "{{.FILE_SHA256}}"
           OUTPUT_DIR: "{{.SOURCE_DIR}}"
           URL: "{{.URL}}"
-      - task: "checksum:validate"
-        vars:
-          CHECKSUM_FILE: "{{.BOOST_CHECKSUM}}"
-          INCLUDE_PATTERNS:
-            - "{{.INSTALL_PREFIX}}"
     cmds:
       - task: "generate"
         vars:
