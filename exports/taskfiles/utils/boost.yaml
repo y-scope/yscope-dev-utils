@@ -7,9 +7,8 @@ set: ["u", "pipefail"]
 shopt: ["globstar"]
 
 tasks:
-  # Creates a build directory that soft links the source files from `SOURCE_DIR`. Runs
-  # `bootstrap.sh` to generate the `b2` build tool and `project-config.jam` file in the build
-  # directory.
+  # Copy the `SOURCE_DIR` into `BUILD_DIR`. Runs `bootstrap.sh` to generate the `b2` build tool
+  # and `project-config.jam` file in the build directory.
   #
   # @param {string} SOURCE_DIR Project source directory.
   # @param {string} BUILD_DIR Directory in which to build the project.
@@ -28,13 +27,10 @@ tasks:
       - "{{.BUILD_DIR}}/b2"
       - "{{.BUILD_DIR}}/project-config.jam"
     cmds:
-      - |
-        for file in "{{.SOURCE_DIR}}"/*; do
-          filename=$(basename "$file")
-          target="{{.BUILD_DIR}}"/"$filename"
-          [ -e "$target" ] && continue
-          ln -s "$file" "$target"
-        done
+      - >-
+        mkdir -p "{{.BUILD_DIR}}"
+      - >-
+        cp -R "{{.SOURCE_DIR}}"/* "{{.BUILD_DIR}}/"
       - >-
         ./bootstrap.sh
         --prefix="{{.INSTALL_PREFIX}}"
@@ -179,8 +175,6 @@ tasks:
           OUTPUT_DIR: "{{.SOURCE_DIR}}"
           URL: "{{.URL}}"
     cmds:
-      - >-
-        mkdir -p "{{.BUILD_DIR}}"
       - task: "generate"
         vars:
           SOURCE_DIR: "{{.SOURCE_DIR}}"
