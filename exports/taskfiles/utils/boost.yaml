@@ -50,7 +50,7 @@ tasks:
         --prefix="{{.INSTALL_PREFIX}}"
         --exec-prefix="{{.INSTALL_PREFIX}}"
         --with-libraries={{(join "," .TARGETS)}}
-        {{- range .BOOSTRAP_ARGS}}
+        {{- range .BOOTSTRAP_ARGS}}
           "{{.}}"
         {{- end}}
       - >-
