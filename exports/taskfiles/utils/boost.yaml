@@ -110,7 +110,7 @@ tasks:
   # @param {string} [INSTALL_PREFIX={{.WORK_DIR}}/boost-install] Path prefix of where the project
   # should be installed.
   # @param {string[]} [TARGETS] Target libraries to build.
-  # @param {string[]} [GEN_ARGS] Any additional arguments to pass to the generate command.
+  # @param {string[]} [GENERATE_ARGS] Any additional arguments to pass to the generate command.
   #
   # Boost build-and-install parameters
   # @param {string} [BUILD_DIR={{.WORK_DIR}}/boost-build] Directory in which to build the project.
