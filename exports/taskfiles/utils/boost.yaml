@@ -105,8 +105,8 @@ tasks:
   # Boost generate parameters
   # @param {string} [GENERATE_DIR={{.WORK_DIR}}/boost-generate] Directory in which to generate the
   # project build files.
-  # @param {string} [GENERATE_CHECKSUM={{.WORK_DIR}}/boost.md5] Checksum file of the generate
-  # directory.
+  # @param {string} [GENERATE_CHECKSUM={{.WORK_DIR}}/boost-generate.md5] Checksum file of the
+  # generate directory.
   # @param {string} [INSTALL_PREFIX={{.WORK_DIR}}/boost-install] Path prefix of where the project
   # should be installed.
   # @param {string[]} [TARGETS] Target libraries to build.
