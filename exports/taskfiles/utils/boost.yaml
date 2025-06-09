@@ -149,7 +149,7 @@ tasks:
 
       # Boost generate parameters
       GENERATE_DIR: >-
-          {{default (printf "%s/boost-generate" .WORK_DIR) .GENERATE_DIR}}
+        {{default (printf "%s/boost-generate" .WORK_DIR) .GENERATE_DIR}}
       GENERATE_CHECKSUM: >-
         {{default (printf "%s/boost-generate.md5" .WORK_DIR) .GENERATE_CHECKSUM}}
       INSTALL_PREFIX: >-
