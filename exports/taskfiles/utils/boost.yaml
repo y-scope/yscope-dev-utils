@@ -41,7 +41,8 @@ tasks:
             - "{{.BUILD_DIR}}"
     cmds:
       - >-
-        rm -rf "{{.BUILD_DIR}}/*"
+      - >-
+        rm -rf "{{.BUILD_DIR}}"/*
       - >-
         cp -R "{{.SOURCE_DIR}}"/* "{{.BUILD_DIR}}/"
       - >-
