@@ -28,7 +28,7 @@ tasks:
       OUTPUT_DIR: "{{.G_LINT_VENV_DIR}}"
     sources:
       - "{{.LINT_REQUIREMENTS_FILE}}"
-      - "{{.ROOT_DIR}}/exports/taskfiles/**/*.yaml"
+      - "{{.G_EXPORTS_DIR}}/taskfiles/**/*.yaml"
       - "{{.ROOT_DIR}}/taskfile.yaml"
       - "{{.TASKFILE_DIR}}/**/*.yaml"
     generates: ["{{.CHECKSUM_FILE}}"]

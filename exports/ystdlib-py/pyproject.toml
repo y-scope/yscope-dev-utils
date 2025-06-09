@@ -19,9 +19,13 @@ dev = [
 ]
 
 [tool.mypy]
-pretty = true
 strict = true
-warn_unused_ignores = true
+
+# Additional output
+pretty = true
+show_error_code_links = true
+show_error_context = true
+show_error_end = true
 
 [tool.ruff]
 line-length = 100
