@@ -69,7 +69,6 @@ tasks:
   # default is the number of cores.
   build-and-install:
     internal: true
-    dir: "{{.GENERATE_DIR}}"
     vars:
       EXTRA_ARGS:
         ref: "default (list) .EXTRA_ARGS"
@@ -79,6 +78,7 @@ tasks:
       vars: ["GENERATE_DIR", "BUILD_DIR", "INSTALL_PREFIX"]
     cmds:
       - >-
+        pushd "{{.GENERATE_DIR}}";
         ./b2
         install
         --build-dir="{{.BUILD_DIR}}"
@@ -87,7 +87,8 @@ tasks:
         {{- end}}
         {{- if .JOBS}}
           "-j{{.JOBS}}"
-        {{- end}}
+        {{- end}};
+        popd;
 
   # Downloads boost from `URL` and installs boost.
   #
