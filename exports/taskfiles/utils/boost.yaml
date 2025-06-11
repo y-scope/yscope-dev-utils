@@ -38,9 +38,7 @@ tasks:
       - >-
         rm -rf "{{.GENERATE_DIR}}"
       - >-
-        mkdir -p "{{.GENERATE_DIR}}"
-      - >-
-        cp -R "{{.SOURCE_DIR}}"/* "{{.GENERATE_DIR}}/"
+        cp -R "{{.SOURCE_DIR}}" "{{.GENERATE_DIR}}"
       - >-
         pushd "{{.GENERATE_DIR}}";
         ./bootstrap.sh
