@@ -126,7 +126,7 @@ tasks:
   # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
   # omitted, the b2 default number is used. Before 1.76.0, the number was 1. Since 1.76.0, the
   # default is the number of cores.
-  # @param {string[]} [BUILD_AND_INSTALL_ARGS]: Any additional arguments to pass to boost's build
+  # @param {string[]} [BUILD_AND_INSTALL_ARGS] Any additional arguments to pass to boost's build
   # and install command.
   # @param {string} [CMAKE_SETTINGS_DIR] If set, the directory where the project's CMake settings
   # file should be stored.
