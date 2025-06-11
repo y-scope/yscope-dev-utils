@@ -161,8 +161,6 @@ tasks:
         ref: "default (list) .BUILD_ARGS"
       JOBS: >-
         {{default "" .JOBS}}
-
-      # CMake parameters
       CMAKE_SETTINGS_DIR: >-
         {{default "" .CMAKE_SETTINGS_DIR}}
     requires:
@@ -192,3 +190,4 @@ tasks:
           EXTRA_ARGS:
             ref: ".BUILD_ARGS"
           JOBS: "{{.JOBS}}"
+          CMAKE_SETTINGS_DIR: "{{.CMAKE_SETTINGS_DIR}}"
