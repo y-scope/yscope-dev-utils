@@ -188,6 +188,6 @@ tasks:
           BUILD_DIR: "{{.BUILD_DIR}}"
           INSTALL_PREFIX: "{{.INSTALL_PREFIX}}"
           EXTRA_ARGS:
-            ref: ".BUILD_ARGS"
+            ref: ".BUILD_AND_INSTALL_ARGS"
           JOBS: "{{.JOBS}}"
           CMAKE_SETTINGS_DIR: "{{.CMAKE_SETTINGS_DIR}}"
