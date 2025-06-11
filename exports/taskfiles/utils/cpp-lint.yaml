@@ -39,7 +39,7 @@ tasks:
       vars: ["ROOT_PATHS", "VENV_DIR"]
 
     cmd: |-
-      . "{{.VENV_DIR}}/bin/activate" \
+      . "{{.VENV_DIR}}/bin/activate"
       uv run --project "{{.TASKFILE_DIR}}/../../ystdlib-py" pyfind \
         {{- range .ROOT_PATHS}}
           "{{.}}" \
