@@ -11,8 +11,9 @@ tasks:
   # Generates `GENERATE_DIR` by copying `SOURCE_DIR` and then running boost's bootstrap step.
   #
   # @param {string} SOURCE_DIR Project source directory.
-  # @param {string} GENERATE_DIR Directory in which to generate the build files.
-  # @param {string} GENERATE_CHECKSUM Checksum file of the `GENERATE_DIR` directory.
+  # @param {string} GENERATE_DIR Directory in which to generate the `b2` and the build
+  # configuration.
+  # @param {string} GENERATE_CHECKSUM Checksum file for `GENERATE_DIR`.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
   # @param {string[]} TARGETS Target libraries to build.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the generate command.
@@ -59,8 +60,8 @@ tasks:
   # Runs the b2 build step for boost. The caller must have previously called `generate` on
   # `SOURCE_DIR` to produce the `GENERATE_DIR` for this task to succeed.
   #
-  # @param {string} GENERATE_DIR Directory containing the boost source and build files.
-  # @param {string} BUILD_DIR Directory in which to build the project.
+  # @param {string} GENERATE_DIR Directory containing boost's source and build files.
+  # @param {string} BUILD_DIR Directory in which to build boost.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the build command.
   # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
@@ -92,8 +93,8 @@ tasks:
   # Downloads boost from `URL` and installs boost.
   #
   # General parameters
-  # @param {string} [WORK_DIR={{.ROOT_DIR}}] Base directory to store the src, build and install
-  # directories inside.
+  # @param {string} [WORK_DIR={{.ROOT_DIR}}] Base directory in which to store the source, generate,
+  # build, and install directories.
   # @param {string} [SOURCE_DIR={{.WORK_DIR}}/boost-src] Directory in which to extract the tar
   # file.
   # @param {string} [BUILD_DIR={{.WORK_DIR}}/boost-build] Directory in which to build the project.
@@ -105,7 +106,7 @@ tasks:
   # Boost generate parameters
   # @param {string} [GENERATE_DIR={{.WORK_DIR}}/boost-generate] Directory in which to generate the
   # project build files.
-  # @param {string} [GENERATE_CHECKSUM={{.WORK_DIR}}/boost-generate.md5] Checksum file of the
+  # @param {string} [GENERATE_CHECKSUM={{.WORK_DIR}}/boost-generate.md5] Checksum file for the
   # generate directory.
   # @param {string} [INSTALL_PREFIX={{.WORK_DIR}}/boost-install] Path prefix of where the project
   # should be installed.
@@ -117,10 +118,10 @@ tasks:
   # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
   # omitted, the b2 default number is used. Before 1.76.0, the number was 1. Since 1.76.0, the
   # default is the number of cores.
-  # @param {string[]} [BUILD_ARGS] Any additional arguments to pass to the build and install
+  # @param {string[]} [BUILD_ARGS] Any additional arguments to pass to boost's build and install
   # command.
   #
-  # Boost cmake parameters
+  # CMake parameters
   # @param {string} [CMAKE_SETTINGS_DIR] If set, the directory where the project's CMake settings
   # file should be stored.
   download-and-install:
@@ -153,7 +154,7 @@ tasks:
       JOBS: >-
         {{default "" .JOBS}}
 
-      # Boost cmake parameters
+      # CMake parameters
       CMAKE_SETTINGS_DIR: >-
         {{default "" .CMAKE_SETTINGS_DIR}}
     requires:
@@ -188,6 +189,6 @@ tasks:
           echo "set(Boost_ROOT
             \"{{.INSTALL_PREFIX}}\"
             CACHE PATH
-            \"Package root for boost.\"
-          )" >> "{{.CMAKE_SETTINGS_DIR}}/boost.cmake"
+            \"Package root for Boost.\"
+          )" >> "{{.CMAKE_SETTINGS_DIR}}/Boost.cmake"
         {{- end}}
