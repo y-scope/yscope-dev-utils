@@ -11,8 +11,7 @@ tasks:
   # Generates `GENERATE_DIR` by copying `SOURCE_DIR` and then running boost's bootstrap step.
   #
   # @param {string} SOURCE_DIR Project source directory.
-  # @param {string} GENERATE_DIR Directory in which to generate the `b2` and the build
-  # configuration.
+  # @param {string} GENERATE_DIR Directory in which to generate `b2` and the build configuration.
   # @param {string} GENERATE_CHECKSUM_FILE Checksum file for `GENERATE_DIR`.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
   # @param {string[]} TARGETS Target libraries to build.
@@ -55,7 +54,7 @@ tasks:
           INCLUDE_PATTERNS:
             - "{{.GENERATE_DIR}}"
 
-  # Runs the b2 build and install step for boost, and add cmake target file. The caller must have
+  # Runs boost's b2 build and install step, and creates a CMake settings file. The caller must have
   # previously called `generate` on `SOURCE_DIR` (to produce the `GENERATE_DIR`) for this task to
   # succeed.
   #
