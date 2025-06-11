@@ -58,7 +58,7 @@ tasks:
             - "{{.GENERATE_DIR}}"
 
   # Runs the b2 build and install step for boost, and add cmake target file. The caller must have
-  # previously called `generate` on SOURCE_DIR` (to produce the `GENERATE_DIR`) for this task to
+  # previously called `generate` on `SOURCE_DIR` (to produce the `GENERATE_DIR`) for this task to
   # succeed.
   #
   # @param {string} GENERATE_DIR Directory containing boost's source and build files.
