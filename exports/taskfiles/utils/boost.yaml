@@ -108,7 +108,6 @@ tasks:
   # build, and install directories.
   # @param {string} [SOURCE_DIR={{.WORK_DIR}}/boost-src] Directory in which to extract the tar
   # file.
-  # @param {string} [BUILD_DIR={{.WORK_DIR}}/boost-build] Directory in which to build the project.
   #
   # Download parameters
   # @param {string} FILE_SHA256 Content hash to verify the downloaded tar file against.
