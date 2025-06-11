@@ -13,7 +13,7 @@ tasks:
   # @param {string} SOURCE_DIR Project source directory.
   # @param {string} GENERATE_DIR Directory in which to generate the `b2` and the build
   # configuration.
-  # @param {string} GENERATE_CHECKSUM Checksum file for `GENERATE_DIR`.
+  # @param {string} GENERATE_CHECKSUM_FILE Checksum file for `GENERATE_DIR`.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
   # @param {string[]} TARGETS Target libraries to build.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the generate command.
@@ -23,15 +23,15 @@ tasks:
       EXTRA_ARGS:
         ref: "default (list) .EXTRA_ARGS"
     requires:
-      vars: ["SOURCE_DIR", "GENERATE_DIR", "GENERATE_CHECKSUM", "INSTALL_PREFIX", "TARGETS"]
+      vars: ["SOURCE_DIR", "GENERATE_DIR", "GENERATE_CHECKSUM_FILE", "INSTALL_PREFIX", "TARGETS"]
     sources:
       - "{{.SOURCE_DIR}}/**/*"
     generates:
-      - "{{.GENERATE_CHECKSUM}}"
+      - "{{.GENERATE_CHECKSUM_FILE}}"
     deps:
       - task: "checksum:validate"
         vars:
-          CHECKSUM_FILE: "{{.GENERATE_CHECKSUM}}"
+          CHECKSUM_FILE: "{{.GENERATE_CHECKSUM_FILE}}"
           INCLUDE_PATTERNS:
             - "{{.GENERATE_DIR}}"
     cmds:
@@ -53,7 +53,7 @@ tasks:
         popd
       - task: "checksum:compute"
         vars:
-          CHECKSUM_FILE: "{{.GENERATE_CHECKSUM}}"
+          CHECKSUM_FILE: "{{.GENERATE_CHECKSUM_FILE}}"
           INCLUDE_PATTERNS:
             - "{{.GENERATE_DIR}}"
 
@@ -106,7 +106,7 @@ tasks:
   # Boost generate parameters
   # @param {string} [GENERATE_DIR={{.WORK_DIR}}/boost-generate] Directory in which to generate the
   # project build files.
-  # @param {string} [GENERATE_CHECKSUM={{.WORK_DIR}}/boost-generate.md5] Checksum file for the
+  # @param {string} [GENERATE_CHECKSUM_FILE={{.WORK_DIR}}/boost-generate.md5] Checksum file for the
   # generate directory.
   # @param {string} [INSTALL_PREFIX={{.WORK_DIR}}/boost-install] Path prefix of where the project
   # should be installed.
@@ -137,8 +137,8 @@ tasks:
       # Boost generate parameters
       GENERATE_DIR: >-
         {{default (printf "%s/boost-generate" .WORK_DIR) .GENERATE_DIR}}
-      GENERATE_CHECKSUM: >-
-        {{default (printf "%s/boost-generate.md5" .WORK_DIR) .GENERATE_CHECKSUM}}
+      GENERATE_CHECKSUM_FILE: >-
+        {{default (printf "%s/boost-generate.md5" .WORK_DIR) .GENERATE_CHECKSUM_FILE}}
       INSTALL_PREFIX: >-
         {{default (printf "%s/boost-install" .WORK_DIR) .INSTALL_PREFIX}}
       TARGETS:
@@ -170,7 +170,7 @@ tasks:
         vars:
           SOURCE_DIR: "{{.SOURCE_DIR}}"
           GENERATE_DIR: "{{.GENERATE_DIR}}"
-          GENERATE_CHECKSUM: "{{.GENERATE_CHECKSUM}}"
+          GENERATE_CHECKSUM_FILE: "{{.GENERATE_CHECKSUM_FILE}}"
           INSTALL_PREFIX: "{{.INSTALL_PREFIX}}"
           TARGETS:
             ref: ".TARGETS"
