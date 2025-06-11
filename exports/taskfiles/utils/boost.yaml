@@ -8,8 +8,7 @@ set: ["u", "pipefail"]
 shopt: ["globstar"]
 
 tasks:
-  # Copy the source directory into the generate directory. Runs the `bootstrap.sh` script to
-  # generate `b2` and `project-config.jam` files.
+  # Generates `GENERATE_DIR` by copying `SOURCE_DIR` and then running boost's bootstrap step.
   #
   # @param {string} SOURCE_DIR Project source directory.
   # @param {string} GENERATE_DIR Directory in which to generate the build files.
