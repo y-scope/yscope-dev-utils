@@ -156,7 +156,7 @@ tasks:
       BUILD_DIR: >-
         {{default (printf "%s/boost-build" .WORK_DIR) .BUILD_DIR}}
       BUILD_AND_INSTALL_ARGS:
-        ref: "default (list) .BUILD_ARGS"
+        ref: "default (list) .BUILD_AND_INSTALL_ARGS"
       JOBS: >-
         {{default "" .JOBS}}
       CMAKE_SETTINGS_DIR: >-
