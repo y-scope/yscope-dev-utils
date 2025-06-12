@@ -107,8 +107,6 @@ tasks:
         {{default "" .CMAKE_SETTINGS_DIR}}
       EXTRA_ARGS:
         ref: "default (list) .EXTRA_ARGS"
-      COMPONENT: >-
-        {{default "" .COMPONENT}}
     requires:
       vars: ["BUILD_DIR", "INSTALL_PREFIX"]
     preconditions:
@@ -124,7 +122,6 @@ tasks:
         cmake
         --install "{{.BUILD_DIR}}"
         --prefix "{{.INSTALL_PREFIX}}"
-        {{if not (eq .COMPONENT "")}}--component {{.COMPONENT}}{{end}}
         {{- range .EXTRA_ARGS}}
         {{.}}
         {{- end}}
