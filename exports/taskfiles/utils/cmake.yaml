@@ -37,7 +37,7 @@ tasks:
         --target="{{.}}"
         {{- end}}
         {{- range .EXTRA_ARGS}}
-        "{{.}}"
+        {{.}}
         {{- end}}
 
   # Runs the CMake clean target for the given build directory. The caller must have previously
@@ -81,7 +81,7 @@ tasks:
         -S "{{.SOURCE_DIR}}"
         -B "{{.BUILD_DIR}}"
         {{- range .EXTRA_ARGS}}
-        "{{.}}"
+        {{.}}
         {{- end}}
 
   # Runs the CMake install step for the given build directory. The caller must have previously
@@ -123,7 +123,7 @@ tasks:
         --install "{{.BUILD_DIR}}"
         --prefix "{{.INSTALL_PREFIX}}"
         {{- range .EXTRA_ARGS}}
-        "{{.}}"
+        {{.}}
         {{- end}}
       - >-
         {{- if .CMAKE_SETTINGS_DIR}}
