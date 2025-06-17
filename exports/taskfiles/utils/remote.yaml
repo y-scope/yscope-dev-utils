@@ -58,6 +58,8 @@ tasks:
   # @param {string} FILE_SHA256 Content hash to verify the downloaded tar file against.
   # @param {string} [CHECKSUM_FILE={{.OUTPUT_DIR}}.md5] File path to store the checksum of the
   # downloaded tar file.
+  # @param {string[]} [CHECKSUM_EXCLUDE_PATTERNS] Path wildcard patterns, relative to `OUTPUT_DIR`,
+  # to exclude from the checksum.
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns that should not be extracted.
   # @param {string[]} [INCLUDE_PATTERNS] Path wildcard patterns to extract.
   # @param {int} [NUM_COMPONENTS_TO_STRIP=1] Number of leading path components to strip from the
@@ -74,6 +76,8 @@ tasks:
         {{default (printf "%s.tar.gz" .OUTPUT_DIR) .TAR_FILE}}
 
       # Path patterns
+      CHECKSUM_EXCLUDE_PATTERNS:
+        ref: "default (list) .CHECKSUM_EXCLUDE_PATTERNS"
       EXCLUDE_PATTERNS:
         ref: "default (list) .EXCLUDE_PATTERNS"
       INCLUDE_PATTERNS:
@@ -97,6 +101,8 @@ tasks:
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
+          EXCLUDE_PATTERNS:
+            ref: ".CHECKSUM_EXCLUDE_PATTERNS"
     cmds:
       - |-
         rm -rf "{{.OUTPUT_DIR}}"
@@ -123,6 +129,8 @@ tasks:
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
+          EXCLUDE_PATTERNS:
+            ref: ".CHECKSUM_EXCLUDE_PATTERNS"
 
   # Uses curl to download a zip file from the given URL and extracts its contents.
   #
@@ -131,6 +139,8 @@ tasks:
   # @param {string} FILE_SHA256 Content hash to verify the downloaded zip file against.
   # @param {string} [CHECKSUM_FILE={{.OUTPUT_DIR}}.md5] File path to store the checksum of the
   # downloaded zip file.
+  # @param {string[]} [CHECKSUM_EXCLUDE_PATTERNS] Path wildcard patterns, relative to `OUTPUT_DIR`,
+  # to exclude from the checksum.
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns that should not be extracted.
   # @param {string[]} [INCLUDE_PATTERNS] Path wildcard patterns to extract.
   # @param {string} [ZIP_FILE={{.OUTPUT_DIR}}.zip] Path where the zip file should be stored.
@@ -145,6 +155,8 @@ tasks:
         {{default (printf "%s.zip" .OUTPUT_DIR) .ZIP_FILE}}
 
       # Path patterns
+      CHECKSUM_EXCLUDE_PATTERNS:
+        ref: "default (list) .CHECKSUM_EXCLUDE_PATTERNS"
       EXCLUDE_PATTERNS:
         ref: "default (list) .EXCLUDE_PATTERNS"
       INCLUDE_PATTERNS:
@@ -164,6 +176,8 @@ tasks:
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
+          EXCLUDE_PATTERNS:
+            ref: ".CHECKSUM_EXCLUDE_PATTERNS"
     cmds:
       - |-
         rm -rf "{{.OUTPUT_DIR}}"
@@ -185,3 +199,5 @@ tasks:
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
+          EXCLUDE_PATTERNS:
+            ref: ".CHECKSUM_EXCLUDE_PATTERNS"
