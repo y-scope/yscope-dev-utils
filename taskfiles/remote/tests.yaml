@@ -83,6 +83,42 @@ tasks:
       - "test -e '{{.OUTPUT_DIR}}/{{.G_EXTRACTED_ZIP_CODEOWNERS_PATH}}'"
       - "test -e '{{.OUTPUT_DIR}}/{{.G_EXTRACTED_ZIP_PULL_REQUEST_TEMPLATE_PATH}}'"
 
+  download-and-extract-zip-test-checksum-exclude:
+    vars:
+      OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
+      CHECKSUM_FILE: "{{.OUTPUT_DIR}}.md5"
+    cmds:
+      - task: "download-and-extract-zip-test-cleaner"
+        vars:
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+
+      # Download the zip file, extract all files, and compute the checksum with some exclude
+      # patterns.
+      - task: "remote:download-and-extract-zip"
+        vars:
+          CHECKSUM_EXCLUDE_PATTERNS: &checksum_exclude_patterns
+            - ".github/CODEOWNERS"
+            - ".github/PULL_REQUEST_TEMPLATE.md"
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+          URL: "{{.G_TEST_ZIP_FILE_URL}}"
+          FILE_SHA256: "{{.G_TEST_ZIP_FILE_SHA256}}"
+      - "mv '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE}}.ref'"
+
+      # Download the zip file again, extract files excluding some files, and compute the checksum
+      # with the same exclude patterns.
+      - task: "remote:download-and-extract-zip"
+        vars:
+          CHECKSUM_EXCLUDE_PATTERNS: *checksum_exclude_patterns
+          EXCLUDE_PATTERNS:
+            - "*/CODEOWNERS"
+            - "{{.G_EXTRACTED_ZIP_PULL_REQUEST_TEMPLATE_PATH}}"
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+          URL: "{{.G_TEST_ZIP_FILE_URL}}"
+          FILE_SHA256: "{{.G_TEST_ZIP_FILE_SHA256}}"
+
+      # Test that the checksum file was created and matches the reference checksum file.
+      - "diff -q '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE}}.ref'"
+
   # Cleans up the files output by download-and-extract-zip (assuming their default paths weren't
   # changed).
   #
