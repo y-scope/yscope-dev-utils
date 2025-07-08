@@ -17,6 +17,6 @@ tasks:
     internal: true
     cmd: |-
       cd "{{.G_YSTDLIB_PY_DIR}}"
-      uv run mypy {{.MYPY_FLAGS}} "./src"
+      uv run mypy "./src"
       uv run ruff check {{.RUFF_CHECK_FLAGS}} "./src"
       uv run ruff format {{.RUFF_FORMAT_FLAGS}} "./src"
