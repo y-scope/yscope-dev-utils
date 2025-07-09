@@ -23,9 +23,8 @@ tasks:
     status:
       - >-
         diff
-        <(echo "{{.FILE_SHA256}}")
-        <(openssl dgst -sha256 "{{.OUTPUT_FILE}}"
-        | awk '{print $2}')
+          <(echo "{{.FILE_SHA256}}")
+          <(openssl dgst -sha256 "{{.OUTPUT_FILE}}" | awk '{print $2}')
     cmds:
       - |-
         mkdir -p "{{dir .OUTPUT_FILE}}"
@@ -50,6 +49,9 @@ tasks:
           echo "Failed to download after $max_attempts attempts."
           exit 1
         fi
+        diff \
+          <(echo "{{.FILE_SHA256}}") \
+          <(openssl dgst -sha256 "{{.OUTPUT_FILE}}" | awk '{print $2}')
 
   # Uses curl to download a tar file from the given URL and extracts its contents.
   #
