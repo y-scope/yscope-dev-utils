@@ -48,7 +48,7 @@ tasks:
     vars:
       OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
       OUTPUT_FILE: "{{.OUTPUT_DIR}}.zip"
-      OUTPUT_FILE_MOD_TS: "{{.CHECKSUM_FILE}}-mod-ts.txt"
+      OUTPUT_FILE_MOD_TS: "{{.OUTPUT_FILE}}-mod-ts.txt"
     cmds:
       - task: "remote-test-cleaner"
         vars:
