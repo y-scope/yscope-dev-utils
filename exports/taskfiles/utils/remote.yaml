@@ -21,9 +21,9 @@ tasks:
       vars: ["FILE_SHA256", "URL"]
     generates: ["{{.OUTPUT_FILE}}"]
     status:
-      - >-
-        diff
-          <(echo "{{.FILE_SHA256}}")
+      - |-
+        diff \
+          <(echo "{{.FILE_SHA256}}") \
           <(openssl dgst -sha256 "{{.OUTPUT_FILE}}" | awk '{print $2}')
     cmds:
       - |-
