@@ -1,0 +1,148 @@
+version: "3"
+
+includes:
+  checksum:
+    internal: true
+    taskfile: "../../exports/taskfiles/utils/checksum.yaml"
+
+tasks:
+  default:
+    cmds:
+      - task: "checksum-test-rerun"
+      - task: "checksum-test-skip"
+      - task: "checksum-test-update"
+
+  checksum-test-rerun:
+    vars:
+      OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
+      SRC_DIR: "{{.OUTPUT_DIR}}/src"
+
+      CHECKSUM_FILE: "{{.SRC_DIR}}.md5"
+      CHECKSUM_FILE_REF: "{{.CHECKSUM_FILE}}.ref"
+      FILE_0: "{{.SRC_DIR}}/0.txt"
+      FILE_1: "{{.SRC_DIR}}/1.txt"
+    cmds:
+      - task: "checksum-test-init"
+        vars:
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+      - task: "create-dir-with-checksum"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          FILE_PATH: "{{.FILE_0}}"
+      - "mv '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'"
+      - task: "create-dir-with-checksum"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          FILE_PATH: "{{.FILE_1}}"
+
+      # Test create-dir-with-checksum ran the second time.
+      - "test ! -e '{{.FILE_0}}'"
+      - "test -e '{{.FILE_1}}'"
+      - |-
+        if cmp --silent "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
+            echo "'{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF}}' should differ."
+            exit 1
+        fi
+
+
+  checksum-test-skip:
+    vars:
+      OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
+      SRC_DIR: "{{.OUTPUT_DIR}}/src"
+
+      CHECKSUM_FILE: "{{.SRC_DIR}}.md5"
+      CHECKSUM_MOD_TS: "{{.CHECKSUM_FILE}}-mod-ts.txt"
+      FILE_0: "{{.SRC_DIR}}/0.txt"
+      FILE_1: "{{.SRC_DIR}}/1.txt"
+    cmds:
+      - task: "checksum-test-init"
+        vars:
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+      - task: "create-dir-with-checksum"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          FILE_PATH: "{{.FILE_0}}"
+      - "date -r '{{.CHECKSUM_FILE}}' > '{{.CHECKSUM_MOD_TS}}'"
+      - task: "create-dir-with-checksum"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          FILE_PATH: "{{.FILE_1}}"
+
+      # Test create-dir-with-checksum didn't run the second time.
+      - "test -e '{{.FILE_0}}'"
+      - "test ! -e '{{.FILE_1}}'"
+      - "diff '{{.CHECKSUM_MOD_TS}}' <(date -r '{{.CHECKSUM_FILE}}')"
+
+  checksum-test-update:
+    vars:
+      OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
+      SRC_DIR: "{{.OUTPUT_DIR}}/src"
+
+      CHECKSUM_FILE: "{{.SRC_DIR}}.md5"
+      CHECKSUM_FILE_REF0: "{{.CHECKSUM_FILE}}.ref0"
+      CHECKSUM_FILE_REF1: "{{.CHECKSUM_FILE}}.ref1"
+      FILE_0: "{{.SRC_DIR}}/0.txt"
+      FILE_1: "{{.SRC_DIR}}/1.txt"
+    cmds:
+      - task: "checksum-test-init"
+        vars:
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+      - task: "create-dir-with-checksum"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          FILE_PATH: "{{.FILE_0}}"
+      - "cp '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}'"
+
+      - "cat '{{.CHECKSUM_FILE}}' > '{{.FILE_0}}'"
+      - task: "checksum:compute"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.SRC_DIR}}"]
+      - "cp '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
+
+      - task: "create-dir-with-checksum"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          FILE_PATH: "{{.FILE_1}}"
+
+      # Test create-dir-with-checksum didn't run the second time.
+      - "test -e '{{.FILE_0}}'"
+      - "test ! -e '{{.FILE_1}}'"
+      - "diff <(cat '{{.FILE_0}}') <(cat '{{.CHECKSUM_FILE_REF0}}')"
+      - "diff -q '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
+      - |-
+        if cmp --silent "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF0}}"; then
+            echo "'{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF0}}' should differ."
+            exit 1
+        fi
+
+  checksum-test-init:
+    internal: true
+    requires:
+      vars: ["OUTPUT_DIR"]
+    cmds:
+      - "rm -rf {{.OUTPUT_DIR}}*"
+      - "mkdir -p '{{.OUTPUT_DIR}}'"
+
+  create-dir-with-checksum:
+    internal: true
+    vars:
+      DIR: "{{dir .FILE_PATH}}"
+    requires:
+      vars: ["CHECKSUM_FILE", "FILE_PATH"]
+    sources: ["{{.TASKFILE}}"]
+    generates: ["{{.CHECKSUM_FILE}}"]
+    deps:
+      - task: "checksum:validate"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.DIR}}"]
+    cmds:
+      - |-
+        rm -rf "{{.DIR}}"
+        mkdir -p "{{.DIR}}"
+        touch "{{.FILE_PATH}}"
+      - task: "checksum:compute"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.DIR}}"]
