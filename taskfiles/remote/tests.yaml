@@ -4,13 +4,17 @@ includes:
   remote: "../../exports/taskfiles/utils/remote.yaml"
 
 vars:
-  G_EXTRACTED_ROOT_DIR: "yscope-dev-utils-fd7c42dd7b59f8f4ab0eccba5078393e10cddb00"
-  G_EXTRACTED_ZIP_CODEOWNERS_PATH: "{{.G_EXTRACTED_ROOT_DIR}}/.github/CODEOWNERS"
-  G_EXTRACTED_ZIP_LICENSE_PATH: "{{.G_EXTRACTED_ROOT_DIR}}/LICENSE"
-  G_EXTRACTED_ZIP_PULL_REQUEST_TEMPLATE_PATH: >-
-    {{.G_EXTRACTED_ROOT_DIR}}/.github/PULL_REQUEST_TEMPLATE.md
+  # Test zip file info
+  G_TEST_COMMIT_HASH: "fd7c42dd7b59f8f4ab0eccba5078393e10cddb00"
   G_TEST_ZIP_FILE_SHA256: "141e807e9b4b9e28c254165c5a402ff54c0c9d3f9153178dfcff5354ace0c3d4"
-  G_TEST_ZIP_FILE_URL: "https://github.com/y-scope/yscope-dev-utils/archive/fd7c42d.zip"
+  G_TEST_ZIP_FILE_URL: "https://github.com/y-scope/yscope-dev-utils/archive/{{.G_TEST_COMMIT_HASH}}.zip"
+
+  # Extracted test zip file contents
+  G_EXTRACTED_ZIP_DIR: "yscope-dev-utils-{{.G_TEST_COMMIT_HASH}}"
+  G_EXTRACTED_ZIP_CODEOWNERS_PATH: "{{.G_EXTRACTED_ZIP_DIR}}/.github/CODEOWNERS"
+  G_EXTRACTED_ZIP_LICENSE_PATH: "{{.G_EXTRACTED_ZIP_DIR}}/LICENSE"
+  G_EXTRACTED_ZIP_PULL_REQUEST_TEMPLATE_PATH: >-
+    {{.G_EXTRACTED_ZIP_DIR}}/.github/PULL_REQUEST_TEMPLATE.md
 
 tasks:
   default:
