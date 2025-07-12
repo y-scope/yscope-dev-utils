@@ -22,6 +22,7 @@ tasks:
     internal: true
     cmds:
       - task: "curl-test-success"
+      - task: "curl-test-success-skip"
       - task: "download-and-extract-zip-test-basic"
       - task: "download-and-extract-zip-test-exclusions"
       - task: "download-and-extract-zip-test-inclusions"
