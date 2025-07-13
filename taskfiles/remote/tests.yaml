@@ -4,26 +4,80 @@ includes:
   remote: "../../exports/taskfiles/utils/remote.yaml"
 
 vars:
-  G_EXTRACTED_ZIP_CODEOWNERS_PATH: "yscope-dev-utils-main/.github/CODEOWNERS"
-  G_EXTRACTED_ZIP_LICENSE_PATH: "yscope-dev-utils-main/LICENSE"
+  # Test zip file info
+  G_TEST_COMMIT_HASH: "fd7c42dd7b59f8f4ab0eccba5078393e10cddb00"
+  G_TEST_ZIP_FILE_SHA256: "141e807e9b4b9e28c254165c5a402ff54c0c9d3f9153178dfcff5354ace0c3d4"
+  G_TEST_ZIP_FILE_URL: >-
+    https://github.com/y-scope/yscope-dev-utils/archive/{{.G_TEST_COMMIT_HASH}}.zip
+
+  # Extracted test zip file contents
+  G_EXTRACTED_ZIP_DIR: "yscope-dev-utils-{{.G_TEST_COMMIT_HASH}}"
+  G_EXTRACTED_ZIP_CODEOWNERS_PATH: "{{.G_EXTRACTED_ZIP_DIR}}/.github/CODEOWNERS"
+  G_EXTRACTED_ZIP_LICENSE_PATH: "{{.G_EXTRACTED_ZIP_DIR}}/LICENSE"
   G_EXTRACTED_ZIP_PULL_REQUEST_TEMPLATE_PATH: >-
-    yscope-dev-utils-main/.github/PULL_REQUEST_TEMPLATE.md
-  G_TEST_ZIP_FILE_SHA256: "2c9a21f83484e004c41c28be759451dbdc787190eb044365ba58f7bb846418f6"
-  G_TEST_ZIP_FILE_URL: "https://github.com/y-scope/yscope-dev-utils/archive/refs/heads/main.zip"
+    {{.G_EXTRACTED_ZIP_DIR}}/.github/PULL_REQUEST_TEMPLATE.md
 
 tasks:
   default:
     internal: true
     cmds:
+      - task: "curl-test-success"
+      - task: "curl-test-success-skip"
       - task: "download-and-extract-zip-test-basic"
       - task: "download-and-extract-zip-test-exclusions"
       - task: "download-and-extract-zip-test-inclusions"
+
+  curl-test-success:
+    vars:
+      OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
+      OUTPUT_FILE: "{{.OUTPUT_DIR}}.zip"
+    cmds:
+      - task: "remote-test-cleaner"
+        vars:
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+      - task: "remote:curl"
+        vars:
+          FILE_SHA256: "{{.G_TEST_ZIP_FILE_SHA256}}"
+          OUTPUT_FILE: "{{.OUTPUT_FILE}}"
+          URL: "{{.G_TEST_ZIP_FILE_URL}}"
+      - |-
+        diff \
+          <(echo "{{.G_TEST_ZIP_FILE_SHA256}}") \
+          <(openssl dgst -sha256 "{{.OUTPUT_FILE}}" | awk '{print $2}')
+
+  # Tests that re-running the curl task won't re-download the file if it already exists and matches
+  # the expected checksum.
+  curl-test-success-skip:
+    vars:
+      OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
+      OUTPUT_FILE: "{{.OUTPUT_DIR}}.zip"
+      OUTPUT_FILE_MOD_TS: "{{.OUTPUT_FILE}}-mod-ts.txt"
+    cmds:
+      - task: "remote-test-cleaner"
+        vars:
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+      - task: "remote:curl"
+        vars:
+          FILE_SHA256: "{{.G_TEST_ZIP_FILE_SHA256}}"
+          OUTPUT_FILE: "{{.OUTPUT_FILE}}"
+          URL: "{{.G_TEST_ZIP_FILE_URL}}"
+      - "date -r '{{.OUTPUT_FILE}}' > '{{.OUTPUT_FILE_MOD_TS}}'"
+      - task: "remote:curl"
+        vars:
+          FILE_SHA256: "{{.G_TEST_ZIP_FILE_SHA256}}"
+          OUTPUT_FILE: "{{.OUTPUT_FILE}}"
+          URL: "{{.G_TEST_ZIP_FILE_URL}}"
+      - |-
+        diff \
+          <(echo "{{.G_TEST_ZIP_FILE_SHA256}}") \
+          <(openssl dgst -sha256 "{{.OUTPUT_FILE}}" | awk '{print $2}')
+      - "diff '{{.OUTPUT_FILE_MOD_TS}}' <(date -r '{{.OUTPUT_FILE}}')"
 
   download-and-extract-zip-test-basic:
     vars:
       OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
     cmds:
-      - task: "download-and-extract-zip-test-cleaner"
+      - task: "remote-test-cleaner"
         vars:
           OUTPUT_DIR: "{{.OUTPUT_DIR}}"
       - task: "remote:download-and-extract-zip"
@@ -43,7 +97,7 @@ tasks:
     vars:
       OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
     cmds:
-      - task: "download-and-extract-zip-test-cleaner"
+      - task: "remote-test-cleaner"
         vars:
           OUTPUT_DIR: "{{.OUTPUT_DIR}}"
       - task: "remote:download-and-extract-zip"
@@ -66,7 +120,7 @@ tasks:
     vars:
       OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
     cmds:
-      - task: "download-and-extract-zip-test-cleaner"
+      - task: "remote-test-cleaner"
         vars:
           OUTPUT_DIR: "{{.OUTPUT_DIR}}"
       - task: "remote:download-and-extract-zip"
@@ -83,11 +137,10 @@ tasks:
       - "test -e '{{.OUTPUT_DIR}}/{{.G_EXTRACTED_ZIP_CODEOWNERS_PATH}}'"
       - "test -e '{{.OUTPUT_DIR}}/{{.G_EXTRACTED_ZIP_PULL_REQUEST_TEMPLATE_PATH}}'"
 
-  # Cleans up the files output by download-and-extract-zip (assuming their default paths weren't
-  # changed).
+  # Cleans up the files output by remote tasks (assuming their default paths weren't changed).
   #
-  # @param {string} OUTPUT_DIR Output directory passed to download-and-extract-zip.
-  download-and-extract-zip-test-cleaner:
+  # @param {string} OUTPUT_DIR Output directory passed to remote tasks.
+  remote-test-cleaner:
     internal: true
     requires:
       vars: ["OUTPUT_DIR"]
