@@ -45,6 +45,8 @@ tasks:
           <(echo "{{.G_TEST_ZIP_FILE_SHA256}}") \
           <(openssl dgst -sha256 "{{.OUTPUT_FILE}}" | awk '{print $2}')
 
+  # Tests that re-running the curl task won't re-download the file if it already exists and matches
+  # the expected checksum.
   curl-test-success-skip:
     vars:
       OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
