@@ -157,8 +157,8 @@ tasks:
   # should be stored.
   # @param {string[]} [CMAKE_TARGETS] A list of specific targets to build instead of the default
   # target.
-  # @param {string} [CMAKE_SOURCE_DIR] Optional path, relative to SRC_DIR, specifying a custom
-  # CMake source directory to pass to the CMake generate command.
+  # @param {string} [CMAKE_SOURCE_DIR] Optional path, relative to SOURCE_DIR, that specifies the
+  # directory containing CMakeLists.txt to use in the generate step.
   install-remote-tar:
     internal: true
     label: "{{.TASK}}:{{.CMAKE_PACKAGE_NAME}}-{{.TAR_URL}}-{{.INSTALL_PREFIX}}"
