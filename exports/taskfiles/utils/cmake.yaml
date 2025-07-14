@@ -157,6 +157,8 @@ tasks:
   # should be stored.
   # @param {string[]} [CMAKE_TARGETS] A list of specific targets to build instead of the default
   # target.
+  # @param {string} [CMAKE_SOURCE_DIR] Optional path, relative to SRC_DIR, specifying a custom
+  # CMake source directory to pass to the CMake generate command.
   install-remote-tar:
     internal: true
     label: "{{.TASK}}:{{.CMAKE_PACKAGE_NAME}}-{{.TAR_URL}}-{{.INSTALL_PREFIX}}"
@@ -174,6 +176,8 @@ tasks:
         {{default "" .CMAKE_SETTINGS_DIR}}
       CMAKE_TARGETS:
         ref: "default (list) .CMAKE_TARGETS"
+      CMAKE_SOURCE_DIR: >-
+        {{default "." .CMAKE_SOURCE_DIR}}
 
       # Directory parameters
       BUILD_DIR: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-build"
@@ -194,7 +198,7 @@ tasks:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
             ref: ".CMAKE_GEN_ARGS"
-          SOURCE_DIR: "{{.SOURCE_DIR}}"
+          SOURCE_DIR: "{{.SOURCE_DIR}}/{{.CMAKE_SOURCE_DIR}}"
       - task: "build"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
