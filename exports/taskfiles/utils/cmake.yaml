@@ -155,10 +155,11 @@ tasks:
   # omitted, the native build tool's default number is used. See `man cmake`.
   # @param {string} [CMAKE_SETTINGS_DIR] The directory where the project's CMake settings file
   # should be stored.
+  # @param {string} [CMAKE_SOURCE_DIR] Relative path from the extracted tarball directory to the
+  # CMake source directory containing the CMakeLists.txt file. Defaults to ".", meaning the root
+  # of the extracted directory.
   # @param {string[]} [CMAKE_TARGETS] A list of specific targets to build instead of the default
   # target.
-  # @param {string} [CMAKE_SOURCE_DIR] Optional path, relative to SOURCE_DIR, that specifies the
-  # directory containing CMakeLists.txt to use in the generate step.
   install-remote-tar:
     internal: true
     label: "{{.TASK}}:{{.CMAKE_PACKAGE_NAME}}-{{.TAR_URL}}-{{.INSTALL_PREFIX}}"
@@ -174,15 +175,15 @@ tasks:
         {{default "" .CMAKE_JOBS}}
       CMAKE_SETTINGS_DIR: >-
         {{default "" .CMAKE_SETTINGS_DIR}}
-      CMAKE_TARGETS:
-        ref: "default (list) .CMAKE_TARGETS"
       CMAKE_SOURCE_DIR: >-
         {{default "." .CMAKE_SOURCE_DIR}}
+      CMAKE_TARGETS:
+        ref: "default (list) .CMAKE_TARGETS"
 
       # Directory parameters
       BUILD_DIR: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-build"
+      EXTRACTED_DIR: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-extracted"
       INSTALL_PREFIX: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-install"
-      SOURCE_DIR: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-src"
 
     requires:
       vars: ["CMAKE_PACKAGE_NAME", "TAR_SHA256", "TAR_URL", "WORK_DIR"]
@@ -198,7 +199,7 @@ tasks:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
             ref: ".CMAKE_GEN_ARGS"
-          SOURCE_DIR: "{{.SOURCE_DIR}}/{{.CMAKE_SOURCE_DIR}}"
+          SOURCE_DIR: "{{.EXTRACTED_DIR}}/{{.CMAKE_SOURCE_DIR}}"
       - task: "build"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
