@@ -191,7 +191,7 @@ tasks:
       - task: "remote:download-and-extract-tar"
         vars:
           FILE_SHA256: "{{.TAR_SHA256}}"
-          OUTPUT_DIR: "{{.SOURCE_DIR}}"
+          OUTPUT_DIR: "{{.EXTRACTED_DIR}}"
           URL: "{{.TAR_URL}}"
     cmds:
       - task: "generate"
