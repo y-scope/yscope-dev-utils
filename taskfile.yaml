@@ -8,7 +8,14 @@ set: ["u", "pipefail"]
 shopt: ["globstar"]
 
 vars:
+  # Directories
+  G_EXPORTS_DIR: "{{.ROOT_DIR}}/exports"
+  G_LINT_CONFIGS_DIR: "{{.G_EXPORTS_DIR}}/lint-configs"
   G_OUTPUT_DIR: "{{.ROOT_DIR}}/build"
+  G_YSTDLIB_PY_DIR: "{{.G_EXPORTS_DIR}}/ystdlib-py"
+
+  # Utility commands
+  G_PYFIND_CMD: "uv run --project '{{.G_YSTDLIB_PY_DIR}}' pyfind"
 
 tasks:
   clean:

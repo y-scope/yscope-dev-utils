@@ -1,0 +1,22 @@
+version: "3"
+
+tasks:
+  check-py:
+    cmds:
+      - task: "py"
+        vars:
+          RUFF_FORMAT_FLAGS: "--diff"
+
+  fix-py:
+    cmds:
+      - task: "py"
+        vars:
+          RUFF_CHECK_FLAGS: "--fix"
+
+  py:
+    internal: true
+    cmd: |-
+      cd "{{.G_YSTDLIB_PY_DIR}}"
+      uv run mypy "./src"
+      uv run ruff check {{.RUFF_CHECK_FLAGS}} "./src"
+      uv run ruff format {{.RUFF_FORMAT_FLAGS}} "./src"
