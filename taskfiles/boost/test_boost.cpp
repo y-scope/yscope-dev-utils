@@ -100,10 +100,9 @@ auto test_process() -> bool {
     constexpr int cWaitTime = 10;
     try {
         boost::asio::io_context io_context;
-        boost::filesystem::path const test_boost = boost::dll::program_location();
         boost::process::v2::process process{
                 io_context,
-                test_boost,
+                boost::dll::program_location(),
                 {"--help"},
                 boost::process::process_stdio{.in{}, .out{nullptr}, .err{nullptr}}
         };
@@ -132,8 +131,8 @@ auto test_regex() -> bool {
 
 auto test_url() -> bool {
     constexpr std::string_view cUrl
-            = "https://user:pass@example.com:443/path/to/"
-              "my%2dfile.txt?id=42&name=John%20Doe+Jingleheimer%2DSchmidt#page%20anchor";
+            = "https://user:pass@example.com:443/path/to"
+              "/my%2dfile.txt?id=42&name=John%20Doe+Jingleheimer%2DSchmidt#page%20anchor";
     boost::system::result<boost::urls::url_view> result = boost::urls::parse_uri(cUrl);
     if (result.has_error()) {
         return false;
@@ -144,12 +143,16 @@ auto test_url() -> bool {
 }  // namespace
 
 auto main(int argc, char** argv) -> int {
+    constexpr std::string_view cHelpFlag{"help"};
+    constexpr std::string_view cInputFlag{"input"};
+    constexpr std::string_view cSizeFlag{"size"};
+
     boost::program_options::options_description desc{"Possible options"};
     desc.add_options()
-        ("help", "Print help message.")
-        ("input", boost::program_options::value<std::string>()->required(), "Input string.")
+        (cHelpFlag.data(), "Print help message.")
+        (cInputFlag.data(), boost::program_options::value<std::string>()->required(), "Input string.")
         (
-             "size",
+             cSizeFlag.data(),
              boost::program_options::value<int>()->required(),
              "Size to test input string against."
         )
@@ -162,7 +165,7 @@ auto main(int argc, char** argv) -> int {
                 variables
         );
 
-        if (variables.contains("help")) {
+        if (variables.contains(cHelpFlag.data())) {
             std::cerr << desc << "\n";
             return 0;
         }
