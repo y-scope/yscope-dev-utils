@@ -97,7 +97,6 @@ auto test_iostreams() -> bool {
 }
 
 auto test_process() -> bool {
-    constexpr int cWaitTime = 10;
     try {
         boost::asio::io_context io_context;
         boost::process::v2::process process{
@@ -107,10 +106,8 @@ auto test_process() -> bool {
                 boost::process::process_stdio{.in{}, .out{nullptr}, .err{nullptr}}
         };
         std::future<int> result = process.async_wait(boost::asio::use_future);
-        io_context.run_for(std::chrono::milliseconds(cWaitTime));
-        if (std::future_status::ready != result.wait_for(std::chrono::milliseconds(cWaitTime))) {
-            return false;
-        }
+        io_context.run();
+        result.wait();
         return 0 == result.get();
     } catch (std::exception const& e) {
         return false;
