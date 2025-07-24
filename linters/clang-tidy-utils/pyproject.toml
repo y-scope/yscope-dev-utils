@@ -1,0 +1,45 @@
+[project]
+name = "clang-tidy-utils"
+version = "0.0.1"
+authors = [
+    { name="zhihao lin", email="lin.zhihao@yscope.com" },
+]
+requires-python = ">=3.10"
+dependencies = [
+    "clang-tidy ~= 19.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "black >= 24.10.0",
+    "docformatter >= 1.7.5",
+    "mypy >= 1.14.1",
+    "ruff >= 0.9.2",
+]
+
+[project.scripts]
+clang-tidy-utils = "clang_tidy_utils.cli:main"
+
+[tool.black]
+line-length = 100
+color = true
+preview = true
+
+[tool.docformatter]
+make-summary-multi-line = true
+pre-summary-newline = true
+recursive = true
+wrap-summaries = 100
+wrap-descriptions = 100
+
+[tool.mypy]
+explicit_package_bases = true
+strict = true
+pretty = true
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "I", "F"]
+isort.order-by-type = false
