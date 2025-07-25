@@ -2,9 +2,15 @@ name: "code-linting-checks"
 
 on:
   pull_request:
-    paths: ["**/*.yaml"]
+    paths:
+      - "**/*.py"
+      - "**/*.pyi"
+      - "**/*.yaml"
   push:
-    paths: ["**/*.yaml"]
+    paths:
+      - "**/*.py"
+      - "**/*.pyi"
+      - "**/*.yaml"
   schedule:
     # Run daily at 00:15 UTC (the 15 is to avoid periods of high load)
     - cron: "15 0 * * *"
@@ -34,6 +40,10 @@ jobs:
       - name: "Install task"
         shell: "bash"
         run: "npm install -g @go-task/cli"
+
+      - name: "Install uv"
+        shell: "bash"
+        run: "curl --fail --location --silent --show-error https://astral.sh/uv/install.sh | sh"
 
       - name: "Run lint task"
         shell: "bash"
