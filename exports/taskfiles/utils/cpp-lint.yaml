@@ -200,7 +200,7 @@ tasks:
             {{- end}}
       SOURCE_FILE_PATHS:
         ref: >-
-          splitList "\n" .SOURCE_FILE_PATHS_
+          compact (splitList "\n" .SOURCE_FILE_PATHS_)
     requires:
       vars: ["ROOT_PATHS", "VENV_DIR"]
     cmds:
