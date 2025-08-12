@@ -9,6 +9,7 @@ WarningsAsErrors: >-
 
 # Disabled checks:
 # - `bugprone-easily-swappable-parameters` because it's difficult to mitigate.
+# - `modernize-use-ranges` because we want to support compilations with llvm/apple clang 15.
 # - `portability-template-virtual-member-function` because we don't support MSVC compilers yet.
 # - `readability-identifier-length` because it's case-dependent.
 # - `readability-named-parameter` because we don't want to enforce that all parameters have a name.
@@ -24,6 +25,7 @@ Checks: >-
   cppcoreguidelines-*,
   misc-*,
   modernize-*,
+  -modernize-use-ranges,
   performance-*,
   portability-*,
   -portability-template-virtual-member-function,
