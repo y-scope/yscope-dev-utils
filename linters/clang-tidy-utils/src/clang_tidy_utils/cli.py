@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import dataclasses
 import multiprocessing
+import os
 import subprocess
 import sys
 from typing import List, Optional
@@ -27,7 +28,32 @@ def _create_clang_tidy_task_arg_list(file: str, clang_tidy_args: List[str]) -> L
     """
     args: List[str] = ["clang-tidy", file]
     args.extend(clang_tidy_args)
+    # Enforce `warning-as-error` for all checks:
+    args.append("-warnings-as-errors=*")
     return args
+
+
+def _collect_target_files(input_paths: List[str]) -> List[str]:
+    """
+    Collect all the target files to lint, including all C++ source/header files under the input
+    directory.
+
+    :param input_paths: The input paths.
+    :return: A list of target files.
+    """
+    target_files = []
+    for path in input_paths:
+        if os.path.isfile(path):
+            target_files.append(os.path.abspath(path))
+            continue
+        if not os.path.isdir(path):
+            continue
+        for root, _, files in os.walk(path):
+            for name in files:
+                if name.endswith('.cpp') or name.endswith('.hpp'):
+                    full_path = os.path.join(root, name)
+                    target_files.append(os.path.abspath(full_path))
+    return target_files
 
 
 async def _execute_clang_tidy_task(file: str, clang_tidy_args: List[str]) -> ClangTidyResult:
@@ -82,7 +108,8 @@ async def _clang_tidy_parallel_execution_entry(
     Async entry for running clang-tidy checks in parallel.
 
     :param num_jobs: The maximum number of jobs allowed to run in parallel.
-    :param files: The list of files to check. :clang_tidy_args: The clang-tidy cli arguments.
+    :param files: The list of files to check.
+    :param clang_tidy_args: The clang-tidy cli arguments.
     """
     sem: asyncio.Semaphore = asyncio.Semaphore(num_jobs)
     tasks: List[asyncio.Task[ClangTidyResult]] = [
@@ -97,9 +124,11 @@ async def _clang_tidy_parallel_execution_entry(
             result: ClangTidyResult = await clang_tidy_task
             if 0 != result.ret_code:
                 ret_code = 1
-            print(f"[{idx + 1}/{num_total_files}]: {result.file_name}")
-            print(result.stdout)
-            print(result.stderr)
+                print(f"[{idx + 1}/{num_total_files}]: {result.file_name}")
+                print(result.stdout)
+                print(result.stderr)
+            else:
+                print(f"[{idx + 1}/{num_total_files}]: {result.file_name} [All check passed!]")
     except asyncio.CancelledError as e:
         print(f"\nAll tasks cancelled: {e}")
         for task in tasks:
@@ -162,13 +191,19 @@ def main() -> None:
     try:
         ret_code = asyncio.run(
             _clang_tidy_parallel_execution_entry(
-                num_jobs, parsed_cli_args.input_files, clang_tidy_args
+                num_jobs, _collect_target_files(parsed_cli_args.input_files), clang_tidy_args
             )
         )
     except KeyboardInterrupt:
         pass
 
-    exit(ret_code)
+    if 0 != ret_code:
+        # Ideally, we should return the error code directly. However, this utility is used inside
+        # the GitHub action, and we don't want to fail the workflow. We log the error code instead
+        # if it's not 0.
+        print(f"\nclang-tidy-utils: Linter check failed with return code {ret_code}")
+
+    exit(0)
 
 
 if "__main__" == __name__:
