@@ -142,7 +142,8 @@ tasks:
   # @param {string} CMAKE_PACKAGE_NAME CMake package name.
   # @param {string} TAR_SHA256 Content hash to verify the downloaded tar file against.
   # @param {string} TAR_URL URL of the tar file to download.
-  # @param {string} WORK_DIR Directory in which to store the build, install, and source directories.
+  # @param {string} WORK_DIR Directory in which to store the build, install, and extraction
+  # directories.
   #
   # CMake parameters
   # @param {string[]} [CMAKE_BUILD_ARGS] Any additional arguments to pass to the CMake build
@@ -155,6 +156,8 @@ tasks:
   # omitted, the native build tool's default number is used. See `man cmake`.
   # @param {string} [CMAKE_SETTINGS_DIR] The directory where the project's CMake settings file
   # should be stored.
+  # @param {string} [CMAKE_SOURCE_DIR=.] The path, within the extraction directory, containing the
+  # project's top level CMakeLists.txt.
   # @param {string[]} [CMAKE_TARGETS] A list of specific targets to build instead of the default
   # target.
   install-remote-tar:
@@ -172,13 +175,15 @@ tasks:
         {{default "" .CMAKE_JOBS}}
       CMAKE_SETTINGS_DIR: >-
         {{default "" .CMAKE_SETTINGS_DIR}}
+      CMAKE_SOURCE_DIR: >-
+        {{default "." .CMAKE_SOURCE_DIR}}
       CMAKE_TARGETS:
         ref: "default (list) .CMAKE_TARGETS"
 
       # Directory parameters
       BUILD_DIR: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-build"
+      EXTRACTION_DIR: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-extracted"
       INSTALL_PREFIX: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-install"
-      SOURCE_DIR: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-src"
 
     requires:
       vars: ["CMAKE_PACKAGE_NAME", "TAR_SHA256", "TAR_URL", "WORK_DIR"]
@@ -186,7 +191,7 @@ tasks:
       - task: "remote:download-and-extract-tar"
         vars:
           FILE_SHA256: "{{.TAR_SHA256}}"
-          OUTPUT_DIR: "{{.SOURCE_DIR}}"
+          OUTPUT_DIR: "{{.EXTRACTION_DIR}}"
           URL: "{{.TAR_URL}}"
     cmds:
       - task: "generate"
@@ -194,7 +199,7 @@ tasks:
           BUILD_DIR: "{{.BUILD_DIR}}"
           EXTRA_ARGS:
             ref: ".CMAKE_GEN_ARGS"
-          SOURCE_DIR: "{{.SOURCE_DIR}}"
+          SOURCE_DIR: "{{.EXTRACTION_DIR}}/{{.CMAKE_SOURCE_DIR}}"
       - task: "build"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
