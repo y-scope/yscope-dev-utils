@@ -46,20 +46,29 @@ tasks:
     # Ignore errors so that dependent tasks don't fail
     ignore_error: true
 
+  # Validates the checksum of the given path include patterns matches the checksum in the given
+  # file. If `FAIL` is set to "true" the task will fail, otherwise the checksum file is deleted.
+  #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to validate the checksum for.
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
   # to exclude from the checksum.
+  # @param {string} [FAIL="false"] If set to "true" the task fails.
   validate:
-    desc: "Validates the checksum of the given directory matches the checksum in the given file, or
-    deletes the checksum file otherwise."
     internal: true
     label: "{{.TASK}}-{{.CHECKSUM_FILE}}"
-    silent: true
     vars:
+      FAIL: >-
+        {{- if (eq "true" .FAIL) -}}
+          true
+        {{- else}}
+          false
+        {{- end}}
       TMP_CHECKSUM_FILE: "{{.CHECKSUM_FILE}}.tmp"
     requires:
-      vars: ["CHECKSUM_FILE", "INCLUDE_PATTERNS"]
+      vars:
+        - "CHECKSUM_FILE"
+        - "INCLUDE_PATTERNS"
     cmds:
       - task: "compute"
         vars:
@@ -69,7 +78,6 @@ tasks:
             ref: "default (list) .EXCLUDE_PATTERNS"
           CHECKSUM_FILE: "{{.TMP_CHECKSUM_FILE}}"
       - defer: "rm -f '{{.TMP_CHECKSUM_FILE}}'"
-      # Check that all paths exist and the checksum matches; otherwise delete the checksum file.
       - |-
         (
           {{- range .INCLUDE_PATTERNS}}
@@ -78,4 +86,9 @@ tasks:
           done
           {{- end}}
           diff -q "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" 2> /dev/null
-        ) || rm -f "{{.CHECKSUM_FILE}}"
+        ) \
+        {{- if eq "true" .FAIL}}
+          || false
+        {{- else}}
+          || rm -f "{{.CHECKSUM_FILE}}"
+        {{- end}}
