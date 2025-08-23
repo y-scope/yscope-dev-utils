@@ -29,8 +29,7 @@ tasks:
         - "INSTALL_PREFIX"
         - "TARGETS"
         - "SOURCE_DIR"
-    sources:
-      - "{{.TASKFILE}}"
+    sources: ["{{.TASKFILE}}"]
     generates:
       - "{{.CHECKSUM_FILE}}"
       - "{{.SOURCE_SENTINEL_FILE}}"
@@ -38,8 +37,7 @@ tasks:
       - task: "checksum:validate"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS:
-            - "{{.SOURCE_DIR}}"
+          INCLUDE_PATTERNS: ["{{.SOURCE_DIR}}"]
     cmds:
       - >-
         pushd "{{.SOURCE_DIR}}";
@@ -55,8 +53,7 @@ tasks:
       - task: "checksum:compute"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS:
-            - "{{.SOURCE_DIR}}"
+          INCLUDE_PATTERNS: ["{{.SOURCE_DIR}}"]
 
   # Runs Boost's b2 build and install step.
   # Fails if the caller has not successfully called `generate` on `SOURCE_DIR`.
@@ -97,8 +94,7 @@ tasks:
         - "BUILD_DIR"
         - "INSTALL_PREFIX"
         - "SOURCE_DIR"
-    sources:
-      - "{{.TASKFILE}}"
+    sources: ["{{.TASKFILE}}"]
     generates:
       - "{{.BUILD_CHECKSUM_FILE}}"
       - "{{.INSTALL_CHECKSUM_FILE}}"
@@ -108,18 +104,15 @@ tasks:
       - task: "checksum:validate"
         vars:
           CHECKSUM_FILE: "{{.BUILD_CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS:
-            - "{{.BUILD_DIR}}"
+          INCLUDE_PATTERNS: ["{{.BUILD_DIR}}"]
       - task: "checksum:validate"
         vars:
           CHECKSUM_FILE: "{{.INSTALL_CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS:
-            - "{{.INSTALL_PREFIX}}"
+          INCLUDE_PATTERNS: ["{{.INSTALL_PREFIX}}"]
       - task: "checksum:validate"
         vars:
           CHECKSUM_FILE: "{{.SOURCE_CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS:
-            - "{{.SOURCE_DIR}}"
+          INCLUDE_PATTERNS: ["{{.SOURCE_DIR}}"]
           FAIL: "true"
     cmds:
       - >-
@@ -138,18 +131,15 @@ tasks:
       - task: "checksum:compute"
         vars:
           CHECKSUM_FILE: "{{.BUILD_CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS:
-            - "{{.BUILD_DIR}}"
+          INCLUDE_PATTERNS: ["{{.BUILD_DIR}}"]
       - task: "checksum:compute"
         vars:
           CHECKSUM_FILE: "{{.INSTALL_CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS:
-            - "{{.INSTALL_PREFIX}}"
+          INCLUDE_PATTERNS: ["{{.INSTALL_PREFIX}}"]
       - task: "checksum:compute"
         vars:
           CHECKSUM_FILE: "{{.SOURCE_CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS:
-            - "{{.SOURCE_DIR}}"
+          INCLUDE_PATTERNS: ["{{.SOURCE_DIR}}"]
 
   # Downloads Boost from `URL` and then generates, builds, and installs Boost inside `WORK_DIR`. If
   # `CMAKE_SETTINGS_DIR` is set, a settings file will be created in that directory, containing a
