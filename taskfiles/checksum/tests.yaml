@@ -44,7 +44,6 @@ tasks:
             exit 1
         fi
 
-
   checksum-test-skip:
     vars:
       OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
