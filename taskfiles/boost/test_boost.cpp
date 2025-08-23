@@ -11,7 +11,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
-#include <boost/process/v2.hpp>
+#include <boost/process/v2/process.hpp>
 #include <boost/process/v2/stdio.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
