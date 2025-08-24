@@ -40,16 +40,16 @@ tasks:
       - "test -e '{{.FILE_1}}'"
 
       - defer: |-
-          echo "[debug] rerun {{.EXIT_CODE}}"
+          echo "[debug] rerun exit code: {{.EXIT_CODE}}"
       - "cat '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'"
       - |-
         if cmp --silent "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
           echo "[debug] '{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF}}' should differ."
           exit 1
         else
-          echo "[debug] '{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF}}' match."
+          echo "[debug] '{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF}}' differ!!"
         fi
-      - "[debug] rerun finished."
+      - "echo '[debug] rerun finished.'"
 
       - "! cmp --silent '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'"
 
