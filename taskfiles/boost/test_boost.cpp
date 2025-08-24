@@ -103,7 +103,7 @@ auto test_process() -> bool {
                 io_context,
                 boost::dll::program_location(),
                 {"--help"},
-                boost::process::process_stdio{.in{}, .out{nullptr}, .err{nullptr}}
+                boost::process::v2::process_stdio{.in{}, .out{nullptr}, .err{nullptr}}
         };
         std::future<int> result = process.async_wait(boost::asio::use_future);
         io_context.run();

@@ -141,8 +141,8 @@ tasks:
           CHECKSUM_FILE: "{{.SOURCE_CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.SOURCE_DIR}}"]
 
-  # Downloads Boost from `URL` and then generates, builds, and installs Boost inside `WORK_DIR`. If
-  # `CMAKE_SETTINGS_DIR` is set, a settings file will be created in that directory, containing a
+  # Downloads Boost from `TAR_URL` and then generates, builds, and installs Boost inside `WORK_DIR`.
+  # If `CMAKE_SETTINGS_DIR` is set, a settings file will be created in that directory, containing a
   # `Boost_ROOT` CMake variable that points to `INSTALL_PREFIX`.
   #
   # General parameters
@@ -162,7 +162,7 @@ tasks:
   # @param {string[]} [TARGETS] Target libraries to build.
   download-and-install:
     internal: true
-    label: "{{.TASK}}:{{.URL}}-{{.WORK_DIR}}"
+    label: "{{.TASK}}:{{.TAR_URL}}-{{.WORK_DIR}}"
     vars:
       # Directory parameters
       BUILD_DIR: "{{.WORK_DIR}}/boost-build"
