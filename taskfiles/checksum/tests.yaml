@@ -22,8 +22,6 @@ tasks:
       FILE_0: "{{.SRC_DIR}}/0.txt"
       FILE_1: "{{.SRC_DIR}}/1.txt"
     cmds:
-      - defer: |-
-          echo "[debug] rerun {{.EXIT_CODE}}"
       - task: "checksum-test-init"
         vars:
           OUTPUT_DIR: "{{.OUTPUT_DIR}}"
@@ -40,13 +38,7 @@ tasks:
       # Test create-dir-with-checksum ran the second time.
       - "test ! -e '{{.FILE_0}}'"
       - "test -e '{{.FILE_1}}'"
-      - |-
-        if cmp --silent "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
-          echo "'{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF}}' should differ."
-        else
-          echo "[debug] cmp failed successfully."
-        fi
-      - "echo '[debug] rerun finished.'"
+      - "! cmp --silent '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'"
 
   checksum-test-skip:
     vars:
@@ -113,11 +105,7 @@ tasks:
       - "test ! -e '{{.FILE_1}}'"
       - "cmp --silent  '{{.FILE_0}}'  '{{.CHECKSUM_FILE_REF0}}'"
       - "cmp --silent '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
-      - |-
-        if cmp --silent "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF0}}"; then
-          echo "'{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF0}}' should differ."
-          exit 1
-        fi
+      - "! cmp --silent '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}'"
 
   checksum-test-init:
     internal: true
