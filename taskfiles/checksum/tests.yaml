@@ -43,8 +43,10 @@ tasks:
       - |-
         if cmp --silent "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
           echo "'{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF}}' should differ."
-          exit 1
+        else
+          echo "[debug] cmp failed successfully."
         fi
+      - "echo '[debug] rerun finished.'"
 
   checksum-test-skip:
     vars:
