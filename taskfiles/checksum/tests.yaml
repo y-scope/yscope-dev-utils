@@ -105,7 +105,8 @@ tasks:
       - "test ! -e '{{.FILE_1}}'"
       - "cmp --silent  '{{.FILE_0}}'  '{{.CHECKSUM_FILE_REF0}}'"
       - "cmp --silent '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
-      - "! cmp --silent '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}'"
+      - "cat '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}'"
+      - "! cmp '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}'"
 
   checksum-test-init:
     internal: true
