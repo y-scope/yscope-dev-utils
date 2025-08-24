@@ -34,7 +34,8 @@ jobs:
         shell: "bash"
         # run: "npm install -g @go-task/cli"
         run: >-
-          curl --fail --location --silent --show-error https://taskfile.dev/install.sh | sh -s -- -d
+          curl --fail --location --silent --show-error https://taskfile.dev/install.sh
+          | sh -s -- -d -b /usr/local/bin
 
       - name: "Install uv"
         shell: "bash"
