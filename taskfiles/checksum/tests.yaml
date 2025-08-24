@@ -39,7 +39,7 @@ tasks:
       - "test ! -e '{{.FILE_0}}'"
       - "test -e '{{.FILE_1}}'"
       - |-
-        if cmp --silent "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
+        if diff -q "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
             echo "'{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF}}' should differ."
             exit 1
         fi
@@ -110,7 +110,7 @@ tasks:
       - "diff <(cat '{{.FILE_0}}') <(cat '{{.CHECKSUM_FILE_REF0}}')"
       - "diff -q '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
       - |-
-        if cmp --silent "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF0}}"; then
+        if diff -q "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF0}}"; then
             echo "'{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF0}}' should differ."
             exit 1
         fi
