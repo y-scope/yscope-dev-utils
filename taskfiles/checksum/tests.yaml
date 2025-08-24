@@ -53,7 +53,6 @@ tasks:
 
       - "! cmp --silent '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'"
 
-
   checksum-test-skip:
     vars:
       OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
