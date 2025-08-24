@@ -39,4 +39,4 @@ jobs:
         run: "curl --fail --location --silent --show-error https://astral.sh/uv/install.sh | sh"
 
       - name: "Run unit tests"
-        run: "task test"
+        run: "task test -v"

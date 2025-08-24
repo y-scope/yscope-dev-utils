@@ -22,6 +22,8 @@ tasks:
       FILE_0: "{{.SRC_DIR}}/0.txt"
       FILE_1: "{{.SRC_DIR}}/1.txt"
     cmds:
+      - defer: |-
+          echo "[debug] rerun {{.EXIT_CODE}}"
       - task: "checksum-test-init"
         vars:
           OUTPUT_DIR: "{{.OUTPUT_DIR}}"
