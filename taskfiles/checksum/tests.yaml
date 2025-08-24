@@ -39,9 +39,9 @@ tasks:
       - "test ! -e '{{.FILE_0}}'"
       - "test -e '{{.FILE_1}}'"
       - |-
-        if diff -q "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
-            echo "'{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF}}' should differ."
-            exit 1
+        if cmp --silent "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
+          echo "'{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF}}' should differ."
+          exit 1
         fi
 
   checksum-test-skip:
@@ -70,7 +70,7 @@ tasks:
       # Test create-dir-with-checksum didn't run the second time.
       - "test -e '{{.FILE_0}}'"
       - "test ! -e '{{.FILE_1}}'"
-      - "diff '{{.CHECKSUM_MOD_TS}}' <(date -r '{{.CHECKSUM_FILE}}')"
+      - "cmp --silent '{{.CHECKSUM_MOD_TS}}' <(date -r '{{.CHECKSUM_FILE}}')"
 
   checksum-test-update:
     vars:
@@ -107,12 +107,12 @@ tasks:
       # Test create-dir-with-checksum didn't run the second time.
       - "test -e '{{.FILE_0}}'"
       - "test ! -e '{{.FILE_1}}'"
-      - "diff <(cat '{{.FILE_0}}') <(cat '{{.CHECKSUM_FILE_REF0}}')"
-      - "diff -q '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
+      - "cmp --silent  '{{.FILE_0}}'  '{{.CHECKSUM_FILE_REF0}}'"
+      - "cmp --silent '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
       - |-
-        if diff -q "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF0}}"; then
-            echo "'{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF0}}' should differ."
-            exit 1
+        if cmp --silent "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF0}}"; then
+          echo "'{{.CHECKSUM_FILE}}' and '{{.CHECKSUM_FILE_REF0}}' should differ."
+          exit 1
         fi
 
   checksum-test-init:
