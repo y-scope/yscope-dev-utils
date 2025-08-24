@@ -40,7 +40,7 @@ tasks:
       - "test -e '{{.FILE_1}}'"
       - |-
         cmp "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"
-        test $? -eq 1
+        test $? -eq 1 && exit 0 || exit 1
 
   checksum-test-skip:
     vars:
@@ -109,7 +109,7 @@ tasks:
       - "cmp --silent '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
       - |-
         cmp "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF0}}"
-        test $? -eq 1
+        test $? -eq 1 && exit 0 || exit 1
 
   checksum-test-init:
     internal: true
