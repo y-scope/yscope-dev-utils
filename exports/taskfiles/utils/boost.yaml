@@ -168,10 +168,6 @@ tasks:
       BUILD_DIR: "{{.WORK_DIR}}/boost-build"
       INSTALL_PREFIX: "{{.WORK_DIR}}/boost-install"
       SOURCE_DIR: "{{.WORK_DIR}}/boost-src"
-
-      # Checksum parameters
-      BUILD_AND_INSTALL_CHECKSUM_FILE: "{{.WORK_DIR}}/boost-build-install.md5"
-      SOURCE_CHECKSUM_FILE: "{{.SOURCE_DIR}}.md5"
     requires:
       vars:
         - "TAR_SHA256"
@@ -186,7 +182,6 @@ tasks:
     cmds:
       - task: "generate"
         vars:
-          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INSTALL_PREFIX: "{{.INSTALL_PREFIX}}"
           SOURCE_DIR: "{{.SOURCE_DIR}}"
           TARGETS:
@@ -195,10 +190,8 @@ tasks:
             ref: ".GENERATE_ARGS"
       - task: "build-and-install"
         vars:
-          BUILD_AND_INSTALL_CHECKSUM_FILE: "{{.BUILD_AND_INSTALL_CHECKSUM_FILE}}"
           BUILD_DIR: "{{.BUILD_DIR}}"
           INSTALL_PREFIX: "{{.INSTALL_PREFIX}}"
-          SOURCE_CHECKSUM_FILE: "{{.SOURCE_CHECKSUM_FILE}}"
           SOURCE_DIR: "{{.SOURCE_DIR}}"
           EXTRA_ARGS:
             ref: ".BUILD_AND_INSTALL_ARGS"

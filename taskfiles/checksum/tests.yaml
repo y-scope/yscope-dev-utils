@@ -124,7 +124,7 @@ tasks:
     requires:
       vars: ["OUTPUT_DIR"]
     cmds:
-      - "rm -rf {{.OUTPUT_DIR}}*"
+      - "rm -rf '{{.OUTPUT_DIR}}'"
       - "mkdir -p '{{.OUTPUT_DIR}}'"
 
   create-dir-with-checksum:
