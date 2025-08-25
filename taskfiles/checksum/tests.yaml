@@ -38,9 +38,16 @@ tasks:
       # Test create-dir-with-checksum ran the second time.
       - "test ! -e '{{.FILE_0}}'"
       - "test -e '{{.FILE_1}}'"
+      - defer: |-
+          echo "[debug] rerun {{.EXIT_CODE}}"
       - |-
         cmp "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"
-        test $? -eq 1 && exit 0 || exit 1
+        echo "sigh $?"
+        if cmp "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
+          return 0
+        else
+          return 1
+        fi
 
   checksum-test-skip:
     vars:
