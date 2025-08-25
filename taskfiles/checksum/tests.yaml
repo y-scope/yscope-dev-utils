@@ -38,7 +38,6 @@ tasks:
       # Test create-dir-with-checksum ran the second time and created a different checksum.
       - "test ! -e '{{.FILE_0}}'"
       - "test -e '{{.FILE_1}}'"
-      - "cmp -h"
       - "echo \"$(cmp '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}')\""
       - |-
         if cmp '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'; then
