@@ -44,6 +44,23 @@ tasks:
         {{- range .INCLUDE_PATTERNS}}
         {{.}}
         {{- end}}
+      - >-
+        {{.TAR}}
+        --create
+        --file -
+        --group 0
+        --mtime "UTC 1970-01-01"
+        --numeric-owner
+        --owner 0
+        --sort name
+        --no-anchored
+        --wildcards
+        {{- range .EXCLUDE_PATTERNS}}
+        --exclude="{{.}}"
+        {{- end}}
+        {{- range .INCLUDE_PATTERNS}}
+        {{.}}
+        {{- end}}
         2> /dev/null
         | md5sum > {{.CHECKSUM_FILE}}
     # Ignore errors so that dependent tasks don't fail
