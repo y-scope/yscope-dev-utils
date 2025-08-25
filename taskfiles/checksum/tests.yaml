@@ -40,10 +40,12 @@ tasks:
       - "test -e '{{.FILE_1}}'"
       - "shopt -o"
       - |-
+        shopt -u errexit
         if cmp -s "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
           exit 1
         fi
         echo $?
+      - "cmp -h"
 
   checksum-test-skip:
     vars:
