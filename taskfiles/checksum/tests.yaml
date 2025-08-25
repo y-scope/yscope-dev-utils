@@ -38,9 +38,8 @@ tasks:
       # Test create-dir-with-checksum ran the second time and created a different checksum.
       - "test ! -e '{{.FILE_0}}'"
       - "test -e '{{.FILE_1}}'"
-      - "! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}' && true"
       - "! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'; echo $?"
-      - "! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'"
+      - "(! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}') && exit $?"
 
   checksum-test-skip:
     vars:
@@ -108,7 +107,8 @@ tasks:
       - "test ! -e '{{.FILE_1}}'"
       - "cmp -s '{{.FILE_0}}'  '{{.CHECKSUM_FILE_REF0}}'"
       - "cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
-      - "set -o pipefail; ! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}' && true"
+      - "! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}'; echo $?"
+      - "(! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}') && exit $?"
 
   checksum-test-init:
     internal: true
