@@ -35,12 +35,12 @@ tasks:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           FILE_PATH: "{{.FILE_1}}"
 
-      # Test create-dir-with-checksum ran the second time.
+      # Test create-dir-with-checksum ran the second time and created a different checksum.
       - "test ! -e '{{.FILE_0}}'"
       - "test -e '{{.FILE_1}}'"
-      - "echo $SHELL"
-      - "echo $(diff '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}')"
-      - "! diff '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'; echo $?"
+      - "! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}' && true"
+      - "! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'; echo $?"
+      - "! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'"
 
   checksum-test-skip:
     vars:
@@ -65,10 +65,10 @@ tasks:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           FILE_PATH: "{{.FILE_1}}"
 
-      # Test create-dir-with-checksum didn't run the second time.
+      # Test create-dir-with-checksum didn't run the second time and the checksum is unmodified.
       - "test -e '{{.FILE_0}}'"
       - "test ! -e '{{.FILE_1}}'"
-      - "diff -q '{{.CHECKSUM_MOD_TS}}' <(date -r '{{.CHECKSUM_FILE}}')"
+      - "cmp -s '{{.CHECKSUM_MOD_TS}}' <(date -r '{{.CHECKSUM_FILE}}')"
 
   checksum-test-update:
     vars:
@@ -102,12 +102,13 @@ tasks:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           FILE_PATH: "{{.FILE_1}}"
 
-      # Test create-dir-with-checksum didn't run the second time.
+      # Test create-dir-with-checksum didn't run the second time and the updated checksum is
+      # different from the original.
       - "test -e '{{.FILE_0}}'"
       - "test ! -e '{{.FILE_1}}'"
-      - "diff -q '{{.FILE_0}}'  '{{.CHECKSUM_FILE_REF0}}'"
-      - "diff -q '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
-      - "! diff '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}' && true"
+      - "cmp -s '{{.FILE_0}}'  '{{.CHECKSUM_FILE_REF0}}'"
+      - "cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
+      - "set -o pipefail; ! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}' && true"
 
   checksum-test-init:
     internal: true
