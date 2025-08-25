@@ -39,13 +39,8 @@ tasks:
       - "test ! -e '{{.FILE_0}}'"
       - "test -e '{{.FILE_1}}'"
       - |-
-        set -o
         set +e
-        set -o
-        if cmp -s "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
-          exit 1
-        fi
-        echo $?
+        ! cmp -s "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"
 
   checksum-test-skip:
     vars:
@@ -112,7 +107,9 @@ tasks:
       - "test ! -e '{{.FILE_1}}'"
       - "cmp -s  '{{.FILE_0}}'  '{{.CHECKSUM_FILE_REF0}}'"
       - "cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
-      - "! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}'"
+      - |-
+        set +e
+        ! cmp -s "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF0}}"
 
   checksum-test-init:
     internal: true
