@@ -156,9 +156,9 @@ tasks:
           INCLUDE_PATTERNS: ["{{.DIR}}"]
     cmds:
       - |-
-        rm -rf "{{.DIR}}"
+        rm -rf "{{.DIR}}/"
         mkdir -p "{{.DIR}}"
-        echo "{{.FILE_PATH}}" > "{{.FILE_PATH}}"
+        touch "{{.FILE_PATH}}"
       - task: "checksum:compute"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
