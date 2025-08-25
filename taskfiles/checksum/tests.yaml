@@ -38,7 +38,9 @@ tasks:
       # Test create-dir-with-checksum ran the second time.
       - "test ! -e '{{.FILE_0}}'"
       - "test -e '{{.FILE_1}}'"
-      - "! diff '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}' && true"
+      - "echo $SHELL"
+      - "echo $(diff '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}')"
+      - "! diff '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'; echo $?"
 
   checksum-test-skip:
     vars:
