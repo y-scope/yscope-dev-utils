@@ -39,13 +39,37 @@ tasks:
       - "test ! -e '{{.FILE_0}}'"
       - "test -e '{{.FILE_1}}'"
       - |-
-        echo "checksum_file"
         date -r '{{.CHECKSUM_FILE}}'
         cat '{{.CHECKSUM_FILE}}'
       - |-
-        echo "checksum_file"
         date -r '{{.CHECKSUM_FILE_REF}}'
         cat '{{.CHECKSUM_FILE_REF}}'
+      - >-
+        tar
+        --create
+        --file -
+        --group 0
+        --mtime "UTC 1970-01-01"
+        --numeric-owner
+        --owner 0
+        --sort name
+        --no-anchored
+        --wildcards
+        "{{.SRC_DIR}}"
+      - >-
+        tar
+        --create
+        --file -
+        --group 0
+        --mtime "UTC 1970-01-01"
+        --numeric-owner
+        --owner 0
+        --sort name
+        --no-anchored
+        --wildcards
+        "{{.SRC_DIR}}"
+        2> /dev/null
+        | md5sum
       - |-
         if cmp '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'; then
           exit 1
@@ -167,4 +191,4 @@ tasks:
       - task: "checksum:compute"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS: ["{{.DIR}}/*"]
+          INCLUDE_PATTERNS: ["{{.DIR}}"]
