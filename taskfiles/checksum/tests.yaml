@@ -43,7 +43,6 @@ tasks:
       - "cmp --help"
       - "shopt -o"
       - "shopt -po"
-      - "shopt -p"
       - "set -o"
       - |-
         if cmp "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
