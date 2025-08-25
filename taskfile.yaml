@@ -4,7 +4,7 @@ includes:
   lint: "./taskfiles/lint/main.yaml"
   tests: "./taskfiles/tests.yaml"
 
-set: ["u"]
+set: ["u", "pipefail"]
 shopt: ["globstar"]
 
 vars:
