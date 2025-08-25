@@ -158,7 +158,7 @@ tasks:
       - |-
         rm -rf "{{.DIR}}"
         mkdir -p "{{.DIR}}"
-        touch "{{.FILE_PATH}}"
+        echo "{{.FILE_PATH}}" > "{{.FILE_PATH}}"
       - task: "checksum:compute"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
