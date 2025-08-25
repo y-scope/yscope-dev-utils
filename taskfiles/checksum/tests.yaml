@@ -38,13 +38,9 @@ tasks:
       # Test create-dir-with-checksum ran the second time.
       - "test ! -e '{{.FILE_0}}'"
       - "test -e '{{.FILE_1}}'"
-      - defer: |-
-          echo "[debug] rerun {{.EXIT_CODE}}"
-      - "cmp --help"
       - "shopt -o"
       - |-
-        if cmp --silent "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
-          echo "checksums shouldn't match"
+        if cmp -s "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
           exit 1
         fi
         echo $?
@@ -75,7 +71,7 @@ tasks:
       # Test create-dir-with-checksum didn't run the second time.
       - "test -e '{{.FILE_0}}'"
       - "test ! -e '{{.FILE_1}}'"
-      - "cmp --silent '{{.CHECKSUM_MOD_TS}}' <(date -r '{{.CHECKSUM_FILE}}')"
+      - "cmp -s '{{.CHECKSUM_MOD_TS}}' <(date -r '{{.CHECKSUM_FILE}}')"
 
   checksum-test-update:
     vars:
@@ -112,9 +108,9 @@ tasks:
       # Test create-dir-with-checksum didn't run the second time.
       - "test -e '{{.FILE_0}}'"
       - "test ! -e '{{.FILE_1}}'"
-      - "cmp --silent  '{{.FILE_0}}'  '{{.CHECKSUM_FILE_REF0}}'"
-      - "cmp --silent '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
-      - "! cmp '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}'"
+      - "cmp -s  '{{.FILE_0}}'  '{{.CHECKSUM_FILE_REF0}}'"
+      - "cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
+      - "! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}'"
 
   checksum-test-init:
     internal: true
