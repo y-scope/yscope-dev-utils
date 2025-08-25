@@ -44,7 +44,7 @@ tasks:
         2> /dev/null
         | md5sum > {{.CHECKSUM_FILE}}
     # Ignore errors so that dependent tasks don't fail
-    ignore_error: true
+    # ignore_error: true
 
   # Validates the checksum of the given path include patterns matches the checksum in the given
   # file. If `FAIL` is set to "true" the task will fail, otherwise the checksum file is deleted.
