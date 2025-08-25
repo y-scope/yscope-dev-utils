@@ -12,7 +12,10 @@ tasks:
     desc: "Tries to compute a checksum for the given paths and output it to a file."
     internal: true
     label: "{{.TASK}}-{{.CHECKSUM_FILE}}"
-    silent: true
+    # silent: true
+    vars:
+      TAR: >-
+        {{if eq OS "darwin"}}gtar{{else}}tar{{end}}
     requires:
       vars: ["CHECKSUM_FILE", "INCLUDE_PATTERNS"]
     cmds:
@@ -25,7 +28,7 @@ tasks:
       # passed to `tar` as arguments. If the input patterns are passed to `tar` with quotes, the
       # pattern won't be evaluated and will instead be treated literally.
       - >-
-        tar
+        {{.TAR}}
         --create
         --file -
         --group 0
@@ -44,7 +47,7 @@ tasks:
         2> /dev/null
         | md5sum > {{.CHECKSUM_FILE}}
     # Ignore errors so that dependent tasks don't fail
-    ignore_error: true
+    # ignore_error: true
 
   # Validates the checksum of the given path include patterns matches the checksum in the given
   # file. If `FAIL` is set to "true" the task will fail, otherwise the checksum file is deleted.
@@ -82,10 +85,10 @@ tasks:
         (
           {{- range .INCLUDE_PATTERNS}}
           for path in {{.}}; do
-            test -e "$path"
+            test -e "$path" || exit 1
           done
           {{- end}}
-          diff -q "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" 2> /dev/null
+          cmp -s "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}"
         ) \
         {{- if eq "true" .FAIL}}
           || false

@@ -21,6 +21,9 @@ tasks:
       CHECKSUM_FILE_REF: "{{.CHECKSUM_FILE}}.ref"
       FILE_0: "{{.SRC_DIR}}/0.txt"
       FILE_1: "{{.SRC_DIR}}/1.txt"
+
+      ARCHIVER: >-
+        {{if eq OS "darwin"}}gtar{{else}}tar{{end}}
     cmds:
       - task: "checksum-test-init"
         vars:
@@ -45,7 +48,7 @@ tasks:
         date -r '{{.CHECKSUM_FILE_REF}}'
         cat '{{.CHECKSUM_FILE_REF}}'
       - >-
-        tar
+        {{.ARCHIVER}}
         --create
         --file -
         --group 0
@@ -57,7 +60,7 @@ tasks:
         --wildcards
         "{{.SRC_DIR}}"
       - >-
-        tar
+        {{.ARCHIVER}}
         --create
         --file -
         --group 0
