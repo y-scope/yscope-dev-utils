@@ -42,16 +42,12 @@ tasks:
           echo "[debug] rerun {{.EXIT_CODE}}"
       - "cmp --help"
       - "shopt -o"
-      - "shopt -po"
-      - "set -o"
       - |-
-        if cmp "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
-          echo "true $?"
-          exit 0
-        else
-          echo "false $?"
+        if cmp --silent "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
+          echo "checksums shouldn't match"
           exit 1
         fi
+        echo $?
 
   checksum-test-skip:
     vars:
@@ -118,9 +114,7 @@ tasks:
       - "test ! -e '{{.FILE_1}}'"
       - "cmp --silent  '{{.FILE_0}}'  '{{.CHECKSUM_FILE_REF0}}'"
       - "cmp --silent '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
-      - |-
-        cmp "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF0}}"
-        test $? -eq 1 && exit 0 || exit 1
+      - "! cmp '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}'"
 
   checksum-test-init:
     internal: true
