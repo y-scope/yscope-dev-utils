@@ -38,5 +38,9 @@ jobs:
         shell: "bash"
         run: "curl --fail --location --silent --show-error https://astral.sh/uv/install.sh | sh"
 
+      - if: "'macos-15' == matrix.os"
+        run: |-
+          brew install coreutils
+
       - name: "Run unit tests"
         run: "task test --concurrency 1 --verbose"
