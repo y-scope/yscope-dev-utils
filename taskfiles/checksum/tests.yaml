@@ -41,7 +41,10 @@ tasks:
       - defer: |-
           echo "[debug] rerun {{.EXIT_CODE}}"
       - "cmp --help"
-      - printf %s\\n "$-"
+      - "shopt -o"
+      - "shopt -po"
+      - "shopt -p"
+      - "set -o"
       - |-
         if cmp "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
           echo "true $?"
