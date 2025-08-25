@@ -40,12 +40,13 @@ tasks:
       - "test -e '{{.FILE_1}}'"
       - defer: |-
           echo "[debug] rerun {{.EXIT_CODE}}"
+      - "cmp --help"
       - |-
-        cmp "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"
-        echo "sigh $?"
         if cmp "{{.CHECKSUM_FILE}}" "{{.CHECKSUM_FILE_REF}}"; then
+          echo "true $?"
           return 0
         else
+          echo "false $?"
           return 1
         fi
 
