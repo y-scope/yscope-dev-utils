@@ -112,9 +112,15 @@ tasks:
       - "cmp -s '{{.FILE_0}}'  '{{.CHECKSUM_FILE_REF0}}'"
       - "cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
       - |-
-        if cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}'; then
+        if ! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}'; then
+          exit 0
+        else
           exit 1
         fi
+      - |-
+         if ! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'; then
+           exit 1
+         fi
 
   checksum-test-init:
     internal: true
