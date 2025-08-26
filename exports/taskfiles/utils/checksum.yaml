@@ -17,7 +17,7 @@ tasks:
       FAIL: "{{if eq \"false\" .FAIL}}false{{else}}true{{end}}"
       TAR: "{{if eq OS \"darwin\"}}gtar{{else}}tar{{end}}"
       ERR_LOG:
-        sh: mktemp
+        sh: "mktemp"
     requires:
       vars:
         - "CHECKSUM_FILE"
@@ -80,7 +80,7 @@ tasks:
       TMP_CHECKSUM_FILE: "{{.CHECKSUM_FILE}}.tmp"
 
       ERR_LOG:
-        sh: mktemp
+        sh: "mktemp"
     requires:
       vars:
         - "CHECKSUM_FILE"
