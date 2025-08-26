@@ -12,6 +12,14 @@ Before you submit a pull request, ensure you follow the testing and linting inst
 * [Task] 3.40 or higher
 * [uv] 0.7.10 or higher
 
+### MacOS
+
+The exported tasks use GNU utilities that are not always pre-installed on MacOS. You may need to
+install the following brew packages:
+
+* [coreutils]
+* [gnu-tar]
+
 ## Testing
 
 To run all tests:
@@ -42,5 +50,7 @@ To clean up any generated files:
 task clean
 ```
 
+[coreutils]: https://formulae.brew.sh/formula/coreutils
+[gnu-tar]: https://formulae.brew.sh/formula/gnu-tar
 [Task]: https://taskfile.dev/
 [uv]: https://docs.astral.sh/uv
