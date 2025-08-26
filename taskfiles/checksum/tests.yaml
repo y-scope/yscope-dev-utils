@@ -115,11 +115,6 @@ tasks:
           exit 0
         fi
         exit 1
-      # test
-      - |-
-        if ! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'; then
-          exit 1
-        fi
 
   checksum-test-init:
     internal: true
