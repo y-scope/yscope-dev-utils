@@ -30,7 +30,7 @@ tasks:
       # input patterns cannot be quoted since they're evaluated by the shell and the results are
       # passed to `tar` as arguments. If the input patterns are passed to `tar` with quotes, the
       # pattern won't be evaluated and will instead be treated literally.
-      - defer: "rm '{{.TMP_ERR_LOG}}'"
+      - defer: "rm -f '{{.TMP_ERR_LOG}}'"
       - |-
         if ! \
           {{.TAR}} \
@@ -92,8 +92,8 @@ tasks:
           CHECKSUM_FILE: "{{.TMP_CHECKSUM_FILE}}"
           FAIL: "false"
       - defer: |-
-          rm "{{.TMP_CHECKSUM_FILE}}"
-          rm "{{.TMP_ERR_LOG}}"
+          rm -f "{{.TMP_CHECKSUM_FILE}}"
+          rm -f "{{.TMP_ERR_LOG}}"
       - |-
         (
           {{- range .INCLUDE_PATTERNS}}
