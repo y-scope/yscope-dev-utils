@@ -57,7 +57,7 @@ tasks:
             2> "{{.TMP_ERR_LOG}}" \
                 | md5sum > "{{.CHECKSUM_FILE}}" \
         ; then
-          rm "{{.CHECKSUM_FILE}}"
+          rm -f "{{.CHECKSUM_FILE}}"
           {{- if eq "true" .FAIL}}
             printf "[{{.TASK}} error] failed with:\n%s\n" "$(cat {{.TMP_ERR_LOG}})"
             exit 1
