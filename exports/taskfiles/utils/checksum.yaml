@@ -108,10 +108,11 @@ tasks:
                 > "{{.TMP_ERR_LOG}}"
               exit 1
             )
-        ) || \
+        ) || ( \
           {{- if eq "true" .FAIL}}
             echo "[{{.TASK}} error] failed with:\n$(cat {{.TMP_ERR_LOG}})"
             exit 1
           {{- else}}
             rm -f "{{.CHECKSUM_FILE}}"
           {{- end}}
+          )
