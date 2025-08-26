@@ -1,8 +1,10 @@
 version: "3"
 
 tasks:
-  # Compute the checksum of the given path include patterns saving the result to `CHECKSUM_FILE`. A
-  # calling task can set `FAIL` to false if they wish to continue after errors.
+
+  # Compute the checksum of the given path include/exclude patterns, saving the result to
+  # `CHECKSUM_FILE`. The calling task can set `FAIL` to "false" if they wish to continue if checksum
+  # computation fails.
   #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to compute the checksum for.
@@ -63,10 +65,10 @@ tasks:
           {{- end}}
         fi
 
-  # Validates the checksum of the given path include patterns matches the checksum in the given
-  # file. If validation fails the checksum file is deleted so that a calling task with the checksum
-  # file in their `generates` field will be reran. A calling task can set `FAIL` to true if they
-  # wish to halt on failure.
+  # Validates the checksum of the given path include/exclude patterns matches the checksum in the
+  # given file. If validation fails the checksum file is deleted, but the task succeeds so that the
+  # calling task will be reran (by using the checksum file in their `generates` field). The calling
+  # task can set `FAIL` to "true" if they wish for this task to fail if validation fails.
   #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to validate the checksum for.
