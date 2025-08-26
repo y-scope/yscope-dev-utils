@@ -38,27 +38,28 @@ tasks:
       - defer: "rm -f '{{.TMP_ERR_LOG}}'"
       - |-
         if ! \
-          {{.TAR}} \
-          --create \
-          --file - \
-          --group 0 \
-          --mtime "UTC 1970-01-01" \
-          --numeric-owner \
-          --owner 0 \
-          --sort name \
-          --no-anchored \
-          --wildcards \
-          {{- range .EXCLUDE_PATTERNS}}
-          --exclude="{{.}}" \
-          {{- end}}
-          {{- range .INCLUDE_PATTERNS}}
-          {{.}} \
-          {{- end}}
-          2> {{.TMP_ERR_LOG}} \
-            | md5sum > {{.CHECKSUM_FILE}} \
+            {{.TAR}} \
+            --create \
+            --file - \
+            --group 0 \
+            --mtime "UTC 1970-01-01" \
+            --numeric-owner \
+            --owner 0 \
+            --sort name \
+            --no-anchored \
+            --wildcards \
+            {{- range .EXCLUDE_PATTERNS}}
+            --exclude="{{.}}" \
+            {{- end}}
+            {{- range .INCLUDE_PATTERNS}}
+            {{.}} \
+            {{- end}}
+            2> "{{.TMP_ERR_LOG}}" \
+                | md5sum > "{{.CHECKSUM_FILE}}" \
         ; then
+          rm "{{.CHECKSUM_FILE}}"
           {{- if eq "true" .FAIL}}
-            echo "[{{.TASK}} error] tar failed with:\n$(cat {{.TMP_ERR_LOG}})"
+            printf "[{{.TASK}} error] failed with:\n%s\n" "$(cat {{.TMP_ERR_LOG}})"
             exit 1
           {{- else}}
             exit 0
@@ -102,22 +103,28 @@ tasks:
       - |-
         (
           {{- range .INCLUDE_PATTERNS}}
-          for path in {{.}}; do
-            test -e "$path" \
-              || (echo "Include path does not exist: $path" > "{{$.TMP_ERR_LOG}}"; exit 1)
-          done
+            for path in {{.}}; do
+              test -e "${path}" \
+                  || (
+                    echo "Include path does not exist: ${path}" > "{{$.TMP_ERR_LOG}}"
+                    exit 1
+                  )
+            done && \
           {{- end}}
-          cmp -s "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" \
+              (
+                cmp -s "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" \
+                || (
+                  echo "cmp failed for '{{.TMP_CHECKSUM_FILE}}' '{{.CHECKSUM_FILE}}'" \
+                    > "{{.TMP_ERR_LOG}}"
+                  exit 1
+                  )
+              )
+        ) \
             || (
-              echo "cmp failed for '{{.TMP_CHECKSUM_FILE}}' '{{.CHECKSUM_FILE}}'" \
-                > "{{.TMP_ERR_LOG}}"
-              exit 1
+              {{- if eq "true" .FAIL}}
+                printf "[{{.TASK}} error] failed with:\n%s\n" "$(cat {{.TMP_ERR_LOG}})"
+                exit 1
+              {{- else}}
+                rm -f "{{.CHECKSUM_FILE}}"
+              {{- end}}
             )
-        ) || ( \
-          {{- if eq "true" .FAIL}}
-            echo "[{{.TASK}} error] failed with:\n$(cat {{.TMP_ERR_LOG}})"
-            exit 1
-          {{- else}}
-            rm -f "{{.CHECKSUM_FILE}}"
-          {{- end}}
-          )
