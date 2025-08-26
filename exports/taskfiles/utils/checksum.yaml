@@ -1,20 +1,27 @@
 version: "3"
 
-set: ["u", "pipefail"]
-shopt: ["globstar"]
-
 tasks:
+  # Compute the checksum of the given path include patterns saving the result to `CHECKSUM_FILE`. A
+  # calling task can set `FAIL` to false if they wish to continue after errors.
+  #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to compute the checksum for.
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
   # to exclude from the checksum.
+  # @param {string} [FAIL="true"] If set to "false" the task will not fail.
   compute:
-    desc: "Tries to compute a checksum for the given paths and output it to a file."
     internal: true
     label: "{{.TASK}}-{{.CHECKSUM_FILE}}"
     silent: true
+    vars:
+      FAIL: "{{if eq \"false\" .FAIL}}false{{else}}true{{end}}"
+      TAR: "{{if eq OS \"darwin\"}}gtar{{else}}tar{{end}}"
+      ERR_LOG:
+        sh: mktemp
     requires:
-      vars: ["CHECKSUM_FILE", "INCLUDE_PATTERNS"]
+      vars:
+        - "CHECKSUM_FILE"
+        - "INCLUDE_PATTERNS"
     cmds:
       # We explicitly set `--no-anchored` and `--wildcards` to make the inclusion behaviour match
       # the default exclusion behaviour.
@@ -24,42 +31,60 @@ tasks:
       # input patterns cannot be quoted since they're evaluated by the shell and the results are
       # passed to `tar` as arguments. If the input patterns are passed to `tar` with quotes, the
       # pattern won't be evaluated and will instead be treated literally.
-      - >-
-        tar
-        --create
-        --file -
-        --group 0
-        --mtime "UTC 1970-01-01"
-        --numeric-owner
-        --owner 0
-        --sort name
-        --no-anchored
-        --wildcards
-        {{- range .EXCLUDE_PATTERNS}}
-        --exclude="{{.}}"
-        {{- end}}
-        {{- range .INCLUDE_PATTERNS}}
-        {{.}}
-        {{- end}}
-        2> /dev/null
-        | md5sum > {{.CHECKSUM_FILE}}
-    # Ignore errors so that dependent tasks don't fail
-    ignore_error: true
+      - defer: "rm '{{.ERR_LOG}}'"
+      - |-
+        if ! \
+          {{.TAR}} \
+          --create \
+          --file - \
+          --group 0 \
+          --mtime "UTC 1970-01-01" \
+          --numeric-owner \
+          --owner 0 \
+          --sort name \
+          --no-anchored \
+          --wildcards \
+          {{- range .EXCLUDE_PATTERNS}}
+          --exclude="{{.}}" \
+          {{- end}}
+          {{- range .INCLUDE_PATTERNS}}
+          {{.}} \
+          {{- end}}
+          2> {{.ERR_LOG}} \
+            | md5sum > {{.CHECKSUM_FILE}} \
+        ; then
+          {{- if eq "true" .FAIL}}
+            echo "[{{.TASK}} error] tar failed with:\n$(cat {{.ERR_LOG}})"
+            exit 1
+          {{- else}}
+            exit 0
+          {{- end}}
+        fi
 
+  # Validates the checksum of the given path include patterns matches the checksum in the given
+  # file. If validation fails the checksum file is deleted so that a calling task with the checksum
+  # file in their `generates` field will be reran. A calling task can set `FAIL` to true if they
+  # wish to halt on failure.
+  #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to validate the checksum for.
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
   # to exclude from the checksum.
+  # @param {string} [FAIL="false"] If set to "true" the task fails.
   validate:
-    desc: "Validates the checksum of the given directory matches the checksum in the given file, or
-    deletes the checksum file otherwise."
     internal: true
     label: "{{.TASK}}-{{.CHECKSUM_FILE}}"
     silent: true
     vars:
+      FAIL: "{{if eq \"true\" .FAIL}}true{{else}}false{{end}}"
       TMP_CHECKSUM_FILE: "{{.CHECKSUM_FILE}}.tmp"
+
+      ERR_LOG:
+        sh: mktemp
     requires:
-      vars: ["CHECKSUM_FILE", "INCLUDE_PATTERNS"]
+      vars:
+        - "CHECKSUM_FILE"
+        - "INCLUDE_PATTERNS"
     cmds:
       - task: "compute"
         vars:
@@ -68,14 +93,25 @@ tasks:
           EXCLUDE_PATTERNS:
             ref: "default (list) .EXCLUDE_PATTERNS"
           CHECKSUM_FILE: "{{.TMP_CHECKSUM_FILE}}"
+          FAIL: "false"
       - defer: "rm -f '{{.TMP_CHECKSUM_FILE}}'"
-      # Check that all paths exist and the checksum matches; otherwise delete the checksum file.
       - |-
         (
+          {{- $err_log := .ERR_LOG}}
           {{- range .INCLUDE_PATTERNS}}
           for path in {{.}}; do
-            test -e "$path"
+            test -e "$path" || (echo "Include path does not exist: $path" > $err_log; exit 1)
           done
           {{- end}}
-          diff -q "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" 2> /dev/null
-        ) || rm -f "{{.CHECKSUM_FILE}}"
+          cmp -s "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" \
+            || (
+              echo "cmp failed for '{{.TMP_CHECKSUM_FILE}}' '{{.CHECKSUM_FILE}}'" > "{{.ERR_LOG}}"
+              exit 1
+            )
+        ) || \
+          {{- if eq "true" .FAIL}}
+            echo "[{{.TASK}} error] failed with:\n$(cat {{.ERR_LOG}})"
+            exit 1
+          {{- else}}
+            rm -f "{{.CHECKSUM_FILE}}"
+          {{- end}}
