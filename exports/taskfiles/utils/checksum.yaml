@@ -94,13 +94,15 @@ tasks:
             ref: "default (list) .EXCLUDE_PATTERNS"
           CHECKSUM_FILE: "{{.TMP_CHECKSUM_FILE}}"
           FAIL: "false"
-      - defer: "rm -f '{{.TMP_CHECKSUM_FILE}}'"
+      - defer: |-
+          rm -f "{{.TMP_CHECKSUM_FILE}}"
+          rm "{{.ERR_LOG}}"
       - |-
         (
           {{- $err_log := .ERR_LOG}}
           {{- range .INCLUDE_PATTERNS}}
           for path in {{.}}; do
-            test -e "$path" || (echo "Include path does not exist: $path" > $err_log; exit 1)
+            test -e "$path" || (echo "Include path does not exist: $path" > "{{$err_log}}"; exit 1)
           done
           {{- end}}
           cmp -s "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" \
