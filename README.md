@@ -12,13 +12,13 @@ Before you submit a pull request, ensure you follow the testing and linting inst
 * [Task] 3.40 or higher
 * [uv] 0.7.10 or higher
 
-### MacOS
+### macOS
 
-The exported tasks use GNU utilities that are not always pre-installed on MacOS. You may need to
-install the following brew packages:
+The exported tasks use GNU utilities that are not always pre-installed on macOS. You may need to
+install the following brew packages and add their executables to your PATH:
 
-* [coreutils]
-* [gnu-tar]
+* [coreutils]\: `md5sum`
+* [gnu-tar]\: `gtar`
 
 ## Testing
 
