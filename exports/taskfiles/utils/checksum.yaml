@@ -16,8 +16,7 @@ tasks:
     vars:
       FAIL: "{{if eq \"false\" .FAIL}}false{{else}}true{{end}}"
       TAR: "{{if eq OS \"darwin\"}}gtar{{else}}tar{{end}}"
-      ERR_LOG:
-        sh: "mktemp"
+      TMP_ERR_LOG: "{{.CHECKSUM_FILE}}.log.tmp"
     requires:
       vars:
         - "CHECKSUM_FILE"
@@ -31,7 +30,7 @@ tasks:
       # input patterns cannot be quoted since they're evaluated by the shell and the results are
       # passed to `tar` as arguments. If the input patterns are passed to `tar` with quotes, the
       # pattern won't be evaluated and will instead be treated literally.
-      - defer: "rm '{{.ERR_LOG}}'"
+      - defer: "rm '{{.TMP_ERR_LOG}}'"
       - |-
         if ! \
           {{.TAR}} \
@@ -50,11 +49,11 @@ tasks:
           {{- range .INCLUDE_PATTERNS}}
           {{.}} \
           {{- end}}
-          2> {{.ERR_LOG}} \
+          2> {{.TMP_ERR_LOG}} \
             | md5sum > {{.CHECKSUM_FILE}} \
         ; then
           {{- if eq "true" .FAIL}}
-            echo "[{{.TASK}} error] tar failed with:\n$(cat {{.ERR_LOG}})"
+            echo "[{{.TASK}} error] tar failed with:\n$(cat {{.TMP_ERR_LOG}})"
             exit 1
           {{- else}}
             exit 0
@@ -78,9 +77,7 @@ tasks:
     vars:
       FAIL: "{{if eq \"true\" .FAIL}}true{{else}}false{{end}}"
       TMP_CHECKSUM_FILE: "{{.CHECKSUM_FILE}}.tmp"
-
-      ERR_LOG:
-        sh: "mktemp"
+      TMP_ERR_LOG: "{{.CHECKSUM_FILE}}.log.tmp"
     requires:
       vars:
         - "CHECKSUM_FILE"
@@ -95,24 +92,25 @@ tasks:
           CHECKSUM_FILE: "{{.TMP_CHECKSUM_FILE}}"
           FAIL: "false"
       - defer: |-
-          rm -f "{{.TMP_CHECKSUM_FILE}}"
-          rm "{{.ERR_LOG}}"
+          rm "{{.TMP_CHECKSUM_FILE}}"
+          rm "{{.TMP_ERR_LOG}}"
       - |-
         (
-          {{- $err_log := .ERR_LOG}}
           {{- range .INCLUDE_PATTERNS}}
           for path in {{.}}; do
-            test -e "$path" || (echo "Include path does not exist: $path" > "{{$err_log}}"; exit 1)
+            test -e "$path" \
+              || (echo "Include path does not exist: $path" > "{{$.TMP_ERR_LOG}}"; exit 1)
           done
           {{- end}}
           cmp -s "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" \
             || (
-              echo "cmp failed for '{{.TMP_CHECKSUM_FILE}}' '{{.CHECKSUM_FILE}}'" > "{{.ERR_LOG}}"
+              echo "cmp failed for '{{.TMP_CHECKSUM_FILE}}' '{{.CHECKSUM_FILE}}'" \
+                > "{{.TMP_ERR_LOG}}"
               exit 1
             )
         ) || \
           {{- if eq "true" .FAIL}}
-            echo "[{{.TASK}} error] failed with:\n$(cat {{.ERR_LOG}})"
+            echo "[{{.TASK}} error] failed with:\n$(cat {{.TMP_ERR_LOG}})"
             exit 1
           {{- else}}
             rm -f "{{.CHECKSUM_FILE}}"
