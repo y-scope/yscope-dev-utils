@@ -14,7 +14,10 @@ tasks:
     label: "{{.TASK}}-{{.CHECKSUM_FILE}}"
     silent: true
     vars:
+      EXCLUDE_PATTERNS:
+        ref: "default (list) .EXCLUDE_PATTERNS"
       FAIL: "{{if eq \"false\" .FAIL}}false{{else}}true{{end}}"
+
       TAR: "{{if eq OS \"darwin\"}}gtar{{else}}tar{{end}}"
       TMP_ERR_LOG: "{{.CHECKSUM_FILE}}.log.tmp"
     requires:
@@ -85,11 +88,11 @@ tasks:
     cmds:
       - task: "compute"
         vars:
+          CHECKSUM_FILE: "{{.TMP_CHECKSUM_FILE}}"
           INCLUDE_PATTERNS:
             ref: ".INCLUDE_PATTERNS"
           EXCLUDE_PATTERNS:
-            ref: "default (list) .EXCLUDE_PATTERNS"
-          CHECKSUM_FILE: "{{.TMP_CHECKSUM_FILE}}"
+            ref: ".EXCLUDE_PATTERNS"
           FAIL: "false"
       - defer: |-
           rm -f "{{.TMP_CHECKSUM_FILE}}"
