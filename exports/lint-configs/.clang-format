@@ -105,7 +105,7 @@ MacrosSkippedByRemoveParentheses: []
 MainIncludeChar: "Quote"
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: "None"
-OneLineFormatOffRegex: "^// NOLINT"
+OneLineFormatOffRegex: "^// clang-format offoneline($|: )"
 PPIndentWidth: -1
 PackConstructorInitializers: "CurrentLine"
 PenaltyBreakOpenParenthesis: 25
