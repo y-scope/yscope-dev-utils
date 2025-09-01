@@ -73,7 +73,7 @@ DerivePointerAlignment: false
 DisableFormat: false
 EmptyLineAfterAccessModifier: "Never"
 EmptyLineBeforeAccessModifier: "LogicalBlock"
-EnumTrailingComma: Leave
+EnumTrailingComma: "Leave"
 FixNamespaceComments: true
 IncludeBlocks: "Regroup"
 IndentAccessModifiers: false
