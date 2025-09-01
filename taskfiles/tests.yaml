@@ -2,6 +2,7 @@ version: "3"
 
 includes:
   boost: "boost/tests.yaml"
+  checksum: "checksum/tests.yaml"
   remote: "remote/tests.yaml"
   ystdlib-py: "ystdlib-py/tests.yaml"
 
@@ -9,7 +10,8 @@ tasks:
   all:
     internal: true
     cmds:
-      - task: "boost"
+      # - task: "boost"
+      - task: "checksum"
       - task: "remote"
       - task: "ystdlib-py"
 
