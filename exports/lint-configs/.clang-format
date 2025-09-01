@@ -57,7 +57,7 @@ BreakBeforeBinaryOperators: "All"
 BreakBeforeBraces: "Custom"
 BreakBeforeConceptDeclarations: "Always"
 BreakBeforeInlineASMColon: "OnlyMultiline"
-BreakBeforeTemplateCloser: false
+BreakBeforeTemplateCloser: true
 BreakBeforeTernaryOperators: true
 BreakBinaryOperations: "Never"
 BreakConstructorInitializers: "BeforeColon"
