@@ -101,6 +101,7 @@ KeepEmptyLines:
 KeepFormFeed: false
 LambdaBodyIndentation: "Signature"
 LineEnding: "LF"
+MacrosSkippedByRemoveParentheses: []
 MainIncludeChar: "Quote"
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: "None"
