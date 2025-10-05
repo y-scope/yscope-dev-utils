@@ -1,6 +1,7 @@
 version: "3"
 
 includes:
+  misc: "misc.yaml"
   remote: "remote.yaml"
 
 set: ["u", "pipefail"]
@@ -227,8 +228,7 @@ tasks:
   # @param {string} CMAKE_SETTINGS_DIR The directory where CMake settings files should be stored.
   # @param {string} DEP_TASK The task to run that will install all dependencies. NOTE:
   # - The task name must be qualified from the root of the project.
-  # - The task must not require any arguments (to use a task with arguments create a new task that
-  #   calls the original with any arguments set).
+  # - The task takes in CMAKE_SETTINGS_DIR and CMAKE_SETTINGS_FILE as optional arguments.
   # - Dependencies must write their settings file to CMAKE_SETTINGS_DIR in order to have them
   #   included in CMAKE_SETTINGS_FILE.
   # @param {string} [CMAKE_SETTINGS_FILE={{.CMAKE_SETTINGS_DIR}}/all.cmake] The file in which to
@@ -242,12 +242,21 @@ tasks:
     requires:
       vars: ["CMAKE_SETTINGS_DIR", "DEP_TASK"]
     cmds:
-      - "rm -rf {{.CMAKE_SETTINGS_DIR}}"
-      - "mkdir -p {{.CMAKE_SETTINGS_DIR}}"
+      - task: "misc:reset-dir"
+        vars:
+          DIR_PATH: "{{.CMAKE_SETTINGS_DIR}}"
+      - task: "misc:reset-file"
+        vars:
+          DIR_PATH: "{{.CMAKE_SETTINGS_FILE}}"
 
       # NOTE: We prefix DEP_TASK with `::` assuming that this taskfile is included through the
       # `utils` taskfile, and that in turn is included in the user's taskfile.
       - task: "::{{.DEP_TASK}}"
+        vars:
+          CMAKE_SETTINGS_DIR: {{.CMAKE_SETTINGS_DIR}}
+          CMAKE_SETTINGS_FILE: {{.CMAKE_SETTINGS_FILE}}
+
+      # Combine CMake settings
       - |-
         for file in {{.CMAKE_SETTINGS_DIR}}/*.cmake; do
           if [[ "$file" != "{{.CMAKE_SETTINGS_FILE}}" ]]; then
