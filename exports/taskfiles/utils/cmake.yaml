@@ -253,8 +253,8 @@ tasks:
       # `utils` taskfile, and that in turn is included in the user's taskfile.
       - task: "::{{.DEP_TASK}}"
         vars:
-          CMAKE_SETTINGS_DIR: {{.CMAKE_SETTINGS_DIR}}
-          CMAKE_SETTINGS_FILE: {{.CMAKE_SETTINGS_FILE}}
+          CMAKE_SETTINGS_DIR: "{{.CMAKE_SETTINGS_DIR}}"
+          CMAKE_SETTINGS_FILE: "{{.CMAKE_SETTINGS_FILE}}"
 
       # Combine CMake settings
       - |-
