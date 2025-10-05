@@ -247,7 +247,7 @@ tasks:
           DIR_PATH: "{{.CMAKE_SETTINGS_DIR}}"
       - task: "misc:reset-file"
         vars:
-          DIR_PATH: "{{.CMAKE_SETTINGS_FILE}}"
+          FILE_PATH: "{{.CMAKE_SETTINGS_FILE}}"
 
       # NOTE: We prefix DEP_TASK with `::` assuming that this taskfile is included through the
       # `utils` taskfile, and that in turn is included in the user's taskfile.
@@ -256,7 +256,6 @@ tasks:
           CMAKE_SETTINGS_DIR: "{{.CMAKE_SETTINGS_DIR}}"
           CMAKE_SETTINGS_FILE: "{{.CMAKE_SETTINGS_FILE}}"
 
-      # Combine CMake settings
       - |-
         for file in {{.CMAKE_SETTINGS_DIR}}/*.cmake; do
           if [[ "$file" != "{{.CMAKE_SETTINGS_FILE}}" ]]; then
