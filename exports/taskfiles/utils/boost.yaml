@@ -8,7 +8,7 @@ set: ["u", "pipefail"]
 shopt: ["globstar"]
 
 tasks:
-  # Generates `GENERATE_DIR` by copying `SOURCE_DIR` and then running boost's bootstrap step.
+  # Generates `GENERATE_DIR` by copying `SOURCE_DIR` and then running Boost's bootstrap step.
   #
   # @param {string} SOURCE_DIR Project source directory.
   # @param {string} GENERATE_DIR Directory in which to generate `b2` and the build configuration.
@@ -54,19 +54,17 @@ tasks:
           INCLUDE_PATTERNS:
             - "{{.GENERATE_DIR}}"
 
-  # Runs boost's b2 build and install step, and creates a CMake settings file. The caller must have
+  # Runs Boost's b2 build and install step, and creates a CMake settings file. The caller must have
   # previously called `generate` on `SOURCE_DIR` (to produce the `GENERATE_DIR`) for this task to
   # succeed.
   #
-  # @param {string} GENERATE_DIR Directory containing boost's source and build files.
-  # @param {string} BUILD_DIR Directory in which to build boost.
+  # @param {string} GENERATE_DIR Directory containing Boost's source and build files.
+  # @param {string} BUILD_DIR Directory in which to build Boost.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the build command.
   # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
   # omitted, the b2 default number is used. Before 1.76.0, the number was 1. Since 1.76.0, the
   # default is the number of cores.
-  # @param {string} [CMAKE_SETTINGS_DIR] If set, the directory where the project's CMake settings
-  # file should be stored.
   build-and-install:
     internal: true
     vars:
@@ -89,21 +87,13 @@ tasks:
           "-j{{.JOBS}}"
         {{- end}};
         popd;
-      - >-
-        {{- if .CMAKE_SETTINGS_DIR}}
-          echo "set(Boost_ROOT
-            \"{{.INSTALL_PREFIX}}\"
-            CACHE PATH
-            \"Package root for Boost.\"
-          )" >> "{{.CMAKE_SETTINGS_DIR}}/Boost.cmake"
-        {{- end}}
 
-  # Downloads boost from `URL` and installs boost.
+  # Downloads Boost from `URL` and installs Boost.
   #
   # General parameters
   # @param {string} [WORK_DIR={{.ROOT_DIR}}] Base directory in which to store the source, generate,
   # build, and install directories.
-  # @param {string} [SOURCE_DIR={{.WORK_DIR}}/boost-src] Directory in which to extract the tar
+  # @param {string} [SOURCE_DIR={{.WORK_DIR}}/Boost-src] Directory in which to extract the tar
   # file.
   #
   # Download parameters
@@ -111,41 +101,40 @@ tasks:
   # @param {string} URL
   #
   # Boost generate parameters
-  # @param {string} [GENERATE_DIR={{.WORK_DIR}}/boost-generate] Directory in which to generate the
+  # @param {string} [GENERATE_DIR={{.WORK_DIR}}/Boost-generate] Directory in which to generate the
   # project build files.
-  # @param {string} [GENERATE_CHECKSUM_FILE={{.WORK_DIR}}/boost-generate.md5] Checksum file for the
+  # @param {string} [GENERATE_CHECKSUM_FILE={{.WORK_DIR}}/Boost-generate.md5] Checksum file for the
   # generate directory.
-  # @param {string} [INSTALL_PREFIX={{.WORK_DIR}}/boost-install] Path prefix of where the project
+  # @param {string} [INSTALL_PREFIX={{.WORK_DIR}}/Boost-install] Path prefix of where the project
   # should be installed.
   # @param {string[]} [TARGETS] Target libraries to build.
   # @param {string[]} [GENERATE_ARGS] Any additional arguments to pass to the generate command.
   #
   # Boost build-and-install parameters
-  # @param {string} [BUILD_DIR={{.WORK_DIR}}/boost-build] Directory in which to build the project.
+  # @param {string} [BUILD_DIR={{.WORK_DIR}}/Boost-build] Directory in which to build the project.
   # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
   # omitted, the b2 default number is used. Before 1.76.0, the number was 1. Since 1.76.0, the
   # default is the number of cores.
-  # @param {string[]} [BUILD_AND_INSTALL_ARGS] Any additional arguments to pass to boost's build
+  # @param {string[]} [BUILD_AND_INSTALL_ARGS] Any additional arguments to pass to Boost's build
   # and install command.
-  # @param {string} [CMAKE_SETTINGS_DIR] If set, the directory where the project's CMake settings
-  # file should be stored.
   download-and-install:
     internal: true
     label: "{{.TASK}}:{{.URL}}-{{.INSTALL_PREFIX}}"
     vars:
       # General parameters
+      BOOST_PACKAGE_NAME: "Boost"
       WORK_DIR: >-
         {{default .ROOT_DIR .WORK_DIR}}
       SOURCE_DIR: >-
-        {{default (printf "%s/boost-src" .WORK_DIR) .SOURCE_DIR}}
+        {{default (printf "%s/%s-src" .WORK_DIR .BOOST_PACKAGE_NAME) .SOURCE_DIR}}
 
       # Boost generate parameters
       GENERATE_DIR: >-
-        {{default (printf "%s/boost-generate" .WORK_DIR) .GENERATE_DIR}}
+        {{default (printf "%s/%s-generate" .WORK_DIR .BOOST_PACKAGE_NAME) .GENERATE_DIR}}
       GENERATE_CHECKSUM_FILE: >-
-        {{default (printf "%s/boost-generate.md5" .WORK_DIR) .GENERATE_CHECKSUM_FILE}}
+        {{default (printf "%s.md5" .GENERATE_DIR) .GENERATE_CHECKSUM_FILE}}
       INSTALL_PREFIX: >-
-        {{default (printf "%s/boost-install" .WORK_DIR) .INSTALL_PREFIX}}
+        {{default (printf "%s/%s-install" .WORK_DIR .BOOST_PACKAGE_NAME) .INSTALL_PREFIX}}
       TARGETS:
         ref: "default (list) .TARGETS"
       GENERATE_ARGS:
@@ -153,15 +142,16 @@ tasks:
 
       # Boost build-and-install parameters
       BUILD_DIR: >-
-        {{default (printf "%s/boost-build" .WORK_DIR) .BUILD_DIR}}
+        {{default (printf "%s/%s-build" .WORK_DIR .BOOST_PACKAGE_NAME) .BUILD_DIR}}
       BUILD_AND_INSTALL_ARGS:
         ref: "default (list) .BUILD_AND_INSTALL_ARGS"
       JOBS: >-
         {{default "" .JOBS}}
-      CMAKE_SETTINGS_DIR: >-
-        {{default "" .CMAKE_SETTINGS_DIR}}
     requires:
       vars: ["FILE_SHA256", "URL"]
+    # TODO: use install directory checksum to properly decide if the task is up-to-date. Right now,
+    # the task gets re-run for each unique task label.
+    run: "when_changed"
     deps:
       - task: "remote:download-and-extract-tar"
         vars:
@@ -187,4 +177,3 @@ tasks:
           EXTRA_ARGS:
             ref: ".BUILD_AND_INSTALL_ARGS"
           JOBS: "{{.JOBS}}"
-          CMAKE_SETTINGS_DIR: "{{.CMAKE_SETTINGS_DIR}}"
