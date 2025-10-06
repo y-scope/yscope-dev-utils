@@ -41,3 +41,25 @@ tasks:
         . "{{.OUTPUT_DIR}}/bin/activate"
         pip3 install --upgrade pip
         pip3 install --upgrade -r "{{.REQUIREMENTS_FILE}}"
+
+  reset-dir:
+    desc: "Removes the given directory and create it empty. Runs once per directory path."
+    internal: true
+    label: "{{.TASK}}:{{.DIR_PATH}}"
+    requires:
+      vars: ["DIR_PATH"]
+    run: "when_changed"
+    cmds:
+      - "rm -rf {{.DIR_PATH}}"
+      - "mkdir -p {{.DIR_PATH}}"
+
+  reset-file:
+    desc: "Removes the given file. Runs once per file path."
+    internal: true
+    label: "{{.TASK}}:{{.FILE_PATH}}"
+    requires:
+      vars: ["FILE_PATH"]
+    run: "when_changed"
+    cmds:
+      - "rm -rf {{.FILE_PATH}}"
+      - "mkdir -p $(dirname -- {{.FILE_PATH}})"
