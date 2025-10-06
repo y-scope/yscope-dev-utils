@@ -206,6 +206,7 @@ tasks:
     label: "{{.TASK}}:{{.CMAKE_PACKAGE_NAME}}-{{.CMAKE_SETTINGS_DIR}}-{{.PACKAGE_INSTALL_PREFIX}}"
     requires:
       vars: ["CMAKE_PACKAGE_NAME", "CMAKE_SETTINGS_DIR", "PACKAGE_INSTALL_PREFIX"]
+    run: "when_changed"
     cmds:
       - "mkdir -p {{.CMAKE_SETTINGS_DIR}}"
       - >-
