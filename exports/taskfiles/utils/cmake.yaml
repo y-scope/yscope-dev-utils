@@ -203,9 +203,11 @@ tasks:
     deps:
       - task: "remote:download-and-extract-tar"
         vars:
-          EXCLUDE_PATTERNS: "{{.TAR_EXCLUDE_PATTERNS}}"
+          EXCLUDE_PATTERNS:
+            ref: ".TAR_EXCLUDE_PATTERNS"
           FILE_SHA256: "{{.TAR_SHA256}}"
-          INCLUDE_PATTERNS: "{{.TAR_INCLUDE_PATTERNS}}"
+          INCLUDE_PATTERNS:
+            ref: ".TAR_INCLUDE_PATTERNS"
           NUM_COMPONENTS_TO_STRIP: "{{.TAR_NUM_COMPONENTS_TO_STRIP}}"
           OUTPUT_DIR: "{{.EXTRACTION_DIR}}"
           URL: "{{.TAR_URL}}"
