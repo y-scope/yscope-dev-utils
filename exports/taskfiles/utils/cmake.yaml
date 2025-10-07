@@ -160,6 +160,12 @@ tasks:
   # project's top level CMakeLists.txt.
   # @param {string[]} [CMAKE_TARGETS] A list of specific targets to build instead of the default
   # target.
+  #
+  # Tar extraction parameters
+  # @param {string[]} [TAR_EXCLUDE_PATTERNS] Path wildcard patterns that should not be extracted.
+  # @param {string[]} [TAR_INCLUDE_PATTERNS] Path wildcard patterns to extract.
+  # @param {int} [TAR_NUM_COMPONENTS_TO_STRIP=1] Number of leading path components to strip from the
+  # extracted files.
   install-remote-tar:
     internal: true
     label: "{{.TASK}}:{{.CMAKE_PACKAGE_NAME}}-{{.TAR_URL}}-{{.INSTALL_PREFIX}}"
@@ -180,6 +186,13 @@ tasks:
       CMAKE_TARGETS:
         ref: "default (list) .CMAKE_TARGETS"
 
+      # Tar extraction parameters
+      TAR_EXCLUDE_PATTERNS:
+        ref: "default (list) .TAR_EXCLUDE_PATTERNS"
+      TAR_INCLUDE_PATTERNS:
+        ref: "default (list) .TAR_INCLUDE_PATTERNS"
+      TAR_NUM_COMPONENTS_TO_STRIP: "{{default 1 .TAR_NUM_COMPONENTS_TO_STRIP}}"
+
       # Directory parameters
       BUILD_DIR: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-build"
       EXTRACTION_DIR: "{{.WORK_DIR}}/{{.CMAKE_PACKAGE_NAME}}-extracted"
@@ -190,7 +203,10 @@ tasks:
     deps:
       - task: "remote:download-and-extract-tar"
         vars:
+          EXCLUDE_PATTERNS: "{{.TAR_EXCLUDE_PATTERNS}}"
           FILE_SHA256: "{{.TAR_SHA256}}"
+          INCLUDE_PATTERNS: "{{.TAR_INCLUDE_PATTERNS}}"
+          NUM_COMPONENTS_TO_STRIP: "{{.TAR_NUM_COMPONENTS_TO_STRIP}}"
           OUTPUT_DIR: "{{.EXTRACTION_DIR}}"
           URL: "{{.TAR_URL}}"
     cmds:
