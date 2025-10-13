@@ -39,7 +39,7 @@ tasks:
         vars:
           DIR_PATH: "{{.GENERATE_DIR}}"
       - >-
-        rsync -a "{{.SOURCE_DIR}}" "{{.GENERATE_DIR}}"
+        rsync -a "{{.SOURCE_DIR}}"/ "{{.GENERATE_DIR}}"/
         pushd "{{.GENERATE_DIR}}";
         ./bootstrap.sh
         --prefix="{{.INSTALL_PREFIX}}"

@@ -29,7 +29,7 @@ tasks:
     cmds:
       - task: "misc:reset-file"
         vars:
-          FILE_PATH: "{{.OUTPUT_FILE}}}"
+          FILE_PATH: "{{.OUTPUT_FILE}}"
       - |-
         max_attempts=3
         attempt=1
