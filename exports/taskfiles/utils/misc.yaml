@@ -63,7 +63,7 @@ tasks:
       - "mkdir -p -- '{{.DIR_PATH}}'"
 
   reset-file:
-    desc: "Removes the given file and creates its parent directory. Runs once unique per file path."
+    desc: "Removes the given file and creates its parent directory. Runs once per unique file path."
     internal: true
     label: "{{.TASK}}:{{.FILE_PATH}}"
     vars:
