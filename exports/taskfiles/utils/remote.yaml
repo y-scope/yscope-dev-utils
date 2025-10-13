@@ -12,14 +12,12 @@ tasks:
   #
   # @param {string} URL
   # @param {string} FILE_SHA256 Content hash to verify the downloaded file against.
-  # @param {string} [OUTPUT_FILE={{(base .URL)}}] Path where the file should be stored.
+  # @param {string} OUTPUT_FILE Path where the file should be stored.
   curl:
     internal: true
     label: "{{.TASK}}-{{.OUTPUT_FILE}}"
-    vars:
-      OUTPUT_FILE: "{{default (base .URL) .OUTPUT_FILE}}"
     requires:
-      vars: ["FILE_SHA256", "URL"]
+      vars: ["FILE_SHA256", "OUTPUT_FILE", "URL"]
     generates: ["{{.OUTPUT_FILE}}"]
     status:
       - |-
