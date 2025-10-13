@@ -50,6 +50,13 @@ tasks:
     label: "{{.TASK}}:{{.DIR_PATH}}"
     requires:
       vars: ["DIR_PATH"]
+    preconditions:
+      - sh: >-
+          case "{{.DIR_PATH}}" in
+            /*) exit 0;;
+            *) exit 1;;
+          esac
+        msg: "DIR_PATH {{.DIR_PATH}} is not absolute."
     run: "when_changed"
     cmds:
       - "rm -rf -- '{{.DIR_PATH}}'"
@@ -63,6 +70,13 @@ tasks:
       PARENT_DIR: "{{ dir .FILE_PATH }}"
     requires:
       vars: ["FILE_PATH"]
+    preconditions:
+      - sh: >-
+          case "{{.FILE_PATH}}" in
+            /*) exit 0;;
+            *) exit 1;;
+          esac
+        msg: "FILE_PATH {{.FILE_PATH}} is not absolute."
     run: "when_changed"
     cmds:
       - "rm -f -- '{{.FILE_PATH}}'"
