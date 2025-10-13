@@ -45,7 +45,7 @@ tasks:
         pip3 install --upgrade -r "{{.REQUIREMENTS_FILE}}"
 
   reset-dir:
-    desc: "Removes the directory at the given path and creates it empty."
+    desc: "Clears the directory at the given path without removal of the directory itself."
     internal: true
     label: "{{.TASK}}:{{.DIR_PATH}}"
     requires:
@@ -61,8 +61,11 @@ tasks:
         msg: "DIR_PATH `{{.DIR_PATH}}` is not absolute."
     run: "when_changed"
     cmds:
-      - "rm -rf -- '{{.DIR_PATH}}'"
-      - "mkdir -p -- '{{.DIR_PATH}}'"
+      - |-
+        mkdir -p -- "{{.DIR_PATH}}"
+        find -- "{{.DIR_PATH}}" \
+          \( -path "{{.DIR_PATH}}" \) -o \
+          \( -prune -exec rm -rf -- {} + \)
 
   reset-file:
     desc: "Removes the file at the given path and makes sure its parent directory exists."
