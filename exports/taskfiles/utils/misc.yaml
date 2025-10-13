@@ -45,7 +45,7 @@ tasks:
         pip3 install --upgrade -r "{{.REQUIREMENTS_FILE}}"
 
   reset-dir:
-    desc: "Clears the contents inside the given directory. Runs once per unique directory path."
+    desc: "Removes the directory at the given path and creates it empty."
     internal: true
     label: "{{.TASK}}:{{.DIR_PATH}}"
     requires:
@@ -65,7 +65,7 @@ tasks:
       - "mkdir -p -- '{{.DIR_PATH}}'"
 
   reset-file:
-    desc: "Removes the given file and creates its parent directory. Runs once per unique file path."
+    desc: "Removes the file at the given path and makes sure its parent directory exists."
     internal: true
     label: "{{.TASK}}:{{.FILE_PATH}}"
     vars:
