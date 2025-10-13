@@ -242,8 +242,12 @@ tasks:
     requires:
       vars: ["CMAKE_SETTINGS_DIR", "DEP_TASK"]
     cmds:
-      - "rm -rf {{.CMAKE_SETTINGS_DIR}}"
-      - "mkdir -p {{.CMAKE_SETTINGS_DIR}}"
+      - task: "misc:reset-dir"
+        vars:
+          DIR_PATH: "{{.CMAKE_SETTINGS_DIR}}"
+      - task: "misc:reset-file"
+        vars:
+          FILE_PATH: "{{.CMAKE_SETTINGS_FILE}}"
 
       # NOTE: We prefix DEP_TASK with `::` assuming that this taskfile is included through the
       # `utils` taskfile, and that in turn is included in the user's taskfile.

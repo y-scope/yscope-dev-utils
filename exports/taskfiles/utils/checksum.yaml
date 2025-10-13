@@ -16,6 +16,9 @@ tasks:
     requires:
       vars: ["CHECKSUM_FILE", "INCLUDE_PATTERNS"]
     cmds:
+      - task: "misc:reset-file"
+        vars:
+          FILE_PATH: "{{.CHECKSUM_FILE}}"
       # We explicitly set `--no-anchored` and `--wildcards` to make the inclusion behaviour match
       # the default exclusion behaviour.
       #

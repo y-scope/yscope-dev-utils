@@ -34,11 +34,11 @@ tasks:
           INCLUDE_PATTERNS:
             - "{{.GENERATE_DIR}}"
     cmds:
+      - task: "misc:reset-dir"
+        vars:
+          DIR_PATH: "{{.GENERATE_DIR}}"
       - >-
-        rm -rf "{{.GENERATE_DIR}}"
-      - >-
-        cp -R "{{.SOURCE_DIR}}" "{{.GENERATE_DIR}}"
-      - >-
+        rsync -a "{{.SOURCE_DIR}}" "{{.GENERATE_DIR}}"
         pushd "{{.GENERATE_DIR}}";
         ./bootstrap.sh
         --prefix="{{.INSTALL_PREFIX}}"

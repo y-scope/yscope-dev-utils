@@ -26,8 +26,10 @@ tasks:
           <(echo "{{.FILE_SHA256}}") \
           <(openssl dgst -sha256 "{{.OUTPUT_FILE}}" | awk '{print $2}')
     cmds:
+      - task: "misc:reset-file"
+        vars:
+          FILE_PATH: "{{.OUTPUT_FILE}}}"
       - |-
-        mkdir -p "{{dir .OUTPUT_FILE}}"
         max_attempts=3
         attempt=1
         while [ $attempt -le $max_attempts ]; do
@@ -100,9 +102,9 @@ tasks:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
     cmds:
-      - |-
-        rm -rf "{{.OUTPUT_DIR}}"
-        mkdir -p  "{{.OUTPUT_DIR}}"
+      - task: "misc:reset-dir"
+        vars:
+          DIR_PATH: "{{.OUTPUT_DIR}}"
       # Unlike for `tar --create`, in `--extract` both the exclude and include patterns can be
       # quoted since they're both evaluated by `tar`.
       - >-
@@ -167,9 +169,9 @@ tasks:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
     cmds:
-      - |-
-        rm -rf "{{.OUTPUT_DIR}}"
-        mkdir -p  "{{.OUTPUT_DIR}}"
+      - task: "misc:reset-dir"
+        vars:
+          DIR_PATH: "{{.OUTPUT_DIR}}"
       # NOTE: Options in the unzip command must be in a specific order. See the docs for details.
       - >-
         unzip

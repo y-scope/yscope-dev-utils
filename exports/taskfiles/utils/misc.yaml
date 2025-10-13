@@ -26,7 +26,9 @@ tasks:
     requires:
       vars: ["LABEL", "OUTPUT_DIR", "REQUIREMENTS_FILE"]
     cmds:
-      - "rm -rf '{{.OUTPUT_DIR}}'"
+      - task: "reset-dir"
+        vars:
+          DIR_PATH: "{{.OUTPUT_DIR}}"
       - "python3 -m venv '{{.OUTPUT_DIR}}'"
       # Remove calls to `hash` from the venv activation script since Task uses `gosh` rather than
       # `bash`.
@@ -41,3 +43,25 @@ tasks:
         . "{{.OUTPUT_DIR}}/bin/activate"
         pip3 install --upgrade pip
         pip3 install --upgrade -r "{{.REQUIREMENTS_FILE}}"
+
+  reset-dir:
+    desc: "Clears the contents inside the given directory. Runs once per unique directory path."
+    internal: true
+    label: "{{.TASK}}:{{.DIR_PATH}}"
+    requires:
+      vars: ["DIR_PATH"]
+    run: "when_changed"
+    cmds:
+      - "rm -rf {{.DIR_PATH}}/*"
+      - "mkdir -p '{{.DIR_PATH}}'"
+
+  reset-file:
+    desc: "Removes the given file and creates its parent directory. Runs once unique per file path."
+    internal: true
+    label: "{{.TASK}}:{{.FILE_PATH}}"
+    requires:
+      vars: ["FILE_PATH"]
+    run: "when_changed"
+    cmds:
+      - "rm -f '{{.FILE_PATH}}'"
+      - "mkdir -p $(dirname -- '{{.FILE_PATH}}')"
