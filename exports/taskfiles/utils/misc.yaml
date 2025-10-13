@@ -52,8 +52,8 @@ tasks:
       vars: ["DIR_PATH"]
     run: "when_changed"
     cmds:
-      - "rm -rf {{.DIR_PATH}}/*"
-      - "mkdir -p '{{.DIR_PATH}}'"
+      - "rm -rf -- '{{.DIR_PATH}}'"
+      - "mkdir -p -- '{{.DIR_PATH}}'"
 
   reset-file:
     desc: "Removes the given file and creates its parent directory. Runs once unique per file path."
@@ -63,5 +63,5 @@ tasks:
       vars: ["FILE_PATH"]
     run: "when_changed"
     cmds:
-      - "rm -f '{{.FILE_PATH}}'"
-      - "mkdir -p $(dirname -- '{{.FILE_PATH}}')"
+      - "rm -f -- '{{.FILE_PATH}}'"
+      - "mkdir -p -- $(dirname -- '{{.FILE_PATH}}')"

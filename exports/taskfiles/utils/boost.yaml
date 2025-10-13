@@ -1,6 +1,7 @@
 version: "3"
 
 includes:
+  misc: "misc.yaml"
   checksum: "checksum.yaml"
   remote: "remote.yaml"
 
