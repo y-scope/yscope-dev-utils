@@ -56,7 +56,7 @@ tasks:
             /*) exit 0;;
             *) exit 1;;
           esac
-        msg: "DIR_PATH {{.DIR_PATH}} is not absolute."
+        msg: "DIR_PATH `{{.DIR_PATH}}` is not absolute."
     run: "when_changed"
     cmds:
       - "rm -rf -- '{{.DIR_PATH}}'"
@@ -76,7 +76,7 @@ tasks:
             /*) exit 0;;
             *) exit 1;;
           esac
-        msg: "FILE_PATH {{.FILE_PATH}} is not absolute."
+        msg: "FILE_PATH `{{.FILE_PATH}}` is not absolute."
     run: "when_changed"
     cmds:
       - "rm -f -- '{{.FILE_PATH}}'"
