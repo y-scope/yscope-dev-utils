@@ -51,6 +51,8 @@ tasks:
     requires:
       vars: ["DIR_PATH"]
     preconditions:
+      # This task runs once per unique directory path, which is fingerprinted by the task label. To
+      # avoid possible label collisions, we avoid using relative paths.
       - sh: >-
           case "{{.DIR_PATH}}" in
             /*) exit 0;;
@@ -71,6 +73,8 @@ tasks:
     requires:
       vars: ["FILE_PATH"]
     preconditions:
+      # This task runs once per unique file path, which is fingerprinted by the task label. To avoid
+      # possible label collisions, we avoid using relative paths.
       - sh: >-
           case "{{.FILE_PATH}}" in
             /*) exit 0;;
