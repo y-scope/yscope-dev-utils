@@ -50,6 +50,7 @@ tasks:
     label: "{{.TASK}}:{{.DIR_PATH}}"
     requires:
       vars: ["DIR_PATH"]
+    run: "when_changed"
     preconditions:
       # This task runs once per unique directory path, which is fingerprinted by the task label. To
       # avoid possible label collisions, we avoid using relative paths.
@@ -59,7 +60,6 @@ tasks:
             *) exit 1;;
           esac
         msg: "DIR_PATH `{{.DIR_PATH}}` is not absolute."
-    run: "when_changed"
     cmds:
       - |-
         mkdir -p "{{.DIR_PATH}}"
@@ -74,6 +74,7 @@ tasks:
       PARENT_DIR: "{{ dir .FILE_PATH }}"
     requires:
       vars: ["FILE_PATH"]
+    run: "when_changed"
     preconditions:
       # This task runs once per unique file path, which is fingerprinted by the task label. To avoid
       # possible label collisions, we avoid using relative paths.
@@ -83,7 +84,6 @@ tasks:
             *) exit 1;;
           esac
         msg: "FILE_PATH `{{.FILE_PATH}}` is not absolute."
-    run: "when_changed"
     cmds:
       - "rm -f '{{.FILE_PATH}}'"
       - "mkdir -p '{{.PARENT_DIR}}'"
