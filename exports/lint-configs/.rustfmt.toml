@@ -1,0 +1,53 @@
+# Stable Options
+# This section only contains overrides to the defaults.
+max_width = 100 # Default value; set explicitly for clarity
+newline_style = "Unix"
+tab_spaces = 4 # Default value; set explicitly for clarity
+use_field_init_shorthand = true
+
+# Unstable Options (nightly only)
+# This section lists all unstable options. Values are set to their defaults unless noted otherwise.
+binop_separator = "Front"
+blank_lines_lower_bound = 0
+blank_lines_upper_bound = 1
+brace_style = "PreferSameLine"
+color = "Auto"
+combine_control_expr = true
+comment_width = 100 # Non-default
+condense_wildcard_suffixes = true # Non-default
+control_brace_style = "AlwaysSameLine"
+empty_item_single_line = true
+enum_discrim_align_threshold = 0
+error_on_line_overflow = true # Non-default
+error_on_unformatted = true # Non-default
+fn_single_line = false
+force_multiline_blocks = false
+format_code_in_doc_comments = false
+format_generated_files = true
+format_macro_matchers = false
+format_macro_bodies = true
+format_strings = true # Non-default
+group_imports = "StdExternalCrate" # Non-default
+hex_literal_case = "Lower" # Non-default
+show_parse_errors = true
+imports_indent = "Block"
+imports_granularity = "Crate" # Non-default
+imports_layout = "HorizontalVertical"
+indent_style = "Block"
+inline_attribute_width = 0
+match_arm_blocks = true
+normalize_comments = true # Non-default
+normalize_doc_attributes = true # Non-default
+overflow_delimited_expr = false
+reorder_impl_items = true # Non-default
+skip_children = false
+space_after_colon = true
+space_before_colon = false
+spaces_around_ranges = false
+struct_field_align_threshold = 0
+trailing_comma = "Vertical"
+trailing_semicolon = true
+type_punctuation_density = "Wide"
+unstable_features = true
+where_single_line = false
+wrap_comments = true # Non-default
