@@ -20,7 +20,7 @@ tasks:
         ref: "default (list) .EXCLUDE_PATTERNS"
       FAIL: "{{if eq \"false\" .FAIL}}false{{else}}true{{end}}"
 
-      TAR: "{{if eq OS \"darwin\"}}gtar{{else}}tar{{end}}"
+      ARCHIVER: "{{if eq OS \"darwin\"}}gtar{{else}}tar{{end}}"
       TMP_ERR_LOG: "{{.CHECKSUM_FILE}}.log.tmp"
     requires:
       vars:
@@ -38,7 +38,7 @@ tasks:
       - defer: "rm -f '{{.TMP_ERR_LOG}}'"
       - |-
         if ! \
-            {{.TAR}} \
+            {{.ARCHIVER}} \
             --create \
             --file - \
             --group 0 \
@@ -66,16 +66,17 @@ tasks:
           {{- end}}
         fi
 
-  # Validates the checksum of the given path include/exclude patterns matches the checksum in the
-  # given file. If validation fails the checksum file is deleted, but the task succeeds so that the
-  # calling task will be reran (by using the checksum file in their `generates` field). The calling
-  # task can set `FAIL` to "true" if they wish for this task to fail if validation fails.
+  # Validates that the checksum computed from the given include/exclude path patterns matches the
+  # reference checksum stored in the given file. If validation fails, the checksum file is deleted,
+  # but the task succeeds so dependent tasks that list the checksum file under `generates` will
+  # rerun automatically. The calling task can set `FAIL` to "true" to make this task fail when the
+  # validation is expected to succeed.
   #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to validate the checksum for.
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
   # to exclude from the checksum.
-  # @param {string} [FAIL="false"] If set to "true" the task fails.
+  # @param {string} [FAIL="false"] If set to "true", the task fails when checksums mismatch.
   validate:
     internal: true
     label: "{{.TASK}}-{{.CHECKSUM_FILE}}"
