@@ -19,6 +19,10 @@ tasks:
     cmds:
       - task: "boost:test"
 
+  checksum:
+    cmds:
+      - task: "checksum:default"
+
   remote:
     cmds:
       - task: "remote:default"
