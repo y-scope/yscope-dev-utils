@@ -56,29 +56,28 @@ tasks:
       vars: ["DIR_PATH"]
     run: "once"
     preconditions:
-      - sh: "{{ osIsAbs .DIR_PATH }}"
+      - sh: "{{osIsAbs .DIR_PATH}}"
         msg: "DIR_PATH `{{.DIR_PATH}}` is not absolute."
     cmds:
       - "rm -rf '{{.DIR_PATH}}'"
       - "mkdir -p '{{.DIR_PATH}}'"
 
-  clear-file:
-    # Clears or creates the file at `FILE_PATH`, ensuring it exists as an empty file.
+  clear-path-for-write:
+    # Removes the file or directory at `PATH` and ensures its parent directory exists, preparing the
+    # location for subsequent writes.
     #
-    # This task either clears a file or creates it empty after ensuring its parent directory exists.
-    # It runs once per unique file path (fingerprinted by the task label). To prevent accidental
-    # label collisions, `FILE_PATH` must be absolute.
+    # This task runs once per unique path (fingerprinted by the task label). To prevent accidental
+    # label collisions, `PATH` must be absolute.
     #
-    # @param {string} FILE_PATH Absolute path to the file to clear.
+    # @param {string} PATH Absolute path to the target file system location to clear and prepare.
     internal: true
-    label: "{{.TASK}}:{{.FILE_PATH}}"
+    label: "{{.TASK}}:{{.PATH}}"
     requires:
-      vars: ["FILE_PATH"]
+      vars: ["PATH"]
     run: "once"
     preconditions:
-      - sh: "{{ osIsAbs .FILE_PATH }}"
-        msg: "FILE_PATH `{{.FILE_PATH}}` is not absolute."
+      - sh: "{{osIsAbs .PATH}}"
+        msg: "PATH `{{.PATH}}` is not absolute."
     cmds:
-      - "mkdir -p '{{ dir .FILE_PATH }}'"
-      - "rm -f '{{.FILE_PATH}}'"
-      - "touch '{{.FILE_PATH}}'"
+      - "mkdir -p '{{dir .PATH}}'"
+      - "rm -rf '{{.PATH}}'"
