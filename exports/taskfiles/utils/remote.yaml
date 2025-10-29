@@ -2,7 +2,6 @@ version: "3"
 
 includes:
   checksum: "checksum.yaml"
-  misc: "misc.yaml"
 
 set: ["u", "pipefail"]
 shopt: ["globstar"]
@@ -101,9 +100,9 @@ tasks:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
     cmds:
-      - task: "misc:reset-dir"
-        vars:
-          DIR_PATH: "{{.OUTPUT_DIR}}"
+      - |-
+        rm -rf "{{.OUTPUT_DIR}}"
+        mkdir -p  "{{.OUTPUT_DIR}}"
       # Unlike for `tar --create`, in `--extract` both the exclude and include patterns can be
       # quoted since they're both evaluated by `tar`.
       - >-
@@ -168,9 +167,9 @@ tasks:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
     cmds:
-      - task: "misc:reset-dir"
-        vars:
-          DIR_PATH: "{{.OUTPUT_DIR}}"
+      - |-
+        rm -rf "{{.OUTPUT_DIR}}"
+        mkdir -p  "{{.OUTPUT_DIR}}"
       # NOTE: Options in the unzip command must be in a specific order. See the docs for details.
       - >-
         unzip

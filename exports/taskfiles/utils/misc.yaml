@@ -26,9 +26,7 @@ tasks:
     requires:
       vars: ["LABEL", "OUTPUT_DIR", "REQUIREMENTS_FILE"]
     cmds:
-      - task: "reset-dir"
-        vars:
-          DIR_PATH: "{{.OUTPUT_DIR}}"
+      - "rm -rf '{{.OUTPUT_DIR}}'"
       - "python3 -m venv '{{.OUTPUT_DIR}}'"
       # Remove calls to `hash` from the venv activation script since Task uses `gosh` rather than
       # `bash`.
