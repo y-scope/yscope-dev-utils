@@ -76,7 +76,7 @@ tasks:
       vars: ["FILE_PATH"]
     run: "once"
     preconditions:
-      - sh: "{{ osIsAbs .DIR_PATH }}"
+      - sh: "{{ osIsAbs .FILE_PATH }}"
         msg: "FILE_PATH `{{.FILE_PATH}}` is not absolute."
     cmds:
       - "mkdir -p '{{ dir .FILE_PATH }}'"
