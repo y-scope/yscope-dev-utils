@@ -81,3 +81,4 @@ tasks:
     cmds:
       - "mkdir -p '{{ dir .FILE_PATH }}'"
       - "rm -f '{{.FILE_PATH}}'"
+      - "touch '{{.FILE_PATH}}'"
