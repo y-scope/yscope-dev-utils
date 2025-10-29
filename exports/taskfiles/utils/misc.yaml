@@ -42,46 +42,42 @@ tasks:
         pip3 install --upgrade pip
         pip3 install --upgrade -r "{{.REQUIREMENTS_FILE}}"
 
-  reset-dir:
-    desc: "Clears the directory at the given path without removing the directory itself."
+  clear-dir:
+    # Clears all contents under `DIR_PATH` or creates the directory if it does not exist.
+    #
+    # This task ensures `DIR_PATH` exists as an empty directory after it is run. It runs once per
+    # unique directory path (fingerprinted by the task label). To prevent accidental label
+    # collisions, `DIR_PATH` must be absolute.
+    #
+    # @param {string} DIR_PATH Absolute path to the directory to clear or create.
     internal: true
     label: "{{.TASK}}:{{.DIR_PATH}}"
     requires:
       vars: ["DIR_PATH"]
-    run: "when_changed"
+    run: "once"
     preconditions:
-      # This task runs once per unique directory path, which is fingerprinted by the task label. To
-      # avoid possible label collisions, we avoid using relative paths.
-      - sh: >-
-          case "{{.DIR_PATH}}" in
-            /*) exit 0;;
-            *) exit 1;;
-          esac
+      - sh: "{{ osIsAbs .DIR_PATH }}"
         msg: "DIR_PATH `{{.DIR_PATH}}` is not absolute."
     cmds:
-      - |-
-        mkdir -p "{{.DIR_PATH}}"
-        find "{{.DIR_PATH}}" \! -path "{{.DIR_PATH}}" -prune \
-          -exec rm -rf -- {} +
+      - "rm -rf '{{.DIR_PATH}}'"
+      - "mkdir -p '{{.DIR_PATH}}'"
 
-  reset-file:
-    desc: "Removes the file at the given path and makes sure its parent directory exists."
+  clear-file:
+    # Clears or creates the file at `FILE_PATH`, ensuring it exists as an empty file.
+    #
+    # This task either clears a file or creates it empty after ensuring its parent directory exists.
+    # It runs once per unique file path (fingerprinted by the task label). To prevent accidental
+    # label collisions, `FILE_PATH` must be absolute.
+    #
+    # @param {string} FILE_PATH Absolute path to the file to clear.
     internal: true
     label: "{{.TASK}}:{{.FILE_PATH}}"
-    vars:
-      PARENT_DIR: "{{ dir .FILE_PATH }}"
     requires:
       vars: ["FILE_PATH"]
-    run: "when_changed"
+    run: "once"
     preconditions:
-      # This task runs once per unique file path, which is fingerprinted by the task label. To avoid
-      # possible label collisions, we avoid using relative paths.
-      - sh: >-
-          case "{{.FILE_PATH}}" in
-            /*) exit 0;;
-            *) exit 1;;
-          esac
+      - sh: "{{ osIsAbs .DIR_PATH }}"
         msg: "FILE_PATH `{{.FILE_PATH}}` is not absolute."
     cmds:
+      - "mkdir -p '{{ dir .FILE_PATH }}'"
       - "rm -f '{{.FILE_PATH}}'"
-      - "mkdir -p '{{.PARENT_DIR}}'"
