@@ -54,7 +54,7 @@ tasks:
     label: "{{.TASK}}:{{.DIR_PATH}}"
     requires:
       vars: ["DIR_PATH"]
-    run: "once"
+    run: "when_changed"
     preconditions:
       - sh: "{{osIsAbs .DIR_PATH}}"
         msg: "DIR_PATH `{{.DIR_PATH}}` is not absolute."

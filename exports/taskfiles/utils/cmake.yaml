@@ -249,7 +249,7 @@ tasks:
         {{default (printf "%s/all.cmake" .CMAKE_SETTINGS_DIR) .CMAKE_SETTINGS_FILE}}
     requires:
       vars: ["CMAKE_SETTINGS_DIR", "DEP_TASK"]
-    run: "once"
+    run: "when_changed"
     cmds:
       - task: "misc:clear-dir"
         vars:
