@@ -226,11 +226,11 @@ tasks:
   #    for use inside a CMake project.
   #
   # This task runs once per unique label, since a project should never repeat the same dependency
-  # installation workflow (i.e. `DEP_TASK`) within a single task invocation. Additionally, if
-  # multiple `DEP_TASK`s share the same `CMAKE_SETTINGS_DIR` and/or `CMAKE_SETTINGS_FILE`, we init
-  # using helper tasks `misc:clear-dir` and `misc:clear-file` that themselves only run once per
-  # unique directory/file path. This usage avoids race conditions and ensures that later dependency
-  # tasks do not overwrite progress made by earlier ones.
+  # installation workflow (i.e. `DEP_TASK`) within a single `task` invocation.
+  #
+  # Additionally, if multiple `DEP_TASK`s share the same `CMAKE_SETTINGS_DIR`, we use helper task
+  # `misc:make-or-clear-dir` to ensure that the directory is only initialized once, avoiding race
+  # conditions and ensuring that later tasks do not overwrite progress made by earlier ones.
   #
   # @param {string} CMAKE_SETTINGS_DIR The directory where CMake settings files should be stored.
   # @param {string} DEP_TASK The task to run that will install all dependencies. NOTE:
@@ -251,7 +251,7 @@ tasks:
       vars: ["CMAKE_SETTINGS_DIR", "DEP_TASK"]
     run: "when_changed"
     cmds:
-      - task: "misc:clear-dir"
+      - task: "misc:make-or-clear-dir"
         vars:
           DIR_PATH: "{{.CMAKE_SETTINGS_DIR}}"
       - "mkdir -p '{{dir .CMAKE_SETTINGS_FILE}}'"
