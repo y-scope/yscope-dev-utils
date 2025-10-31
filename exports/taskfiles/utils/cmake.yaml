@@ -254,9 +254,8 @@ tasks:
       - task: "misc:clear-dir"
         vars:
           DIR_PATH: "{{.CMAKE_SETTINGS_DIR}}"
-      - task: "misc:clear-path-for-write"
-        vars:
-          PATH: "{{.CMAKE_SETTINGS_FILE}}"
+      - "mkdir -p '{{dir .CMAKE_SETTINGS_FILE}}'"
+      - "rm -f  '{{.CMAKE_SETTINGS_FILE}}'"
 
       # NOTE: We prefix DEP_TASK with `::` assuming that this taskfile is included through the
       # `utils` taskfile, and that in turn is included in the user's taskfile.
