@@ -16,6 +16,7 @@ tasks:
     requires:
       vars: ["CHECKSUM_FILE", "INCLUDE_PATTERNS"]
     cmds:
+      - "mkdir -p '{{ dir .CHECKSUM_FILE }}'"
       # We explicitly set `--no-anchored` and `--wildcards` to make the inclusion behaviour match
       # the default exclusion behaviour.
       #
