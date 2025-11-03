@@ -1,6 +1,7 @@
 version: "3"
 
 includes:
+  misc: "misc.yaml"
   remote: "remote.yaml"
 
 set: ["u", "pipefail"]
@@ -224,6 +225,13 @@ tasks:
   # 3. combining each dependency's settings file into a single settings file (CMAKE_SETTINGS_FILE)
   #    for use inside a CMake project.
   #
+  # This task runs once per unique label, since a project should never repeat the same dependency
+  # installation workflow (i.e. `DEP_TASK`) within a single `task` invocation.
+  #
+  # Additionally, if multiple `DEP_TASK`s share the same `CMAKE_SETTINGS_DIR`, we use helper task
+  # `misc:make-or-clear-dir` to ensure that the directory is only initialized once, avoiding race
+  # conditions and ensuring that later tasks do not overwrite progress made by earlier ones.
+  #
   # @param {string} CMAKE_SETTINGS_DIR The directory where CMake settings files should be stored.
   # @param {string} DEP_TASK The task to run that will install all dependencies. NOTE:
   # - The task name must be qualified from the root of the project.
@@ -241,9 +249,13 @@ tasks:
         {{default (printf "%s/all.cmake" .CMAKE_SETTINGS_DIR) .CMAKE_SETTINGS_FILE}}
     requires:
       vars: ["CMAKE_SETTINGS_DIR", "DEP_TASK"]
+    run: "when_changed"
     cmds:
-      - "rm -rf {{.CMAKE_SETTINGS_DIR}}"
-      - "mkdir -p {{.CMAKE_SETTINGS_DIR}}"
+      - task: "misc:make-or-clear-dir"
+        vars:
+          DIR_PATH: "{{.CMAKE_SETTINGS_DIR}}"
+      - "mkdir -p '{{dir .CMAKE_SETTINGS_FILE}}'"
+      - "rm -f  '{{.CMAKE_SETTINGS_FILE}}'"
 
       # NOTE: We prefix DEP_TASK with `::` assuming that this taskfile is included through the
       # `utils` taskfile, and that in turn is included in the user's taskfile.
