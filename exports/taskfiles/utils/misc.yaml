@@ -41,3 +41,23 @@ tasks:
         . "{{.OUTPUT_DIR}}/bin/activate"
         pip3 install --upgrade pip
         pip3 install --upgrade -r "{{.REQUIREMENTS_FILE}}"
+
+  make-or-clear-dir:
+    # Clears all contents under `DIR_PATH` or creates the directory if it does not exist.
+    #
+    # This task ensures `DIR_PATH` exists as an empty directory after it is run. It runs once per
+    # unique directory path (fingerprinted by the task label). To prevent accidental label
+    # collisions, `DIR_PATH` must be absolute.
+    #
+    # @param {string} DIR_PATH Absolute path to the directory to clear or create.
+    internal: true
+    label: "{{.TASK}}:{{.DIR_PATH}}"
+    requires:
+      vars: ["DIR_PATH"]
+    run: "when_changed"
+    preconditions:
+      - sh: "{{osIsAbs .DIR_PATH}}"
+        msg: "DIR_PATH `{{.DIR_PATH}}` is not absolute."
+    cmds:
+      - "rm -rf '{{.DIR_PATH}}'"
+      - "mkdir -p '{{.DIR_PATH}}'"
