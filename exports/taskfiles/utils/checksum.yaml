@@ -5,6 +5,9 @@ tasks:
   # `CHECKSUM_FILE`. The calling task can set `IGNORE_ERROR` to "false" if they wish to continue if
   # checksum computation fails.
   #
+  # Note that using this task without setting `pipefail` in the root taskfile will cause `tar`
+  # failures to be ignored.
+  #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to compute the checksum for.
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
