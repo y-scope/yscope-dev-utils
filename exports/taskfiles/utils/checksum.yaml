@@ -2,7 +2,7 @@ version: "3"
 
 tasks:
   # Compute the checksum of the given path include/exclude patterns, saving the result to
-  # `CHECKSUM_FILE`. The calling task can set `IGNORE_ERROR` to "false" if they wish to continue if
+  # `CHECKSUM_FILE`. The calling task can set `IGNORE_ERROR` to "true" if they wish to continue if
   # checksum computation fails.
   #
   # Note that using this task without setting `pipefail` in the root taskfile will cause `tar`
@@ -125,7 +125,7 @@ tasks:
         ) \
           || (
             {{- if eq "true" .FAIL_ON_ERROR}}
-              printf "[{{.TASK}} error] failed with:\n%s\n" "$(cat {{.TMP_ERR_LOG}})"
+              printf "[{{.TASK}} error] failed with:\n%s\n" "$(cat '{{.TMP_ERR_LOG}}')"
               exit 1
             {{- end}}
             rm -f "{{.CHECKSUM_FILE}}"
