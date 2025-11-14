@@ -108,7 +108,7 @@ tasks:
       # different from the original.
       - "test -e '{{.FILE_0}}'"
       - "test ! -e '{{.FILE_1}}'"
-      - "cmp -s '{{.FILE_0}}'  '{{.CHECKSUM_FILE_REF0}}'"
+      - "cmp -s '{{.FILE_0}}' '{{.CHECKSUM_FILE_REF0}}'"
       - "cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF1}}'"
       - |-
         if ! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF0}}'; then
