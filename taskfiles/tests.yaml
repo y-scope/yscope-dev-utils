@@ -10,7 +10,7 @@ tasks:
   all:
     internal: true
     cmds:
-      # - task: "boost"
+      - task: "boost"
       - task: "checksum"
       - task: "remote"
       - task: "ystdlib-py"
@@ -18,6 +18,10 @@ tasks:
   boost:
     cmds:
       - task: "boost:test"
+
+  checksum:
+    cmds:
+      - task: "checksum:default"
 
   remote:
     cmds:
