@@ -10,7 +10,7 @@ tasks:
   #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to compute the checksum for.
-  # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
+  # @param {string[]} [EXCLUDE_PATTERNS=[]] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
   # to exclude from the checksum.
   # @param {string} [IGNORE_ERROR="false"] If set to "true", the task will not fail on error.
   compute:
@@ -75,7 +75,7 @@ tasks:
   #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to validate the checksum for.
-  # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
+  # @param {string[]} [EXCLUDE_PATTERNS=[]] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
   # to exclude from the checksum.
   # @param {string} [FAIL_ON_ERROR="false"] If set to "true", the task fails when checksums
   # mismatch.
@@ -109,7 +109,7 @@ tasks:
             for path in {{.}}; do
               test -e "${path}" \
                 || (
-                  echo "Include path does not exist: ${path}" > "{{$.TMP_ERR_LOG}}"
+                  echo "Include path does not exist: ${path}" >> "{{$.TMP_ERR_LOG}}"
                   exit 1
                 )
             done && \
