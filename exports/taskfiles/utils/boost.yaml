@@ -166,8 +166,8 @@ tasks:
     vars:
       # Directory parameters
       BUILD_DIR: "{{.WORK_DIR}}/boost-build"
+      EXTRACTION_DIR: "{{.WORK_DIR}}/boost-extracted"
       INSTALL_PREFIX: "{{.WORK_DIR}}/boost-install"
-      SOURCE_DIR: "{{.WORK_DIR}}/boost-src"
     requires:
       vars:
         - "TAR_SHA256"
@@ -178,13 +178,13 @@ tasks:
       - task: "remote:download-and-extract-tar"
         vars:
           FILE_SHA256: "{{.TAR_SHA256}}"
-          OUTPUT_DIR: "{{.SOURCE_DIR}}"
+          OUTPUT_DIR: "{{.EXTRACTION_DIR}}"
           URL: "{{.TAR_URL}}"
     cmds:
       - task: "generate"
         vars:
           INSTALL_PREFIX: "{{.INSTALL_PREFIX}}"
-          SOURCE_DIR: "{{.SOURCE_DIR}}"
+          SOURCE_DIR: "{{.EXTRACTION_DIR}}"
           TARGETS:
             ref: ".TARGETS"
           EXTRA_ARGS:
@@ -193,7 +193,7 @@ tasks:
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
           INSTALL_PREFIX: "{{.INSTALL_PREFIX}}"
-          SOURCE_DIR: "{{.SOURCE_DIR}}"
+          SOURCE_DIR: "{{.EXTRACTION_DIR}}"
           EXTRA_ARGS:
             ref: ".BUILD_AND_INSTALL_ARGS"
           JOBS: "{{.JOBS}}"
