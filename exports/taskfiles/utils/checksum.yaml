@@ -10,8 +10,8 @@ tasks:
   #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to compute the checksum for.
-  # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
-  # to exclude from the checksum.
+  # @param {string[]} [EXCLUDE_PATTERNS=[]] Path wildcard patterns, relative to any
+  # `INCLUDE_PATTERNS`, to exclude from the checksum.
   # @param {string} [IGNORE_ERROR="false"] If set to "true", the task will not fail on error.
   compute:
     internal: true
@@ -57,7 +57,7 @@ tasks:
           {{- range .INCLUDE_PATTERNS}}
           {{.}} \
           {{- end}}
-          2> "{{.TMP_ERR_LOG}}" \
+          2>> "{{.TMP_ERR_LOG}}" \
             | md5sum > "{{.CHECKSUM_FILE}}" \
         ; then
           rm -f "{{.CHECKSUM_FILE}}"
@@ -75,8 +75,8 @@ tasks:
   #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to validate the checksum for.
-  # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns, relative to any `INCLUDE_PATTERNS`,
-  # to exclude from the checksum.
+  # @param {string[]} [EXCLUDE_PATTERNS=[]] Path wildcard patterns, relative to any
+  # `INCLUDE_PATTERNS`, to exclude from the checksum.
   # @param {string} [FAIL_ON_ERROR="false"] If set to "true", the task fails when checksums
   # mismatch.
   validate:
@@ -109,7 +109,7 @@ tasks:
             for path in {{.}}; do
               test -e "${path}" \
                 || (
-                  echo "Include path does not exist: ${path}" > "{{$.TMP_ERR_LOG}}"
+                  echo "Include path does not exist: ${path}" >> "{{$.TMP_ERR_LOG}}"
                   exit 1
                 )
             done && \
@@ -118,7 +118,7 @@ tasks:
               cmp -s "{{.TMP_CHECKSUM_FILE}}" "{{.CHECKSUM_FILE}}" \
               || (
                 echo "cmp failed for '{{.TMP_CHECKSUM_FILE}}' '{{.CHECKSUM_FILE}}'" \
-                  > "{{.TMP_ERR_LOG}}"
+                  >> "{{.TMP_ERR_LOG}}"
                 exit 1
                 )
             )
