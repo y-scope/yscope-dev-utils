@@ -14,7 +14,7 @@ tasks:
   # @param {string} SOURCE_DIR Project source directory.
   # @param {string[]} TARGETS Target libraries to build.
   # @param {string} [CHECKSUM_FILE={{.SOURCE_DIR}}.md5] Checksum file path for `SOURCE_DIR`.
-  # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the generate command.
+  # @param {string[]} [EXTRA_ARGS=[]] Any additional arguments to pass to the generate command.
   generate:
     internal: true
     label: "{{.TASK}}:{{.SOURCE_DIR}}"
@@ -70,10 +70,10 @@ tasks:
   # @param {string} [SOURCE_CHECKSUM_FILE={{.SOURCE_DIR}}.md5] Checksum file path for `SOURCE_DIR`.
   #
   # Build command parameters
-  # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
-  # omitted, the b2 default number is used. Before 1.76.0, the number was 1. Since 1.76.0, the
+  # @param {int} [JOBS=0] The maximum number of concurrent processes to use when building. If 0, the
+  # b2 flag is ommitted and the default is used. Before 1.76.0, the number was 1. Since 1.76.0, the
   # default is the number of cores.
-  # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the build command.
+  # @param {string[]} [EXTRA_ARGS=[]] Any additional arguments to pass to the build command.
   build-and-install:
     internal: true
     label: "{{.TASK}}:{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}"
@@ -149,16 +149,16 @@ tasks:
   # @param {string} TAR_SHA256 Content hash to verify the downloaded tar file against.
   # @param {string} TAR_URL URL of the tar file to download.
   # @param {string} WORK_DIR Directory in which to store the source, build, and install directories.
-  # @param {string} [CMAKE_SETTINGS_DIR] If set, the directory where the project's CMake settings
+  # @param {string} [CMAKE_SETTINGS_DIR=""] If set, the directory where the project's CMake settings
   # file should be stored.
   #
   # Boost parameters
   # @param {string[]} TARGETS Target libraries to build.
-  # @param {string[]} [BUILD_AND_INSTALL_ARGS] Any additional arguments to pass to boost's build and
-  # install command.
-  # @param {string[]} [GENERATE_ARGS] Any additional arguments to pass to the generate command.
-  # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
-  # omitted, the b2 default number is used. Before 1.76.0, the number was 1. Since 1.76.0, the
+  # @param {string[]} [BUILD_AND_INSTALL_ARGS=[]] Any additional arguments to pass to boost's build
+  # and install command.
+  # @param {string[]} [GENERATE_ARGS=[]] Any additional arguments to pass to the generate command.
+  # @param {int} [JOBS=0] The maximum number of concurrent processes to use when building. If 0, the
+  # b2 flag is ommitted and the default is used. Before 1.76.0, the number was 1. Since 1.76.0, the
   # default is the number of cores.
   download-and-install:
     internal: true
