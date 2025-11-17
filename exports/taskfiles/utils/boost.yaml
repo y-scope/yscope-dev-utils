@@ -121,10 +121,10 @@ tasks:
         install
         --build-dir="{{.BUILD_DIR}}"
         {{- range .EXTRA_ARGS}}
-          "{{.}}"
+        {{.}}
         {{- end}}
         {{- if .JOBS}}
-          "-j{{.JOBS}}"
+        -j{{.JOBS}}
         {{- end}};
         popd;
       - "touch '{{.SOURCE_SENTINEL_FILE}}'"
