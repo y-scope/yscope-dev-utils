@@ -3,7 +3,20 @@
 This directory contains standalone, working Python linter configuration files that serve as
 reference settings for integrating these linters into your project.
 
-For a project with its own `pyproject.toml` file, at the time of writing, there is no clean, general
-solution for including the standalone configuration files for different linters. In this scenario,
-the settings inside the configuration files should be copied into your `pyproject.toml` file, as
-seen in [ystdlib-py/pyproject.toml](../../ystdlib-py/pyproject.toml).
+## Integration Methods
+
+### Ruff
+
+Ruff supports the `extend` directive. Add this to your `pyproject.toml`:
+
+```toml
+[tool.ruff]
+extend = "path/to/yscope-dev-utils/exports/lint-configs/python/ruff.toml"
+```
+
+See [ystdlib-py/pyproject.toml](../../ystdlib-py/pyproject.toml) for an example.
+
+### Mypy
+
+Mypy does not support extending external configuration files. Copy the settings from `mypy.ini`
+into your `pyproject.toml` under `[tool.mypy]`.
