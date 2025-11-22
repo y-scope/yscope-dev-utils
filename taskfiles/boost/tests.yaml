@@ -47,7 +47,6 @@ tasks:
     cmds:
       - task: "utils:boost:download-and-install"
         vars:
-          WORK_DIR: "{{.G_BOOST_DEPS_DIR}}/boost"
           TAR_SHA256: "aa25e7b9c227c21abb8a681efd4fe6e54823815ffc12394c9339de998eb503fb"
           TAR_URL: "https://github.com/boostorg/boost/releases/download/boost-1.89.0/\
             boost-1.89.0-b2-nodocs.tar.gz"
@@ -60,6 +59,7 @@ tasks:
             - "program_options"
             - "regex"
             - "url"
+          WORK_DIR: "{{.G_BOOST_DEPS_DIR}}/boost"
 
   run-boost-test:
     internal: true
