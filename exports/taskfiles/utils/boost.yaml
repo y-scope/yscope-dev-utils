@@ -111,7 +111,7 @@ tasks:
         vars:
           CHECKSUM_FILE: "{{.SOURCE_CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.SOURCE_DIR}}"]
-          FAIL: "true"
+          FAIL_ON_ERROR: "true"
     cmds:
       - >-
         pushd "{{.SOURCE_DIR}}";
