@@ -1,12 +1,44 @@
 version: "3"
 
+set: ["u", "pipefail"]
+shopt: ["globstar"]
+
+# The checksum tasks are a robust way for a task to decided whether or not it should run.
+#
+# For many tasks it is not feasible to list out all files in `sources` and `generates`. These tasks
+# provide a way to `compute` a checksum for the contents of directories/files and `validate` whether
+# the contents still match the checksum in later runs.
+#
+# When creating a checksum a task should:
+#
+# a. Call the `compute` task at the end to create the checksum file.
+# b. Call `validate` in `deps` to verify the checksum file matches the current contents.
+#   - `validate` will delete the checksum file if there is no match.
+# c. Add the checksum file to `generates`. This ensures the task runs if:
+#   - The task has not run before.
+#   - `validate` deleted the checksum file as the contents did not match.
+#
+# When multiple tasks mutate the same contents, each task updates the checksum file and also tracks
+# whether it has run or not by creating a sentinel file.
+#
+# a. Before calling `compute`, create a sentinel file with a name unique to the task.
+# b. Add the sentinel file to `generates`. This ensures the task runs if:
+#   - The checksum file exists and matches the contents, but this task has not been run.
+#
+# Additional guidelines:
+#
+# - When creating a directory that will be included in a checksum, always delete any existing
+# contents first.
+#   - This ensures that if the contents diverge from the checksum file, the task is re-run with no
+#   stale data.
+# - If task, A, implicitly depends on task, B, but A does not call `B` in `deps`, it is possible
+# for a user to run A without having run B. A can ensure it fails gracefully by calling `validate`
+# on B's checksum with `FAIL_ON_ERROR: "true"`.
+
 tasks:
   # Compute the checksum of the given path include/exclude patterns, saving the result to
   # `CHECKSUM_FILE`. The calling task can set `IGNORE_ERROR` to "true" if they wish to continue if
   # checksum computation fails.
-  #
-  # Note that using this task without setting `pipefail` in the root taskfile will cause `tar`
-  # failures to be ignored.
   #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to compute the checksum for.

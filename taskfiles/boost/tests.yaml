@@ -47,10 +47,9 @@ tasks:
     cmds:
       - task: "utils:boost:download-and-install"
         vars:
-          WORK_DIR: "{{.G_BOOST_DEPS_DIR}}/boost"
-          FILE_SHA256: "2128a4c96862b5c0970c1e34d76b1d57e4a1016b80df85ad39667f30b1deba26"
-          URL: "https://github.com/boostorg/boost/releases/download/boost-1.86.0/\
-            boost-1.86.0-b2-nodocs.tar.gz"
+          TAR_SHA256: "aa25e7b9c227c21abb8a681efd4fe6e54823815ffc12394c9339de998eb503fb"
+          TAR_URL: "https://github.com/boostorg/boost/releases/download/boost-1.89.0/\
+            boost-1.89.0-b2-nodocs.tar.gz"
           CMAKE_SETTINGS_DIR: "{{.G_BOOST_DEPS_CMAKE_SETTINGS_DIR}}"
           TARGETS:
             - "filesystem"
@@ -59,8 +58,8 @@ tasks:
             - "process"
             - "program_options"
             - "regex"
-            - "system"
             - "url"
+          WORK_DIR: "{{.G_BOOST_DEPS_DIR}}/boost"
 
   run-boost-test:
     internal: true
