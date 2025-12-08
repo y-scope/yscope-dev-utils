@@ -45,7 +45,7 @@ rules:
     spaces: 2
 
   line-length:
-    allow-non-breakable-words: false
+    allow-non-breakable-words: true
     max: 100
 
   octal-values:
