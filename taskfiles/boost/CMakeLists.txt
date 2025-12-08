@@ -30,7 +30,6 @@ find_package(
         process
         program_options
         regex
-        system
         url
 )
 if(Boost_FOUND)
@@ -49,6 +48,5 @@ target_link_libraries(
         Boost::process
         Boost::program_options
         Boost::regex
-        Boost::system
         Boost::url
 )

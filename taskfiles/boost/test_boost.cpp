@@ -11,7 +11,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
-#include <boost/process/v2.hpp>
+#include <boost/process/v2/process.hpp>
 #include <boost/process/v2/stdio.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
@@ -103,7 +103,7 @@ auto test_process() -> bool {
                 io_context,
                 boost::dll::program_location(),
                 {"--help"},
-                boost::process::process_stdio{.in{}, .out{nullptr}, .err{nullptr}}
+                boost::process::v2::process_stdio{.in{}, .out{nullptr}, .err{nullptr}}
         };
         std::future<int> result = process.async_wait(boost::asio::use_future);
         io_context.run();

@@ -8,183 +8,197 @@ set: ["u", "pipefail"]
 shopt: ["globstar"]
 
 tasks:
-  # Generates `GENERATE_DIR` by copying `SOURCE_DIR` and then running boost's bootstrap step.
+  # Runs Boost's generate (bootstrap) step.
+  # A sentinel file is written to `SOURCE_DIR` and added to `generates` to explicitly track whether
+  # this task updated `SOURCE_DIR`.
   #
-  # @param {string} SOURCE_DIR Project source directory.
-  # @param {string} GENERATE_DIR Directory in which to generate `b2` and the build configuration.
-  # @param {string} GENERATE_CHECKSUM_FILE Checksum file for `GENERATE_DIR`.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
+  # @param {string} SOURCE_DIR Project source directory.
   # @param {string[]} TARGETS Target libraries to build.
-  # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the generate command.
+  # @param {string} [CHECKSUM_FILE={{.SOURCE_DIR}}.md5] Checksum file path for `SOURCE_DIR`.
+  # @param {string[]} [EXTRA_ARGS=[]] Any additional arguments to pass to the generate command.
   generate:
     internal: true
+    label: "{{.TASK}}:{{.SOURCE_DIR}}"
     vars:
-      EXTRA_ARGS:
-        ref: "default (list) .EXTRA_ARGS"
+      CHECKSUM_FILE: >-
+        {{default (printf "%s.md5" .SOURCE_DIR) .CHECKSUM_FILE}}
+      SOURCE_SENTINEL_FILE: "{{.SOURCE_DIR}}/{{.TASK}}.sentinel"
     requires:
-      vars: ["SOURCE_DIR", "GENERATE_DIR", "GENERATE_CHECKSUM_FILE", "INSTALL_PREFIX", "TARGETS"]
-    sources:
-      - "{{.SOURCE_DIR}}/**/*"
+      vars:
+        - "INSTALL_PREFIX"
+        - "SOURCE_DIR"
+        - "TARGETS"
+    sources: ["{{.TASKFILE}}"]
     generates:
-      - "{{.GENERATE_CHECKSUM_FILE}}"
+      - "{{.CHECKSUM_FILE}}"
+      - "{{.SOURCE_SENTINEL_FILE}}"
     deps:
       - task: "checksum:validate"
         vars:
-          CHECKSUM_FILE: "{{.GENERATE_CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS:
-            - "{{.GENERATE_DIR}}"
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.SOURCE_DIR}}"]
     cmds:
       - >-
-        rm -rf "{{.GENERATE_DIR}}"
-      - >-
-        cp -R "{{.SOURCE_DIR}}" "{{.GENERATE_DIR}}"
-      - >-
-        pushd "{{.GENERATE_DIR}}";
+        pushd "{{.SOURCE_DIR}}";
         ./bootstrap.sh
         --prefix="{{.INSTALL_PREFIX}}"
         --exec-prefix="{{.INSTALL_PREFIX}}"
         --with-libraries={{(join "," .TARGETS)}}
         {{- range .EXTRA_ARGS}}
-          "{{.}}"
+        {{.}}
         {{- end}};
         popd
+      - "touch '{{.SOURCE_SENTINEL_FILE}}'"
       - task: "checksum:compute"
         vars:
-          CHECKSUM_FILE: "{{.GENERATE_CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS:
-            - "{{.GENERATE_DIR}}"
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.SOURCE_DIR}}"]
 
-  # Runs boost's b2 build and install step, and creates a CMake settings file. The caller must have
-  # previously called `generate` on `SOURCE_DIR` (to produce the `GENERATE_DIR`) for this task to
-  # succeed.
+  # Runs Boost's combined b2 build and install step.
+  # Fails if the caller has not successfully called `generate` on `SOURCE_DIR`.
+  # A sentinel file is written to `SOURCE_DIR` and added to `generates` to explicitly track whether
+  # this task updated `SOURCE_DIR`.
   #
-  # @param {string} GENERATE_DIR Directory containing boost's source and build files.
+  # Required parameters
   # @param {string} BUILD_DIR Directory in which to build boost.
   # @param {string} INSTALL_PREFIX Path prefix of where the project should be installed.
-  # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the build command.
-  # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
-  # omitted, the b2 default number is used. Before 1.76.0, the number was 1. Since 1.76.0, the
+  # @param {string} SOURCE_DIR Directory containing boost's source and build files.
+  #
+  # Checksum parameters
+  # @param {string} [BUILD_CHECKSUM_FILE={{.BUILD_DIR}}.md5] Checksum file path for `BUILD_DIR`.
+  # @param {string} [INSTALL_CHECKSUM_FILE={{.INSTALL_PREFIX}}.md5] Checksum file path for
+  # `INSTALL_PREFIX`
+  # @param {string} [SOURCE_CHECKSUM_FILE={{.SOURCE_DIR}}.md5] Checksum file path for `SOURCE_DIR`.
+  #
+  # b2 parameters
+  # @param {string[]} [EXTRA_ARGS=[]] Any additional arguments to pass to the build command.
+  # @param {int} [JOBS=0] The maximum number of concurrent processes to use when building. If 0, the
+  # b2 flag is ommitted and the default is used. Before 1.76.0, the number was 1. Since 1.76.0, the
   # default is the number of cores.
-  # @param {string} [CMAKE_SETTINGS_DIR] If set, the directory where the project's CMake settings
-  # file should be stored.
   build-and-install:
     internal: true
+    label: "{{.TASK}}:{{.BUILD_DIR}}-{{.INSTALL_PREFIX}}"
     vars:
-      EXTRA_ARGS:
-        ref: "default (list) .EXTRA_ARGS"
-      JOBS: >-
-        {{default "" .JOBS}}
+      BUILD_CHECKSUM_FILE: >-
+        {{default (printf "%s.md5" .BUILD_DIR) .BUILD_CHECKSUM_FILE}}
+      INSTALL_CHECKSUM_FILE: >-
+        {{default (printf "%s.md5" .INSTALL_PREFIX) .INSTALL_CHECKSUM_FILE}}
+      SOURCE_CHECKSUM_FILE: >-
+        {{default (printf "%s.md5" .SOURCE_DIR) .SOURCE_CHECKSUM_FILE}}
+      SOURCE_SENTINEL_FILE: "{{.SOURCE_DIR}}/{{.TASK}}.sentinel"
     requires:
-      vars: ["GENERATE_DIR", "BUILD_DIR", "INSTALL_PREFIX"]
+      vars:
+        - "BUILD_DIR"
+        - "INSTALL_PREFIX"
+        - "SOURCE_DIR"
+    sources: ["{{.TASKFILE}}"]
+    generates:
+      - "{{.BUILD_CHECKSUM_FILE}}"
+      - "{{.INSTALL_CHECKSUM_FILE}}"
+      - "{{.SOURCE_CHECKSUM_FILE}}"
+      - "{{.SOURCE_SENTINEL_FILE}}"
+    deps:
+      - task: "checksum:validate"
+        vars:
+          CHECKSUM_FILE: "{{.BUILD_CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.BUILD_DIR}}"]
+      - task: "checksum:validate"
+        vars:
+          CHECKSUM_FILE: "{{.INSTALL_CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.INSTALL_PREFIX}}"]
+      - task: "checksum:validate"
+        vars:
+          CHECKSUM_FILE: "{{.SOURCE_CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.SOURCE_DIR}}"]
+          FAIL_ON_ERROR: "true"
     cmds:
       - >-
-        pushd "{{.GENERATE_DIR}}";
+        pushd "{{.SOURCE_DIR}}";
         ./b2
         install
         --build-dir="{{.BUILD_DIR}}"
         {{- range .EXTRA_ARGS}}
-          "{{.}}"
+        {{.}}
         {{- end}}
         {{- if .JOBS}}
-          "-j{{.JOBS}}"
+        -j{{.JOBS}}
         {{- end}};
         popd;
-      - >-
-        {{- if .CMAKE_SETTINGS_DIR}}
-          echo "set(Boost_ROOT
-            \"{{.INSTALL_PREFIX}}\"
-            CACHE PATH
-            \"Package root for Boost.\"
-          )" >> "{{.CMAKE_SETTINGS_DIR}}/Boost.cmake"
-        {{- end}}
+      - "touch '{{.SOURCE_SENTINEL_FILE}}'"
+      - task: "checksum:compute"
+        vars:
+          CHECKSUM_FILE: "{{.BUILD_CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.BUILD_DIR}}"]
+      - task: "checksum:compute"
+        vars:
+          CHECKSUM_FILE: "{{.INSTALL_CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.INSTALL_PREFIX}}"]
+      - task: "checksum:compute"
+        vars:
+          CHECKSUM_FILE: "{{.SOURCE_CHECKSUM_FILE}}"
+          INCLUDE_PATTERNS: ["{{.SOURCE_DIR}}"]
 
-  # Downloads boost from `URL` and installs boost.
+  # Downloads Boost from `TAR_URL` and then generates, builds, and installs Boost inside `WORK_DIR`.
+  # If `CMAKE_SETTINGS_DIR` is set, a settings file will be created in that directory, containing a
+  # `Boost_ROOT` CMake variable that points to the installation.
   #
-  # General parameters
-  # @param {string} [WORK_DIR={{.ROOT_DIR}}] Base directory in which to store the source, generate,
-  # build, and install directories.
-  # @param {string} [SOURCE_DIR={{.WORK_DIR}}/boost-src] Directory in which to extract the tar
-  # file.
+  # Required parameters
+  # @param {string} TAR_SHA256 Content hash to verify the downloaded tar file against.
+  # @param {string} TAR_URL URL of the tar file to download.
+  # @param {string[]} TARGETS Target libraries to build.
+  # @param {string} WORK_DIR Directory in which to store the source, build, and install directories.
   #
-  # Download parameters
-  # @param {string} FILE_SHA256 Content hash to verify the downloaded tar file against.
-  # @param {string} URL
-  #
-  # Boost generate parameters
-  # @param {string} [GENERATE_DIR={{.WORK_DIR}}/boost-generate] Directory in which to generate the
-  # project build files.
-  # @param {string} [GENERATE_CHECKSUM_FILE={{.WORK_DIR}}/boost-generate.md5] Checksum file for the
-  # generate directory.
-  # @param {string} [INSTALL_PREFIX={{.WORK_DIR}}/boost-install] Path prefix of where the project
-  # should be installed.
-  # @param {string[]} [TARGETS] Target libraries to build.
-  # @param {string[]} [GENERATE_ARGS] Any additional arguments to pass to the generate command.
-  #
-  # Boost build-and-install parameters
-  # @param {string} [BUILD_DIR={{.WORK_DIR}}/boost-build] Directory in which to build the project.
-  # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
-  # omitted, the b2 default number is used. Before 1.76.0, the number was 1. Since 1.76.0, the
-  # default is the number of cores.
-  # @param {string[]} [BUILD_AND_INSTALL_ARGS] Any additional arguments to pass to boost's build
+  # Boost parameters
+  # @param {string[]} [BUILD_AND_INSTALL_ARGS=[]] Any additional arguments to pass to boost's build
   # and install command.
-  # @param {string} [CMAKE_SETTINGS_DIR] If set, the directory where the project's CMake settings
+  # @param {string} [CMAKE_SETTINGS_DIR=""] If set, the directory where the project's CMake settings
   # file should be stored.
+  # @param {string[]} [GENERATE_ARGS=[]] Any additional arguments to pass to the generate command.
+  # @param {int} [JOBS=0] The maximum number of concurrent processes to use when building. If 0, the
+  # b2 flag is ommitted and the default is used. Before 1.76.0, the number was 1. Since 1.76.0, the
+  # default is the number of cores.
   download-and-install:
     internal: true
-    label: "{{.TASK}}:{{.URL}}-{{.INSTALL_PREFIX}}"
+    label: "{{.TASK}}:{{.TAR_URL}}-{{.WORK_DIR}}"
     vars:
-      # General parameters
-      WORK_DIR: >-
-        {{default .ROOT_DIR .WORK_DIR}}
-      SOURCE_DIR: >-
-        {{default (printf "%s/boost-src" .WORK_DIR) .SOURCE_DIR}}
-
-      # Boost generate parameters
-      GENERATE_DIR: >-
-        {{default (printf "%s/boost-generate" .WORK_DIR) .GENERATE_DIR}}
-      GENERATE_CHECKSUM_FILE: >-
-        {{default (printf "%s/boost-generate.md5" .WORK_DIR) .GENERATE_CHECKSUM_FILE}}
-      INSTALL_PREFIX: >-
-        {{default (printf "%s/boost-install" .WORK_DIR) .INSTALL_PREFIX}}
-      TARGETS:
-        ref: "default (list) .TARGETS"
-      GENERATE_ARGS:
-        ref: "default (list) .GENERATE_ARGS"
-
-      # Boost build-and-install parameters
-      BUILD_DIR: >-
-        {{default (printf "%s/boost-build" .WORK_DIR) .BUILD_DIR}}
-      BUILD_AND_INSTALL_ARGS:
-        ref: "default (list) .BUILD_AND_INSTALL_ARGS"
-      JOBS: >-
-        {{default "" .JOBS}}
-      CMAKE_SETTINGS_DIR: >-
-        {{default "" .CMAKE_SETTINGS_DIR}}
+      BUILD_DIR: "{{.WORK_DIR}}/boost-build"
+      EXTRACTION_DIR: "{{.WORK_DIR}}/boost-extracted"
+      INSTALL_PREFIX: "{{.WORK_DIR}}/boost-install"
     requires:
-      vars: ["FILE_SHA256", "URL"]
+      vars:
+        - "TAR_SHA256"
+        - "TAR_URL"
+        - "TARGETS"
+        - "WORK_DIR"
     deps:
       - task: "remote:download-and-extract-tar"
         vars:
-          FILE_SHA256: "{{.FILE_SHA256}}"
-          OUTPUT_DIR: "{{.SOURCE_DIR}}"
-          URL: "{{.URL}}"
+          FILE_SHA256: "{{.TAR_SHA256}}"
+          OUTPUT_DIR: "{{.EXTRACTION_DIR}}"
+          URL: "{{.TAR_URL}}"
     cmds:
       - task: "generate"
         vars:
-          SOURCE_DIR: "{{.SOURCE_DIR}}"
-          GENERATE_DIR: "{{.GENERATE_DIR}}"
-          GENERATE_CHECKSUM_FILE: "{{.GENERATE_CHECKSUM_FILE}}"
           INSTALL_PREFIX: "{{.INSTALL_PREFIX}}"
+          SOURCE_DIR: "{{.EXTRACTION_DIR}}"
           TARGETS:
             ref: ".TARGETS"
           EXTRA_ARGS:
             ref: ".GENERATE_ARGS"
       - task: "build-and-install"
         vars:
-          GENERATE_DIR: "{{.GENERATE_DIR}}"
           BUILD_DIR: "{{.BUILD_DIR}}"
           INSTALL_PREFIX: "{{.INSTALL_PREFIX}}"
+          SOURCE_DIR: "{{.EXTRACTION_DIR}}"
           EXTRA_ARGS:
             ref: ".BUILD_AND_INSTALL_ARGS"
           JOBS: "{{.JOBS}}"
-          CMAKE_SETTINGS_DIR: "{{.CMAKE_SETTINGS_DIR}}"
+      - >-
+        {{- if .CMAKE_SETTINGS_DIR}}
+          echo "set(Boost_ROOT
+            \"{{.INSTALL_PREFIX}}\"
+            CACHE PATH
+            \"Package root for Boost.\"
+          )" > "{{.CMAKE_SETTINGS_DIR}}/Boost.cmake"
+        {{- end}}
