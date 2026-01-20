@@ -113,7 +113,13 @@ tasks:
         fi
 
         # Build tar command with conditional GNU-specific flags
-        TAR_CMD=("$ARCHIVER" --extract --strip-components="{{.NUM_COMPONENTS_TO_STRIP}}" --directory "{{.OUTPUT_DIR}}" --file "{{.TAR_FILE}}")
+        TAR_CMD=(
+          "$ARCHIVER"
+          --extract
+          --strip-components="{{.NUM_COMPONENTS_TO_STRIP}}"
+          --directory "{{.OUTPUT_DIR}}"
+          --file "{{.TAR_FILE}}"
+        )
 
         # Add GNU-specific flags only if using gtar
         if [ "$USE_GNU_FLAGS" = true ]; then
