@@ -34,19 +34,18 @@ tasks:
           INCLUDE_PATTERNS:
             - "{{.GENERATE_DIR}}"
     cmds:
-      - >-
+      - |-
         rm -rf "{{.GENERATE_DIR}}"
-      - >-
         cp -R "{{.SOURCE_DIR}}" "{{.GENERATE_DIR}}"
-      - >-
-        pushd "{{.GENERATE_DIR}}";
-        ./bootstrap.sh
-        --prefix="{{.INSTALL_PREFIX}}"
-        --exec-prefix="{{.INSTALL_PREFIX}}"
-        --with-libraries={{(join "," .TARGETS)}}
-        {{- range .EXTRA_ARGS}}
-        {{.}}
-        {{- end}};
+        pushd "{{.GENERATE_DIR}}"
+        ./bootstrap.sh \
+          --prefix="{{.INSTALL_PREFIX}}" \
+          --exec-prefix="{{.INSTALL_PREFIX}}" \
+          --with-libraries={{(join "," .TARGETS)}} \
+          {{- range .EXTRA_ARGS}}
+            {{.}} \
+          {{- end}}
+        ;
         popd
       - task: "checksum:compute"
         vars:
@@ -78,16 +77,16 @@ tasks:
       vars: ["GENERATE_DIR", "BUILD_DIR", "INSTALL_PREFIX"]
     dir: "{{.GENERATE_DIR}}"
     cmds:
-      - >-
-        ./b2
-        install
-        --build-dir="{{.BUILD_DIR}}"
-        {{- range .EXTRA_ARGS}}
-        {{.}}
-        {{- end}}
-        {{- if .JOBS}}
-        -j{{.JOBS}}
-        {{- end}}
+      - |-
+        ./b2 install \
+          --build-dir="{{.BUILD_DIR}}" \
+          {{- range .EXTRA_ARGS}}
+            {{.}} \
+          {{- end}}
+          {{- if .JOBS}}
+            -j{{.JOBS}} \
+          {{- end}}
+        ;
       - >-
         {{- if .CMAKE_SETTINGS_DIR}}
           echo "set(Boost_ROOT
