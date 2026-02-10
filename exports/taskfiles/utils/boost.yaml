@@ -33,7 +33,7 @@ tasks:
     generates:
       - "{{.CHECKSUM_FILE}}"
       - "{{.SOURCE_SENTINEL_FILE}}"
-    dir: ["{{.SOURCE_DIR}}"]
+    dir: "{{.SOURCE_DIR}}"
     deps:
       - task: "checksum:validate"
         vars:
@@ -98,7 +98,7 @@ tasks:
       - "{{.INSTALL_CHECKSUM_FILE}}"
       - "{{.SOURCE_CHECKSUM_FILE}}"
       - "{{.SOURCE_SENTINEL_FILE}}"
-    dir: ["{{.SOURCE_DIR}}"]
+    dir: "{{.SOURCE_DIR}}"
     deps:
       - task: "checksum:validate"
         vars:
