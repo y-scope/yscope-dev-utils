@@ -33,22 +33,22 @@ tasks:
     generates:
       - "{{.CHECKSUM_FILE}}"
       - "{{.SOURCE_SENTINEL_FILE}}"
+    dir: ["{{.SOURCE_DIR}}"]
     deps:
       - task: "checksum:validate"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.SOURCE_DIR}}"]
     cmds:
-      - >-
-        pushd "{{.SOURCE_DIR}}";
-        ./bootstrap.sh
-        --prefix="{{.INSTALL_PREFIX}}"
-        --exec-prefix="{{.INSTALL_PREFIX}}"
-        --with-libraries={{(join "," .TARGETS)}}
-        {{- range .EXTRA_ARGS}}
-        {{.}}
-        {{- end}};
-        popd
+      - |-
+        ./bootstrap.sh \
+          --prefix="{{.INSTALL_PREFIX}}" \
+          --exec-prefix="{{.INSTALL_PREFIX}}" \
+          --with-libraries={{(join "," .TARGETS)}} \
+          {{- range .EXTRA_ARGS}}
+            {{.}} \
+          {{- end}}
+        ;
       - "touch '{{.SOURCE_SENTINEL_FILE}}'"
       - task: "checksum:compute"
         vars:
@@ -98,6 +98,7 @@ tasks:
       - "{{.INSTALL_CHECKSUM_FILE}}"
       - "{{.SOURCE_CHECKSUM_FILE}}"
       - "{{.SOURCE_SENTINEL_FILE}}"
+    dir: ["{{.SOURCE_DIR}}"]
     deps:
       - task: "checksum:validate"
         vars:
@@ -113,18 +114,16 @@ tasks:
           INCLUDE_PATTERNS: ["{{.SOURCE_DIR}}"]
           FAIL_ON_ERROR: "true"
     cmds:
-      - >-
-        pushd "{{.SOURCE_DIR}}";
-        ./b2
-        install
-        --build-dir="{{.BUILD_DIR}}"
-        {{- range .EXTRA_ARGS}}
-        {{.}}
-        {{- end}}
-        {{- if .JOBS}}
-        -j{{.JOBS}}
-        {{- end}};
-        popd;
+      - |-
+        ./b2 install \
+          --build-dir="{{.BUILD_DIR}}" \
+          {{- range .EXTRA_ARGS}}
+            {{.}} \
+          {{- end}}
+          {{- if .JOBS}}
+            -j{{.JOBS}} \
+          {{- end}}
+        ;
       - "touch '{{.SOURCE_SENTINEL_FILE}}'"
       - task: "checksum:compute"
         vars:
