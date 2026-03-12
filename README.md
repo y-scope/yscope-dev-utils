@@ -1,3 +1,11 @@
+# dev-utils
+
+ A collection of configurations, scripts, and tools that are reusable across YScope repositories.
+
+## Linting configuration versions
+
+* [clang-tidy] 19.1 or higher
+
 # Contributing
 
 Before you submit a pull request, ensure you follow the testing and linting instructions below.
@@ -50,6 +58,7 @@ To clean up any generated files:
 task clean
 ```
 
+[clang-tidy]: https://clang.llvm.org/extra/clang-tidy/
 [coreutils]: https://formulae.brew.sh/formula/coreutils
 [gnu-tar]: https://formulae.brew.sh/formula/gnu-tar
 [Task]: https://taskfile.dev/
