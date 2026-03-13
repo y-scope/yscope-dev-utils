@@ -7,6 +7,11 @@ WarningsAsErrors: >-
   *,
   -misc-include-cleaner,
 
+# Do not report diagnostics for non-system header files that are not the main file in the
+# translation unit. Our tasks will run clang-tidy on each header as the main file, therefore
+# diagnostics for headers of interest are reported without relying on reports from included headers.
+ExcludeHeaderFilterRegex: ".*"
+
 # Disabled checks:
 # - `bugprone-easily-swappable-parameters` because it's difficult to mitigate.
 # - `modernize-use-ranges` because we want to support compiling C++20 code with LLVM/Apple Clang 15,
