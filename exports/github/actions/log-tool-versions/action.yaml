@@ -1,0 +1,25 @@
+name: "Log tool versions"
+description: "Log tool versions to aid debugging in case of CI failures."
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Log tool versions"
+      shell: "bash"
+      env:
+        TOOLS: |-
+          cmake
+          md5sum
+          python
+          python3
+          tar
+          task
+          uv
+      run: |-
+        while IFS= read -r tool; do
+          if command -v "${tool}" >/dev/null 2>&1; then
+            "${tool}" --version
+          else
+            echo "${tool} not found"
+          fi
+        done <<< "${TOOLS}"
