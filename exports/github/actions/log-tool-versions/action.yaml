@@ -17,9 +17,7 @@ runs:
           uv
       run: |-
         while IFS= read -r tool; do
-          if command -v "${tool}" >/dev/null 2>&1; then
-            "${tool}" --version
-          else
+          if ! "${tool}" --version; then
             echo "${tool} not found"
           fi
         done <<< "${TOOLS}"
