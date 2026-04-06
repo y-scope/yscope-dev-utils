@@ -41,7 +41,7 @@ jobs:
 
       - uses: "./exports/github/actions/install-uv"
 
-      - uses: "./exports/github/actions/log-tool-versions"
+      - uses: "./exports/github/actions/print-tool-versions"
 
       - name: "Run lint task"
         shell: "bash"

@@ -1,13 +1,15 @@
-name: "Log tool versions"
-description: "Log tool versions to aid debugging in case of CI failures."
+name: "Print tool versions"
+description: "Print tool versions to aid debugging in case of CI failures."
 
 runs:
   using: "composite"
   steps:
-    - name: "Log tool versions"
+    - name: "Print tool versions"
       shell: "bash"
       env:
         TOOLS: |-
+          cc
+          c++
           cmake
           md5sum
           python
