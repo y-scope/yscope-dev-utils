@@ -11,7 +11,12 @@ runs:
           cc
           c++
           cmake
+          java
+          gcc
+          g++
           md5sum
+          node
+          npm
           python
           python3
           tar
