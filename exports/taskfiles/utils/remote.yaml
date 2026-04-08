@@ -47,9 +47,28 @@ tasks:
           echo "Failed to download after $max_attempts attempts."
           exit 1
         fi
-        diff \
-          <(echo "{{.FILE_SHA256}}") \
-          <(openssl dgst -sha256 "{{.OUTPUT_FILE}}" | awk '{print $2}')
+
+        if [ ! -f "{{.OUTPUT_FILE}}" ]; then
+          echo "[remote:curl] output file does not exist: {{.OUTPUT_FILE}}" >&2
+          exit 1
+        fi
+
+        actual_sha="$(openssl dgst -sha256 "{{.OUTPUT_FILE}}" | awk '{print $2}')" || {
+          echo "[remote:curl] failed to compute sha256 for {{.OUTPUT_FILE}}" >&2
+          exit 1
+        }
+
+        if [ -z "${actual_sha}" ]; then
+          echo "[remote:curl] sha256 command returned empty output for {{.OUTPUT_FILE}}" >&2
+          exit 1
+        fi
+
+        if [ "{{.FILE_SHA256}}" != "${actual_sha}" ]; then
+          echo "[remote:curl] sha256 mismatch for {{.OUTPUT_FILE}}" >&2
+          echo "  expected: {{.FILE_SHA256}}" >&2
+          echo "  actual:   ${actual_sha}" >&2
+          exit 1
+        fi
 
   # Uses curl to download a tar file from the given URL and extracts its contents.
   #
