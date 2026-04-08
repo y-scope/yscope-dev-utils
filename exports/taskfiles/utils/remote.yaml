@@ -103,21 +103,41 @@ tasks:
         mkdir -p  "{{.OUTPUT_DIR}}"
       # Unlike for `tar --create`, in `--extract` both the exclude and include patterns can be
       # quoted since they're both evaluated by `tar`.
-      - >-
-        {{.ARCHIVER}}
-        --extract
-        --strip-components="{{.NUM_COMPONENTS_TO_STRIP}}"
-        --directory "{{.OUTPUT_DIR}}"
-        --file "{{.TAR_FILE}}"
-        --no-anchored
-        --wildcards
+      - |-
+        ARCHIVER="{{.ARCHIVER}}"
+        # Fall back to 'tar' if the specified archiver doesn't exist (e.g., gtar on macOS)
+        USE_GNU_FLAGS=true
+        if ! command -v "$ARCHIVER" &> /dev/null; then
+          ARCHIVER="tar"
+          USE_GNU_FLAGS=false
+        fi
+
+        # Build tar command with conditional GNU-specific flags
+        TAR_CMD=(
+          "$ARCHIVER"
+          --extract
+          --strip-components="{{.NUM_COMPONENTS_TO_STRIP}}"
+          --directory "{{.OUTPUT_DIR}}"
+          --file "{{.TAR_FILE}}"
+        )
+
+        # Add GNU-specific flags only if using gtar
+        if [ "$USE_GNU_FLAGS" = true ]; then
+          TAR_CMD+=(--no-anchored --wildcards)
+        fi
+
+        # Add exclude patterns
         {{- range .EXCLUDE_PATTERNS}}
-        --exclude="{{.}}"
+        TAR_CMD+=(--exclude="{{.}}")
         {{- end}}
+
+        # Add include patterns
         {{- range .INCLUDE_PATTERNS}}
-        "{{.}}"
+        TAR_CMD+=("{{.}}")
         {{- end}}
-        2> /dev/null
+
+        # Execute tar command
+        "${TAR_CMD[@]}" 2> /dev/null
       # This command must be last
       - task: "checksum:compute"
         vars:
