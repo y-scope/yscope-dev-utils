@@ -1,0 +1,24 @@
+name: "Install go-task"
+description: "Install Task using a pinned setup-task action."
+
+inputs:
+  version:
+    description: "The Task version to install."
+    required: false
+    default: "3.49.1"
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Install go-task"
+      uses: "go-task/setup-task@3be4020d41929789a01026e0e427a4321ce0ad44"  # v2.0.0
+      with:
+        version: "${{ inputs.version }}"
+
+    - if: "'macOS' == runner.os"
+      name: "Install coreutils (for go-task md5 checksum)"
+      shell: "bash"
+      run: |-
+        if ! command -v md5sum >/dev/null 2>&1; then
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install coreutils
+        fi
