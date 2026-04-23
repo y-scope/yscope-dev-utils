@@ -60,6 +60,10 @@ tasks:
   # downloaded tar file.
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns that should not be extracted.
   # @param {string[]} [INCLUDE_PATTERNS] Path wildcard patterns to extract.
+  # @param {string[]} [CHECKSUM_EXCLUDE_PATTERNS=[]] Path wildcard patterns, relative to any
+  # `CHECKSUM_INCLUDE_PATTERNS`, to exclude from the checksum.
+  # @param {string[]} [CHECKSUM_INCLUDE_PATTERNS=[{{.OUTPUT_DIR}}]] Path wildcard patterns to
+  # compute the checksum for.
   # @param {int} [NUM_COMPONENTS_TO_STRIP=1] Number of leading path components to strip from the
   # extracted files.
   # @param {string} [TAR_FILE={{.OUTPUT_DIR}}.tar.gz] Path where the tar file should be stored.
@@ -79,6 +83,12 @@ tasks:
       INCLUDE_PATTERNS:
         ref: "default (list) .INCLUDE_PATTERNS"
 
+      # Checksum path patterns
+      CHECKSUM_EXCLUDE_PATTERNS:
+        ref: "default (list) .CHECKSUM_EXCLUDE_PATTERNS"
+      CHECKSUM_INCLUDE_PATTERNS:
+        ref: "default (list .OUTPUT_DIR) .CHECKSUM_INCLUDE_PATTERNS"
+
       # Misc
       ARCHIVER: >-
         {{if eq OS "darwin"}}gtar{{else}}tar{{end}}
@@ -96,7 +106,10 @@ tasks:
       - task: "checksum:validate"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
+          EXCLUDE_PATTERNS:
+            ref: ".CHECKSUM_EXCLUDE_PATTERNS"
+          INCLUDE_PATTERNS:
+            ref: ".CHECKSUM_INCLUDE_PATTERNS"
     cmds:
       - |-
         rm -rf "{{.OUTPUT_DIR}}"
@@ -122,7 +135,10 @@ tasks:
       - task: "checksum:compute"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
+          EXCLUDE_PATTERNS:
+            ref: ".CHECKSUM_EXCLUDE_PATTERNS"
+          INCLUDE_PATTERNS:
+            ref: ".CHECKSUM_INCLUDE_PATTERNS"
 
   # Uses curl to download a zip file from the given URL and extracts its contents.
   #
@@ -133,6 +149,10 @@ tasks:
   # downloaded zip file.
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns that should not be extracted.
   # @param {string[]} [INCLUDE_PATTERNS] Path wildcard patterns to extract.
+  # @param {string[]} [CHECKSUM_EXCLUDE_PATTERNS=[]] Path wildcard patterns, relative to any
+  # `CHECKSUM_INCLUDE_PATTERNS`, to exclude from the checksum.
+  # @param {string[]} [CHECKSUM_INCLUDE_PATTERNS=[{{.OUTPUT_DIR}}]] Path wildcard patterns to
+  # compute the checksum for.
   # @param {string} [ZIP_FILE={{.OUTPUT_DIR}}.zip] Path where the zip file should be stored.
   download-and-extract-zip:
     internal: true
@@ -150,6 +170,11 @@ tasks:
       INCLUDE_PATTERNS:
         ref: "default (list) .INCLUDE_PATTERNS"
 
+      # Checksum path patterns
+      CHECKSUM_EXCLUDE_PATTERNS:
+        ref: "default (list) .CHECKSUM_EXCLUDE_PATTERNS"
+      CHECKSUM_INCLUDE_PATTERNS:
+        ref: "default (list .OUTPUT_DIR) .CHECKSUM_INCLUDE_PATTERNS"
     requires:
       vars: ["FILE_SHA256", "OUTPUT_DIR", "URL"]
     sources: ["{{.TASKFILE}}", "{{.ZIP_FILE}}"]
@@ -163,7 +188,10 @@ tasks:
       - task: "checksum:validate"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
+          EXCLUDE_PATTERNS:
+            ref: ".CHECKSUM_EXCLUDE_PATTERNS"
+          INCLUDE_PATTERNS:
+            ref: ".CHECKSUM_INCLUDE_PATTERNS"
     cmds:
       - |-
         rm -rf "{{.OUTPUT_DIR}}"
@@ -184,4 +212,7 @@ tasks:
       - task: "checksum:compute"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
-          INCLUDE_PATTERNS: ["{{.OUTPUT_DIR}}"]
+          EXCLUDE_PATTERNS:
+            ref: ".CHECKSUM_EXCLUDE_PATTERNS"
+          INCLUDE_PATTERNS:
+            ref: ".CHECKSUM_INCLUDE_PATTERNS"
