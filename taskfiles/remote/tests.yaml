@@ -26,6 +26,8 @@ tasks:
       - task: "download-and-extract-zip-test-basic"
       - task: "download-and-extract-zip-test-exclusions"
       - task: "download-and-extract-zip-test-inclusions"
+      - task: "download-and-extract-zip-test-checksum-exclude"
+      - task: "download-and-extract-zip-test-checksum-include"
 
   curl-test-success:
     vars:
@@ -136,6 +138,101 @@ tasks:
       - "test ! -e '{{.OUTPUT_DIR}}/{{.G_EXTRACTED_ZIP_LICENSE_PATH}}'"
       - "test -e '{{.OUTPUT_DIR}}/{{.G_EXTRACTED_ZIP_CODEOWNERS_PATH}}'"
       - "test -e '{{.OUTPUT_DIR}}/{{.G_EXTRACTED_ZIP_PULL_REQUEST_TEMPLATE_PATH}}'"
+
+  download-and-extract-zip-test-checksum-exclude:
+    vars:
+      OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
+      CHECKSUM_FILE_0: "{{.OUTPUT_DIR}}.md5.0"
+      CHECKSUM_FILE_1: "{{.OUTPUT_DIR}}.md5.1"
+    cmds:
+      - defer: |-
+          rm -f "{{.CHECKSUM_FILE_0}}"
+          rm -f "{{.CHECKSUM_FILE_1}}"
+      - defer:
+          task: "remote-test-cleaner"
+          vars:
+            OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+
+      # Case 0: Extract all files, and compute the checksum while excluding a subset of extracted
+      # paths from the checksum.
+      - task: "remote-test-cleaner"
+        vars:
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+      - task: "remote:download-and-extract-zip"
+        vars:
+          CHECKSUM_EXCLUDE_PATTERNS:
+            - ".github/CODEOWNERS"
+            - ".github/PULL_REQUEST_TEMPLATE.md"
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE_0}}"
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+          URL: "{{.G_TEST_ZIP_FILE_URL}}"
+          FILE_SHA256: "{{.G_TEST_ZIP_FILE_SHA256}}"
+
+      # Case 1: Eexclude the same paths during extraction, and compute the checksum of the whole
+      # extracted directory.
+      - task: "remote-test-cleaner"
+        vars:
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+      - task: "remote:download-and-extract-zip"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE_1}}"
+          EXCLUDE_PATTERNS:
+            - "*/CODEOWNERS"
+            - "{{.G_EXTRACTED_ZIP_PULL_REQUEST_TEMPLATE_PATH}}"
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+          URL: "{{.G_TEST_ZIP_FILE_URL}}"
+          FILE_SHA256: "{{.G_TEST_ZIP_FILE_SHA256}}"
+
+      # Test that the checksums from the two cases match
+      - "diff -q '{{.CHECKSUM_FILE_0}}' '{{.CHECKSUM_FILE_1}}'"
+
+  download-and-extract-zip-test-checksum-include:
+    vars:
+      OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
+      CHECKSUM_FILE: "{{.OUTPUT_DIR}}.md5"
+      CHECKSUM_MOD_TS: "{{.CHECKSUM_FILE}}-mod-ts.txt"
+      REMOVED_FILE: "{{.OUTPUT_DIR}}/{{.G_EXTRACTED_ZIP_LICENSE_PATH}}"
+    cmds:
+      - defer: |-
+          rm -f "{{.CHECKSUM_FILE}}"
+          rm -f "{{.CHECKSUM_MOD_TS}}"
+      - defer:
+          task: "remote-test-cleaner"
+          vars:
+            OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+
+      # Extract all files, and compute the checksum while including only a subset of extracted paths
+      # in the checksum. Record the checksum timestamp.
+      - task: "remote-test-cleaner"
+        vars:
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+      - task: "remote:download-and-extract-zip"
+        vars:
+          CHECKSUM_INCLUDE_PATTERNS: &checksum_include_patterns
+            - "{{.OUTPUT_DIR}}/{{.G_EXTRACTED_ZIP_CODEOWNERS_PATH}}"
+            - "{{.OUTPUT_DIR}}/{{.G_EXTRACTED_ZIP_PULL_REQUEST_TEMPLATE_PATH}}"
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+          URL: "{{.G_TEST_ZIP_FILE_URL}}"
+          FILE_SHA256: "{{.G_TEST_ZIP_FILE_SHA256}}"
+      - "date -r '{{.CHECKSUM_FILE}}' > '{{.CHECKSUM_MOD_TS}}'"
+
+      # Remove a file outside the checksum include set, rerun without cleaning, and verify the task
+      # skips because the included checksum scope is unchanged.
+      - "rm -f '{{.REMOVED_FILE}}'"
+      - task: "remote:download-and-extract-zip"
+        vars:
+          CHECKSUM_INCLUDE_PATTERNS: *checksum_include_patterns
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+          URL: "{{.G_TEST_ZIP_FILE_URL}}"
+          FILE_SHA256: "{{.G_TEST_ZIP_FILE_SHA256}}"
+
+      # Test that the task skipped on the second call:
+      # - The removed file was not restored.
+      # - The checksum timestamp has not changed.
+      - "test ! -e '{{.REMOVED_FILE}}'"
+      - "cmp -s '{{.CHECKSUM_MOD_TS}}' <(date -r '{{.CHECKSUM_FILE}}')"
 
   # Cleans up the files output by remote tasks (assuming their default paths weren't changed).
   #
