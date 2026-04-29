@@ -168,7 +168,7 @@ tasks:
           URL: "{{.G_TEST_ZIP_FILE_URL}}"
           FILE_SHA256: "{{.G_TEST_ZIP_FILE_SHA256}}"
 
-      # Case 1: Eexclude the same paths during extraction, and compute the checksum of the whole
+      # Case 1: Exclude the same paths during extraction, and compute the checksum of the whole
       # extracted directory.
       - task: "remote-test-cleaner"
         vars:
@@ -184,7 +184,7 @@ tasks:
           FILE_SHA256: "{{.G_TEST_ZIP_FILE_SHA256}}"
 
       # Test that the checksums from the two cases match
-      - "diff -q '{{.CHECKSUM_FILE_0}}' '{{.CHECKSUM_FILE_1}}'"
+      - "cmp -s '{{.CHECKSUM_FILE_0}}' '{{.CHECKSUM_FILE_1}}'"
 
   download-and-extract-zip-test-checksum-include:
     vars:
