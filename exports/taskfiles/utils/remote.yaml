@@ -60,8 +60,9 @@ tasks:
   # downloaded tar file.
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns that should not be extracted.
   # @param {string[]} [INCLUDE_PATTERNS] Path wildcard patterns to extract.
-  # @param {string[]} [CHECKSUM_EXCLUDE_PATTERNS=[]] Path wildcard patterns, relative to any
-  # `CHECKSUM_INCLUDE_PATTERNS`, to exclude from the checksum.
+  # @param {string[]} [CHECKSUM_EXCLUDE_PATTERNS=[]] Path wildcard patterns to exclude from checksum
+  # computation, applied as glob-style matches to full paths rooted at the
+  # `CHECKSUM_INCLUDE_PATTERNS`.
   # @param {string[]} [CHECKSUM_INCLUDE_PATTERNS=[{{.OUTPUT_DIR}}]] Path wildcard patterns to
   # compute the checksum for.
   # @param {int} [NUM_COMPONENTS_TO_STRIP=1] Number of leading path components to strip from the
@@ -149,8 +150,9 @@ tasks:
   # downloaded zip file.
   # @param {string[]} [EXCLUDE_PATTERNS] Path wildcard patterns that should not be extracted.
   # @param {string[]} [INCLUDE_PATTERNS] Path wildcard patterns to extract.
-  # @param {string[]} [CHECKSUM_EXCLUDE_PATTERNS=[]] Path wildcard patterns, relative to any
-  # `CHECKSUM_INCLUDE_PATTERNS`, to exclude from the checksum.
+  # @param {string[]} [CHECKSUM_EXCLUDE_PATTERNS=[]] Path wildcard patterns to exclude from checksum
+  # computation, applied as glob-style matches to full paths rooted at the
+  # `CHECKSUM_INCLUDE_PATTERNS`.
   # @param {string[]} [CHECKSUM_INCLUDE_PATTERNS=[{{.OUTPUT_DIR}}]] Path wildcard patterns to
   # compute the checksum for.
   # @param {string} [ZIP_FILE={{.OUTPUT_DIR}}.zip] Path where the zip file should be stored.

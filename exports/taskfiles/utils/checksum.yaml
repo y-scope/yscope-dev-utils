@@ -10,8 +10,8 @@ tasks:
   #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to compute the checksum for.
-  # @param {string[]} [EXCLUDE_PATTERNS=[]] Path wildcard patterns, relative to any
-  # `INCLUDE_PATTERNS`, to exclude from the checksum.
+  # @param {string[]} [EXCLUDE_PATTERNS=[]] Path wildcard patterns to exclude from checksum
+  # computation, applied as glob-style matches to full paths rooted at the `INCLUDE_PATTERNS`.
   # @param {string} [IGNORE_ERROR="false"] If set to "true", the task will not fail on error.
   compute:
     internal: true
@@ -75,8 +75,8 @@ tasks:
   #
   # @param {string} CHECKSUM_FILE
   # @param {string[]} INCLUDE_PATTERNS Path wildcard patterns to validate the checksum for.
-  # @param {string[]} [EXCLUDE_PATTERNS=[]] Path wildcard patterns, relative to any
-  # `INCLUDE_PATTERNS`, to exclude from the checksum.
+  # @param {string[]} [EXCLUDE_PATTERNS=[]] Path wildcard patterns to exclude from checksum
+  # computation, applied as glob-style matches to full paths rooted at the `INCLUDE_PATTERNS`.
   # @param {string} [FAIL_ON_ERROR="false"] If set to "true", the task fails when checksums
   # mismatch.
   validate:
