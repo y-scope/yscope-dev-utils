@@ -26,17 +26,15 @@ jobs:
           - "ubuntu-24.04"
     runs-on: "${{matrix.os}}"
     steps:
-      - uses: "actions/checkout@v4"
+      - uses: "actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd"  # v6.0.2
         with:
           submodules: "recursive"
 
-      - name: "Install task"
-        shell: "bash"
-        run: "npm install -g @go-task/cli"
+      - uses: "./exports/github/actions/install-go-task"
 
-      - name: "Install uv"
-        shell: "bash"
-        run: "curl --fail --location --silent --show-error https://astral.sh/uv/install.sh | sh"
+      - uses: "./exports/github/actions/install-uv"
+
+      - uses: "./exports/github/actions/print-tool-versions"
 
       - name: "Run unit tests"
         run: "task test"

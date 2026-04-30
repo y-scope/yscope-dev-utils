@@ -1,0 +1,21 @@
+name: "Install Java"
+description: "Install Java using a pinned setup-java action."
+
+inputs:
+  distribution:
+    description: "The Java distribution to install."
+    required: false
+    default: "temurin"
+  version:
+    description: "The Java version to install."
+    required: false
+    default: "11"
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Install Java"
+      uses: "actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654"  # v5.2.0
+      with:
+        distribution: "${{ inputs.distribution }}"
+        java-version: "${{ inputs.version }}"

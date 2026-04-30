@@ -1,0 +1,30 @@
+name: "Print tool versions"
+description: "Print tool versions to aid debugging in case of CI failures."
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Print tool versions"
+      shell: "bash"
+      env:
+        TOOLS: |-
+          cc
+          c++
+          cmake
+          java
+          gcc
+          g++
+          md5sum
+          node
+          npm
+          python
+          python3
+          tar
+          task
+          uv
+      run: |-
+        while IFS= read -r tool; do
+          if ! "${tool}" --version; then
+            echo "${tool} not found"
+          fi
+        done <<< "${TOOLS}"

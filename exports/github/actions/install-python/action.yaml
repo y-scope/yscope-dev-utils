@@ -1,0 +1,16 @@
+name: "Install Python"
+description: "Install Python using a pinned setup-python action."
+
+inputs:
+  version:
+    description: "The Python version to install."
+    required: false
+    default: "3.10"
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Install Python"
+      uses: "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405"  # v6.2.0
+      with:
+        python-version: "${{ inputs.version }}"
