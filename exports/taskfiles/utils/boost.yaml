@@ -114,7 +114,7 @@ tasks:
           FAIL_ON_ERROR: "true"
     cmds:
       - |-
-        pushd "{{.GENERATE_DIR}}"
+        pushd "{{.SOURCE_DIR}}"
         ./b2 install \
           --build-dir="{{.BUILD_DIR}}" \
           {{- range .EXTRA_ARGS}}
