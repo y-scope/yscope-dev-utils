@@ -27,7 +27,10 @@ tasks:
       # Portable across Linux (`nproc`) and macOS (`sysctl`).
       _CPU_COUNT:
         sh: |-
-          nproc 2>/dev/null || sysctl -n hw.logicalcpu 2>/dev/null || echo 1
+          nproc 2>/dev/null \
+            || getconf _NPROCESSORS_ONLN 2>/dev/null \
+            || sysctl -n hw.logicalcpu 2>/dev/null \
+            || echo 1
       JOBS: >-
         {{default ._CPU_COUNT .JOBS}}
       TARGETS:
