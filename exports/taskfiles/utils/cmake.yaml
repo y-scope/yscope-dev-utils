@@ -15,7 +15,8 @@ tasks:
   # @param {string} BUILD_DIR Directory containing the generated build system to use.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the build command.
   # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
-  # omitted, defaults to the number of logical CPUs (via `nproc`/`sysctl`).
+  # omitted, defaults to the number of logical CPUs reported by the system. Falls back to 1 for a
+  # serial build if the CPU count cannot be determined.
   # @param {string[]} [TARGETS] A list of specific targets to build instead of the default target.
   build:
     internal: true
