@@ -15,7 +15,8 @@ tasks:
   # @param {string} BUILD_DIR Directory containing the generated build system to use.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the build command.
   # @param {int} [JOBS] The maximum number of concurrent processes to use when building. If
-  # omitted, the native build tool's default number is used. See `man cmake`.
+  # omitted, defaults to the number of logical CPUs (via `nproc`/`sysctl`), matching the
+  # `boost:build-and-install` default.
   # @param {string[]} [TARGETS] A list of specific targets to build instead of the default target.
   build:
     internal: true
@@ -23,8 +24,13 @@ tasks:
     vars:
       EXTRA_ARGS:
         ref: "default (list) .EXTRA_ARGS"
+      # Number of logical CPUs, used as the default for `JOBS` when the caller doesn't set it.
+      # Portable across Linux (`nproc`) and macOS (`sysctl`).
+      _CPU_COUNT:
+        sh: |-
+          nproc 2>/dev/null || sysctl -n hw.logicalcpu 2>/dev/null || echo 1
       JOBS: >-
-        {{default "" .JOBS}}
+        {{default ._CPU_COUNT .JOBS}}
       TARGETS:
         ref: "default (list) .TARGETS"
     requires:
@@ -33,9 +39,7 @@ tasks:
       - >-
         cmake
         --build "{{.BUILD_DIR}}"
-        {{- if .JOBS}}
         --parallel "{{.JOBS}}"
-        {{- end}}
         {{- range .TARGETS}}
         --target="{{.}}"
         {{- end}}
@@ -156,7 +160,7 @@ tasks:
   # @param {string[]} [CMAKE_INSTALL_ARGS] Any additional arguments to pass to the CMake install
   # command.
   # @param {int} [CMAKE_JOBS] The maximum number of concurrent processes to use when building. If
-  # omitted, the native build tool's default number is used. See `man cmake`.
+  # omitted, defaults to the number of logical CPUs (see `build`'s `JOBS`).
   # @param {string} [CMAKE_SETTINGS_DIR] The directory where the project's CMake settings file
   # should be stored.
   # @param {string} [CMAKE_SOURCE_DIR=.] The path, within the extraction directory, containing the
