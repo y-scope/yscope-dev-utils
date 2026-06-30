@@ -25,7 +25,7 @@ tasks:
       EXTRA_ARGS:
         ref: "default (list) .EXTRA_ARGS"
       # Number of logical CPUs, used as the default for `JOBS` when the caller doesn't set it.
-      # Portable across Linux (`nproc`) and macOS (`sysctl`).
+      # Portable across Linux (`nproc`), POSIX (`getconf`), and macOS (`sysctl`).
       _CPU_COUNT:
         sh: |-
           nproc 2>/dev/null \
