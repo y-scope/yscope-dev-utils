@@ -33,7 +33,9 @@ tasks:
       - >-
         cmake
         --build "{{.BUILD_DIR}}"
+        {{- if .JOBS}}
         --parallel "{{.JOBS}}"
+        {{- end}}
         {{- range .TARGETS}}
         --target="{{.}}"
         {{- end}}
