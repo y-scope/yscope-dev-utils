@@ -51,8 +51,13 @@ CheckOptions:
   cert-str34-c.CharTypdefsToIgnore: "int8_t"
 
   # This is necessary to allow simple classes (with all members being public) that have a
-  # constructor
+  # constructor.
   misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
+
+  # Passing a reference counted type by reference will skip the usage of the reference count, which
+  # risks lifetime related bugs.
+  performance-unnecessary-copy-initialization.AllowedTypes: "std::shared_ptr"
+  performance-unnecessary-value-param.AllowedTypes: "std::shared_ptr"
 
   # NOTE: In the naming rules below, a rule may imply another (e.g., `ClassCase` seems to imply
   # `AbstractClassCase`), so ideally we'd only specify the parent rule if we didn't need to
