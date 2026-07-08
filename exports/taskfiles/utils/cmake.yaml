@@ -7,10 +7,6 @@ includes:
 set: ["u", "pipefail"]
 shopt: ["globstar"]
 
-# `JOBS` is a special variable name and is used for concurrency related variables to allow users to
-# override all concurrency when invoking task. Callers using these tasks should default to `JOBS` to
-# propagate any user set value.
-
 tasks:
   # Runs the CMake build step for the given build directory. The caller must have previously called
   # `generate` on `BUILD_DIR` for this task to succeed. We purposely omit `sources` and `generates`
@@ -18,8 +14,8 @@ tasks:
   #
   # @param {string} BUILD_DIR Directory containing the generated build system to use.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the build command.
-  # @param {int} [JOBS=G_NPROCS] The maximum number of concurrent processes to use when building. If
-  # omitted, the number of cores is used.
+  # @param {int} [JOBS={{default .G_NPROCS (env "TASK_JOBS")}}] The maximum number of concurrent
+  # processes to use when building.
   # @param {string[]} [TARGETS] A list of specific targets to build instead of the default target.
   build:
     internal: true
@@ -27,7 +23,7 @@ tasks:
     vars:
       EXTRA_ARGS:
         ref: "default (list) .EXTRA_ARGS"
-      JOBS: "{{default .G_NPROCS .JOBS}}"
+      JOBS: '{{default (default .G_NPROCS (env "TASK_JOBS")) .JOBS}}'
       TARGETS:
         ref: "default (list) .TARGETS"
     requires:
@@ -174,7 +170,6 @@ tasks:
         ref: "default (list) .CMAKE_GEN_ARGS"
       CMAKE_INSTALL_ARGS:
         ref: "default (list) .CMAKE_INSTALL_ARGS"
-      CMAKE_JOBS: "{{default .JOBS .CMAKE_JOBS}}"
       CMAKE_SETTINGS_DIR: >-
         {{default "" .CMAKE_SETTINGS_DIR}}
       CMAKE_SOURCE_DIR: >-
