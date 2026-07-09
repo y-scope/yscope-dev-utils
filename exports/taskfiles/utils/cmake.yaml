@@ -23,7 +23,8 @@ tasks:
     vars:
       EXTRA_ARGS:
         ref: "default (list) .EXTRA_ARGS"
-      JOBS: "{{default (default .G_NPROCS (env 'TASK_EXTERNAL_TOOL_CONCURRENCY')) .JOBS}}"
+      JOBS: >-
+        {{default (default .G_NPROCS (env "TASK_EXTERNAL_TOOL_CONCURRENCY")) .JOBS}}
       TARGETS:
         ref: "default (list) .TARGETS"
     requires:
