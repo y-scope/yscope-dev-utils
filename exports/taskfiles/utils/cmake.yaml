@@ -14,8 +14,8 @@ tasks:
   #
   # @param {string} BUILD_DIR Directory containing the generated build system to use.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass to the build command.
-  # @param {int} [JOBS={{default .G_NPROCS (env "TASK_JOBS")}}] The maximum number of concurrent
-  # processes to use when building.
+  # @param {int} [JOBS={{default .G_NPROCS (env "TASK_EXTERNAL_TOOL_CONCURRENCY")}}] The maximum
+  # number of concurrent processes to use when building.
   # @param {string[]} [TARGETS] A list of specific targets to build instead of the default target.
   build:
     internal: true
@@ -23,7 +23,7 @@ tasks:
     vars:
       EXTRA_ARGS:
         ref: "default (list) .EXTRA_ARGS"
-      JOBS: '{{default (default .G_NPROCS (env "TASK_JOBS")) .JOBS}}'
+      JOBS: '{{default (default .G_NPROCS (env "TASK_EXTERNAL_TOOL_CONCURRENCY")) .JOBS}}'
       TARGETS:
         ref: "default (list) .TARGETS"
     requires:
