@@ -3,6 +3,10 @@ version: "3"
 set: ["u", "pipefail"]
 shopt: ["globstar"]
 
+vars:
+  G_NPROCS:
+    sh: "getconf _NPROCESSORS_ONLN"
+
 tasks:
   replace-text:
     desc: "Replaces some text in a file using sed."
