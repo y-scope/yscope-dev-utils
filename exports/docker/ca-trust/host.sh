@@ -76,7 +76,10 @@ stage_host_ca_bundle() {
         echo >&2 "ERROR: failed to create trust directory: ${trust_dir}"
         return 1
     fi
-    trust_dir="$(cd "${trust_dir}" &>/dev/null && pwd)" || return
+    if ! trust_dir="$(cd "${trust_dir}" &>/dev/null && pwd)"; then
+        echo >&2 "ERROR: failed to resolve trust directory: $1"
+        return 1
+    fi
     local dest="${trust_dir}/${CA_TRUST_BUNDLE_FILENAME}"
     if [[ -L "${dest}" || ( -e "${dest}" && ! -f "${dest}" ) ]]; then
         echo >&2 "ERROR: host CA bundle destination is not a regular file: ${dest}"
