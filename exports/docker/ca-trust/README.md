@@ -1,10 +1,20 @@
 # CA trust
 
-A reusable library for propagating the host's trusted certificates into a containerized build behind a corporate TLS gateway, without installing them in an image or persisting them in layers, caches, or artifacts.
+A library for propagating the host's trusted CA certificates into containerized builds that run behind a TLS-inspecting (e.g., corporate) gateway. Trust is wired up through environment variables and a bind-mounted staging directory, so certificates are never installed into an image or persisted in layers, caches, or artifacts.
+
+The examples below assume the consuming project has this repo as a submodule at `tools/yscope-dev-utils` (see the [usage docs](../../../docs/index.md#usage)) and mounts itself at `/repo` inside the build container; adjust the paths to your layout.
+
+## Requirements
+
+* Host: `bash`, plus a container runtime that supports bind mounts (the examples use Docker).
+  * `openssl` (optional): used to drop expired certificates during staging; without it, the bundle is copied as-is.
+* Container: `bash`.
+  * `findmnt` (optional): used to verify `CA_TRUST_DIR` is not on the container's writable overlay; without it, a warning is printed and the build proceeds.
+  * A JDK providing `keytool` (JVM builds only): used to generate the PKCS#12 trust store; without it, JVM trust setup is skipped.
 
 ## Quick start
 
-On the host, stage the PEM CA bundle. Bind-mount it writable into the build container, and in the container set `CA_TRUST_DIR` to that mount point (plus `CA_TRUST_JVM=1` for a JVM build), then source `container.sh`. The Java PKCS#12 trust store is generated in-container into the same directory, alongside the bundle.
+On the host, stage the CA bundle into a temporary directory. Bind-mount that directory (writable) into the container, point `CA_TRUST_DIR` at the mount, and source `container.sh` before running the build:
 
 ```bash
 # Host side
@@ -12,47 +22,54 @@ source tools/yscope-dev-utils/exports/docker/ca-trust/host.sh
 
 CA_TRUST_HOST_DIR="$(mktemp -d)"
 trap 'rm -rf "${CA_TRUST_HOST_DIR}"' EXIT
-stage_host_ca_bundle "${CA_TRUST_HOST_DIR}"  # creates ${CA_TRUST_HOST_DIR}/ca-bundle.pem, read-only
+
+# Creates ${CA_TRUST_HOST_DIR}/ca-bundle.pem (read-only). Check the status: running
+# the build without host CA trust is the failure this library exists to avoid.
+stage_host_ca_bundle "${CA_TRUST_HOST_DIR}" || exit 1
 
 docker run --rm \
+    --mount "type=bind,src=${PWD},dst=/repo" \
     --mount "type=bind,src=${CA_TRUST_HOST_DIR},dst=${CA_TRUST_CONTAINER_DIR}" \
     --env "CA_TRUST_DIR=${CA_TRUST_CONTAINER_DIR}" \
     --env "CA_TRUST_JVM=1" \
     --env MAVEN_OPTS \
-    <image> bash -c '
+    <image> \
+    bash -c '
         source /repo/tools/yscope-dev-utils/exports/docker/ca-trust/container.sh
-        # ... run the build; curl/git/pip/Maven now use the host CAs
+        # Run the build; curl, git, pip, and Maven now trust the host CAs.
     '
 ```
 
-Only the PEM bundle is staged on the host; the Java trust store is generated inside the container, which already has a JDK for the build. The generated store is written to the same writable bind mount (not the container's writable overlay), so it never lands on the overlay and cannot be retained by `docker commit`. The caller cleans up the staging directory.
+`CA_TRUST_JVM=1` and `--env MAVEN_OPTS` are only needed for JVM builds; see [JVM builds](#jvm-builds).
 
 ## Host API (`host.sh`)
 
-| Function               | Args          | Effect                                                                                                                                                                            |
-|------------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `stage_host_ca_bundle` | `<trust-dir>` | Writes `<trust-dir>/${CA_TRUST_BUNDLE_FILENAME}` (`0444`). Uses `SSL_CERT_FILE` when set, else searches common Linux CA-bundle locations; creates an empty file if none is found. |
+`stage_host_ca_bundle <trust-dir>` writes the host's CA bundle to `<trust-dir>/${CA_TRUST_BUNDLE_FILENAME}` (read-only, `0444`):
 
-Constants: `CA_TRUST_BUNDLE_FILENAME` (`ca-bundle.pem`) and `CA_TRUST_CONTAINER_DIR` (`/run/ca-trust`, the in-container mount point for the staged trust directory, passed as `CA_TRUST_DIR`).
+* The bundle is taken from `SSL_CERT_FILE` when set; otherwise, common Linux CA-bundle locations are searched. If none is found (e.g., on macOS without `SSL_CERT_FILE`), an empty file is created and the build proceeds without host CA context.
+* Expired certificates are dropped during staging (when `openssl` is available on the host), since a single expired certificate in a bundle can break TLS verification for otherwise-valid chains.
+
+Constants:
+
+* `CA_TRUST_BUNDLE_FILENAME` (`ca-bundle.pem`): the staged bundle's filename; `container.sh` reads it from `CA_TRUST_DIR` by this name.
+* `CA_TRUST_CONTAINER_DIR` (`/run/ca-trust`): the conventional in-container mount point for the staged trust directory, passed to the container as `CA_TRUST_DIR`.
+
+The caller owns the staging directory and cleans it up (e.g., with `trap`, as above). The scripts never modify the host's or the container's installed trust stores.
 
 ## Container API (`container.sh`)
 
-Source it in the container after setting `CA_TRUST_DIR`; set `CA_TRUST_JVM=1` as well if the build runs on a JVM (Maven, Gradle, ...) that needs its trust store configured:
+Source it after setting `CA_TRUST_DIR` to the (writable) mount of the staged trust directory. It's a no-op when `CA_TRUST_DIR` is unset, so builds that don't mount a trust directory are unaffected.
 
-```bash
-CA_TRUST_DIR=/trusted
-CA_TRUST_JVM=1
-source tools/yscope-dev-utils/exports/docker/ca-trust/container.sh
-```
+When the staged bundle is non-empty, it exports `CURL_CA_BUNDLE`, `GIT_SSL_CAINFO`, `PIP_CERT`, `REQUESTS_CA_BUNDLE`, and `SSL_CERT_FILE`, covering most TLS clients used in builds.
 
-It reads `ca-bundle.pem` from `CA_TRUST_DIR`. When the bundle is non-empty it exports `CURL_CA_BUNDLE`, `GIT_SSL_CAINFO`, `PIP_CERT`, `REQUESTS_CA_BUNDLE`, and `SSL_CERT_FILE`. When `CA_TRUST_JVM` is set, the bundle is non-empty, and `keytool` is available, it also generates a PKCS#12 trust store from the bundle via `generators/java-pkcs12/generate.sh`, writes it to `${CA_TRUST_DIR}/truststore.p12`, and appends `-Djavax.net.ssl.trustStore*` to `MAVEN_OPTS` (preserving any caller-supplied value).
+### JVM builds
 
-**Persistence contract:** `CA_TRUST_DIR` must be a writable host bind-mount or tmpfs, not the container's writable overlay. `container.sh` verifies this with `findmnt` and refuses (with an error) to write to the overlay, since a file there would be retained by `docker commit`. If `findmnt` is unavailable it warns but proceeds. A generation failure errors.
+JVM tools (Maven, Gradle, ...) don't read the environment variables above, so JVM support is opt-in via `CA_TRUST_JVM=1`. When it's set, the bundle is non-empty, and `keytool` is available, `container.sh` uses the container's own JDK to generate a PKCS#12 trust store from the bundle at `${CA_TRUST_DIR}/truststore.p12`, then appends the corresponding `-Djavax.net.ssl.trustStore*` options to `MAVEN_OPTS`, preserving any caller-supplied value (forward `MAVEN_OPTS` into the container, as in the quick start). A generation failure is an error. See [generators/java-pkcs12](generators/java-pkcs12/README.md) for details.
 
-JVM trust configuration is opt-in via `CA_TRUST_JVM`, since not every caller runs on a JVM; it's also skipped when the bundle is empty or `keytool` is absent. A no-op when `CA_TRUST_DIR` is unset, so CI builds that don't mount a trust directory are unaffected.
+## Persistence contract
 
-The caller owns and cleans up the staging directory; the scripts never modify the host or container trust stores, only the staged bundle. The generated PKCS#12 store is a per-build file in the caller's staging directory, removed when the caller cleans up.
+`CA_TRUST_DIR` must be a writable host bind-mount or tmpfs, not the container's writable overlay: a file on the overlay would be retained by `docker commit`, while a bind mount is not part of any committed image. `container.sh` verifies this with `findmnt` and refuses to write to the overlay; if `findmnt` is unavailable, it warns and proceeds. All staged and generated files live in the caller's staging directory and disappear when the caller cleans it up.
 
 ## Extensibility
 
-Add a backend under `generators/` when a trust format can't consume the PEM bundle directly. Keep host discovery and lifecycle in `host.sh`; keep format-specific conversion in the backend, run in-container. See `generators/java-pkcs12/README.md`.
+Add a backend under `generators/` when a trust format can't consume the PEM bundle directly. Keep host discovery and lifecycle in `host.sh`; keep format-specific conversion in the backend, run in-container. See [generators/java-pkcs12](generators/java-pkcs12/README.md) as a template.

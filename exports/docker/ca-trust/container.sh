@@ -19,6 +19,12 @@ if [[ -z "${CA_TRUST_DIR:-}" ]]; then
 fi
 
 _ca_trust_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+# Spelled out rather than read from host.sh's CA_TRUST_BUNDLE_FILENAME: host.sh
+# is the host's half of the library and isn't guaranteed to be beside this file
+# in the container. Renaming the bundle means changing both.
+#
+# Internal to this file, like the other bare names here; the caller gets the
+# environment variables exported below, and all of these are unset at the end.
 HOST_CA_BUNDLE="${CA_TRUST_DIR}/ca-bundle.pem"
 
 if [[ -s "${HOST_CA_BUNDLE:-}" ]]; then
@@ -27,6 +33,18 @@ if [[ -s "${HOST_CA_BUNDLE:-}" ]]; then
     export PIP_CERT="${HOST_CA_BUNDLE}"
     export REQUESTS_CA_BUNDLE="${HOST_CA_BUNDLE}"
     export SSL_CERT_FILE="${HOST_CA_BUNDLE}"
+fi
+
+# Say why when an explicit opt-in does nothing. Silence here surfaces much later
+# as a PKIX path-building error inside the JVM build, far from the cause.
+if [[ -n "${CA_TRUST_JVM:-}" ]]; then
+    if [[ ! -s "${HOST_CA_BUNDLE:-}" ]]; then
+        echo >&2 "WARNING: CA_TRUST_JVM is set but ${HOST_CA_BUNDLE} is empty;" \
+            "skipping the JVM trust store."
+    elif ! command -v keytool &>/dev/null; then
+        echo >&2 "WARNING: CA_TRUST_JVM is set but keytool isn't on PATH;" \
+            "skipping the JVM trust store."
+    fi
 fi
 
 # Generate a Java PKCS#12 trust store in-container from the staged PEM bundle and
@@ -73,4 +91,4 @@ if [[ -n "${CA_TRUST_JVM:-}" ]] && [[ -s "${HOST_CA_BUNDLE:-}" ]] && command -v 
     unset _host_ca_maven_opts _ca_trust_mount_target
 fi
 
-unset _ca_trust_dir
+unset _ca_trust_dir HOST_CA_BUNDLE HOST_CA_JAVA_TRUST_STORE
