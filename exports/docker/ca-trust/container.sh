@@ -14,14 +14,19 @@
 # by `docker commit`; a bind mount is not part of any committed image. This
 # script refuses to write to the overlay.
 
+# SC2317: this file is designed to work both when sourced and when executed, so
+# `return N 2>/dev/null || exit N` is deliberate; shellcheck can only see the
+# sourced half and reports the `exit` as unreachable.
+# shellcheck disable=SC2317
+
 if [[ -z "${CA_TRUST_DIR:-}" ]]; then
     return 0 2>/dev/null || exit 0
 fi
 
 _ca_trust_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # Spelled out rather than read from host.sh's CA_TRUST_BUNDLE_FILENAME: host.sh
-# is the host's half of the library and isn't guaranteed to be beside this file
-# in the container. Renaming the bundle means changing both.
+# is the one file ca_trust_stage_build_context leaves behind, so it isn't here to
+# source. Renaming the bundle means changing both.
 #
 # Internal to this file, like the other bare names here; the caller gets the
 # environment variables exported below, and all of these are unset at the end.
@@ -81,6 +86,11 @@ if [[ -n "${CA_TRUST_JVM:-}" ]] && [[ -s "${HOST_CA_BUNDLE:-}" ]] && command -v 
     fi
 
     # Preserve any Maven options supplied by the caller.
+    #
+    # Append (never prepend) space-separated -D flags. Callers may string-parse
+    # MAVEN_OPTS for a flag they add after sourcing this file -- taking
+    # everything after the last occurrence -- so anything appended here must
+    # stay ahead of the caller's own additions.
     _host_ca_maven_opts="${MAVEN_OPTS:-}"
     [[ -n "${_host_ca_maven_opts}" ]] && _host_ca_maven_opts="${_host_ca_maven_opts} "
     _host_ca_maven_opts="${_host_ca_maven_opts}-Djavax.net.ssl.trustStore=${HOST_CA_JAVA_TRUST_STORE}"
