@@ -19,4 +19,5 @@ To use the repo's artifacts in your project:
 For language/tool-specific guides, see:
 
 * [CA trust for containerized builds](../exports/docker/ca-trust/README.md)
+* [Docker build helpers](../exports/docker/build/README.md)
 * [Linting for C++ projects](lint-tools-cpp.md)
