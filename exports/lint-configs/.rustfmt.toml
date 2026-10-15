@@ -1,5 +1,17 @@
+# <https://rust-lang.github.io/rustfmt/>
+
 # Stable Options
 # This section only contains overrides to the defaults.
+
+# Rust edition used for syntax/parsing.
+# `cargo fmt` reads the edition from `Cargo.toml` to override this value.
+# `rustfmt` (invoked directly) reads the edition from here and defaults to `2015`.
+edition = "2024"
+
+# Rust Style Guide edition.
+# <https://doc.rust-lang.org/style-guide/>
+style_edition = "2024"
+
 max_width = 100 # Default value; set explicitly for clarity
 newline_style = "Unix"
 tab_spaces = 4 # Default value; set explicitly for clarity
@@ -24,7 +36,7 @@ fn_single_line = false
 force_multiline_blocks = false
 format_code_in_doc_comments = false
 format_generated_files = true
-format_macro_matchers = false
+format_macro_matchers = true # Non-default
 format_macro_bodies = true
 format_strings = true # Non-default
 group_imports = "StdExternalCrate" # Non-default
@@ -34,6 +46,7 @@ imports_granularity = "Item" # Non-default
 indent_style = "Block"
 inline_attribute_width = 0
 match_arm_blocks = true
+match_block_trailing_comma = true # Non-default
 normalize_comments = true # Non-default
 normalize_doc_attributes = true # Non-default
 overflow_delimited_expr = false
