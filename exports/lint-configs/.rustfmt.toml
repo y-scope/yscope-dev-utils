@@ -4,9 +4,10 @@
 # This section only contains overrides to the defaults.
 
 # Rust edition used for syntax/parsing.
-# `cargo fmt` reads the edition from `Cargo.toml` and this is ignored.
+# `cargo fmt` reads the edition from `Cargo.toml` to override this value.
 # `rustfmt` (invoked directly) reads the edition from here and defaults to `2015`.
 edition = "2024"
+
 # Rust Style Guide edition.
 # <https://doc.rust-lang.org/style-guide/>
 style_edition = "2024"
