@@ -8,9 +8,77 @@ includes:
 tasks:
   default:
     cmds:
+      - task: "checksum-test-metadata-only-rerun-on-mtime-change"
+      - task: "checksum-test-metadata-only-skip"
       - task: "checksum-test-rerun"
       - task: "checksum-test-skip"
+      - task: "checksum-test-skip-on-mtime-change"
       - task: "checksum-test-update"
+
+  checksum-test-metadata-only-rerun-on-mtime-change:
+    vars:
+      OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
+      SRC_DIR: "{{.OUTPUT_DIR}}/src"
+
+      CHECKSUM_FILE: "{{.SRC_DIR}}.md5"
+      CHECKSUM_FILE_REF: "{{.CHECKSUM_FILE}}.ref"
+      FILE_0: "{{.SRC_DIR}}/0.txt"
+      FILE_1: "{{.SRC_DIR}}/1.txt"
+    cmds:
+      - task: "checksum-test-init"
+        vars:
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+      - task: "create-dir-with-checksum"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          FILE_PATH: "{{.FILE_0}}"
+          METADATA_ONLY: "true"
+      - "cp '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'"
+      - "touch -t 200001010000 '{{.FILE_0}}'"
+      - task: "create-dir-with-checksum"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          FILE_PATH: "{{.FILE_1}}"
+          METADATA_ONLY: "true"
+
+      # Test create-dir-with-checksum ran the second time and created a different checksum.
+      - "test ! -e '{{.FILE_0}}'"
+      - "test -e '{{.FILE_1}}'"
+      - |-
+        if ! cmp -s '{{.CHECKSUM_FILE}}' '{{.CHECKSUM_FILE_REF}}'; then
+          exit 0
+        fi
+        exit 1
+
+  checksum-test-metadata-only-skip:
+    vars:
+      OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
+      SRC_DIR: "{{.OUTPUT_DIR}}/src"
+
+      CHECKSUM_FILE: "{{.SRC_DIR}}.md5"
+      CHECKSUM_MOD_TS: "{{.CHECKSUM_FILE}}-mod-ts.txt"
+      FILE_0: "{{.SRC_DIR}}/0.txt"
+      FILE_1: "{{.SRC_DIR}}/1.txt"
+    cmds:
+      - task: "checksum-test-init"
+        vars:
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+      - task: "create-dir-with-checksum"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          FILE_PATH: "{{.FILE_0}}"
+          METADATA_ONLY: "true"
+      - "date -r '{{.CHECKSUM_FILE}}' > '{{.CHECKSUM_MOD_TS}}'"
+      - task: "create-dir-with-checksum"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          FILE_PATH: "{{.FILE_1}}"
+          METADATA_ONLY: "true"
+
+      # Test create-dir-with-checksum didn't run the second time and the checksum is unmodified.
+      - "test -e '{{.FILE_0}}'"
+      - "test ! -e '{{.FILE_1}}'"
+      - "cmp -s '{{.CHECKSUM_MOD_TS}}' <(date -r '{{.CHECKSUM_FILE}}')"
 
   checksum-test-rerun:
     vars:
@@ -62,6 +130,35 @@ tasks:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           FILE_PATH: "{{.FILE_0}}"
       - "date -r '{{.CHECKSUM_FILE}}' > '{{.CHECKSUM_MOD_TS}}'"
+      - task: "create-dir-with-checksum"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          FILE_PATH: "{{.FILE_1}}"
+
+      # Test create-dir-with-checksum didn't run the second time and the checksum is unmodified.
+      - "test -e '{{.FILE_0}}'"
+      - "test ! -e '{{.FILE_1}}'"
+      - "cmp -s '{{.CHECKSUM_MOD_TS}}' <(date -r '{{.CHECKSUM_FILE}}')"
+
+  checksum-test-skip-on-mtime-change:
+    vars:
+      OUTPUT_DIR: "{{.G_OUTPUT_DIR}}/{{.TASK | replace \":\" \"#\"}}"
+      SRC_DIR: "{{.OUTPUT_DIR}}/src"
+
+      CHECKSUM_FILE: "{{.SRC_DIR}}.md5"
+      CHECKSUM_MOD_TS: "{{.CHECKSUM_FILE}}-mod-ts.txt"
+      FILE_0: "{{.SRC_DIR}}/0.txt"
+      FILE_1: "{{.SRC_DIR}}/1.txt"
+    cmds:
+      - task: "checksum-test-init"
+        vars:
+          OUTPUT_DIR: "{{.OUTPUT_DIR}}"
+      - task: "create-dir-with-checksum"
+        vars:
+          CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
+          FILE_PATH: "{{.FILE_0}}"
+      - "date -r '{{.CHECKSUM_FILE}}' > '{{.CHECKSUM_MOD_TS}}'"
+      - "touch -t 200001010000 '{{.FILE_0}}'"
       - task: "create-dir-with-checksum"
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
@@ -128,6 +225,7 @@ tasks:
     internal: true
     vars:
       DIR: "{{dir .FILE_PATH}}"
+      METADATA_ONLY: "{{default \"false\" .METADATA_ONLY}}"
     requires:
       vars: ["CHECKSUM_FILE", "FILE_PATH"]
     sources: ["{{.TASKFILE}}"]
@@ -137,6 +235,7 @@ tasks:
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.DIR}}"]
+          METADATA_ONLY: "{{.METADATA_ONLY}}"
     cmds:
       - |-
         rm -rf "{{.DIR}}"
@@ -146,3 +245,4 @@ tasks:
         vars:
           CHECKSUM_FILE: "{{.CHECKSUM_FILE}}"
           INCLUDE_PATTERNS: ["{{.DIR}}"]
+          METADATA_ONLY: "{{.METADATA_ONLY}}"
