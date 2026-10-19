@@ -42,6 +42,7 @@ tasks:
       # passed to `tar` as arguments. If the input patterns are passed to `tar` with quotes, the
       # pattern won't be evaluated and will instead be treated literally.
       - defer: "rm -f '{{.TMP_ERR_LOG}}'"
+
       # Set `TZ` and `LC_ALL` in metadata-only mode so that the listing doesn't depend on the local
       # time zone (used to render mtimes) or locale (used to escape file names and translate some
       # listing text).
