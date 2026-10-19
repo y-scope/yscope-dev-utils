@@ -13,6 +13,8 @@ tasks:
   # @param {string[]} [EXCLUDE_PATTERNS=[]] Path wildcard patterns to exclude from checksum
   # computation, applied as glob-style matches to full paths rooted at the `INCLUDE_PATTERNS`.
   # @param {string} [IGNORE_ERROR="false"] If set to "true", the task will not fail on error.
+  # @param {string} [METADATA_ONLY="false"] If set to "true", the checksum covers each path's
+  # metadata (path, type, mode, size, mtime, and symlink target) instead of file contents.
   compute:
     internal: true
     label: "{{.TASK}}-{{.CHECKSUM_FILE}}"
@@ -21,6 +23,7 @@ tasks:
       EXCLUDE_PATTERNS:
         ref: "default (list) .EXCLUDE_PATTERNS"
       IGNORE_ERROR: "{{if eq \"true\" .IGNORE_ERROR}}true{{else}}false{{end}}"
+      METADATA_ONLY: "{{if eq \"true\" .METADATA_ONLY}}true{{else}}false{{end}}"
 
       ARCHIVER: "{{if eq OS \"darwin\"}}gtar{{else}}tar{{end}}"
       TMP_ERR_LOG: "{{.CHECKSUM_FILE}}.log.tmp"
@@ -41,11 +44,21 @@ tasks:
       - defer: "rm -f '{{.TMP_ERR_LOG}}'"
       - |-
         if ! \
+          {{- if eq "true" .METADATA_ONLY}}
+          TZ=UTC LC_ALL=C \
+          {{- end}}
           {{.ARCHIVER}} \
           --create \
+          {{- if eq "true" .METADATA_ONLY}}
+          --file /dev/null \
+          --full-time \
+          --verbose \
+          --verbose \
+          {{- else}}
           --file - \
-          --group 0 \
           --mtime "UTC 1970-01-01" \
+          {{- end}}
+          --group 0 \
           --numeric-owner \
           --owner 0 \
           --sort name \
@@ -79,12 +92,15 @@ tasks:
   # computation, applied as glob-style matches to full paths rooted at the `INCLUDE_PATTERNS`.
   # @param {string} [FAIL_ON_ERROR="false"] If set to "true", the task fails when checksums
   # mismatch.
+  # @param {string} [METADATA_ONLY="false"] If set to "true", the checksum covers each path's
+  # metadata (path, type, mode, size, mtime, and symlink target) instead of file contents.
   validate:
     internal: true
     label: "{{.TASK}}-{{.CHECKSUM_FILE}}"
     silent: true
     vars:
       FAIL_ON_ERROR: "{{if eq \"true\" .FAIL_ON_ERROR}}true{{else}}false{{end}}"
+      METADATA_ONLY: "{{if eq \"true\" .METADATA_ONLY}}true{{else}}false{{end}}"
       TMP_CHECKSUM_FILE: "{{.CHECKSUM_FILE}}.tmp"
       TMP_ERR_LOG: "{{.CHECKSUM_FILE}}.log.tmp"
     requires:
@@ -100,6 +116,7 @@ tasks:
           EXCLUDE_PATTERNS:
             ref: ".EXCLUDE_PATTERNS"
           IGNORE_ERROR: "true"
+          METADATA_ONLY: "{{.METADATA_ONLY}}"
       - defer: |-
           rm -f "{{.TMP_CHECKSUM_FILE}}"
           rm -f "{{.TMP_ERR_LOG}}"
