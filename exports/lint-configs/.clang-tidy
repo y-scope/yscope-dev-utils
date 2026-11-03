@@ -50,6 +50,9 @@ CheckOptions:
   bugprone-signed-char-misuse.CharTypdefsToIgnore: "int8_t"
   cert-str34-c.CharTypdefsToIgnore: "int8_t"
 
+  # `std::span` doesn't gain `at()` until C++26.
+  cppcoreguidelines-pro-bounds-avoid-unchecked-container-access.ExcludeClasses: "::std::span"
+
   # This is necessary to allow simple classes (with all members being public) that have a
   # constructor.
   misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
