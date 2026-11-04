@@ -49,6 +49,7 @@ tasks:
   # called `generate` on `BUILD_DIR` for this task to succeed.
   #
   # @param {string} BUILD_DIR Directory containing the generated buildsystem to use.
+  # @param {string} [ENV_FILE] A file sourced to set up the environment before running CMake.
   # @param {string[]} [EXTRA_ARGS] Any additional arguments to pass with the clean target.
   clean:
     internal: true
@@ -61,6 +62,7 @@ tasks:
       - task: "build"
         vars:
           BUILD_DIR: "{{.BUILD_DIR}}"
+          ENV_FILE: "{{.ENV_FILE}}"
           EXTRA_ARGS:
             ref: ".EXTRA_ARGS"
           TARGETS: ["clean"]
