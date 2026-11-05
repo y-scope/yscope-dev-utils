@@ -16,6 +16,8 @@ ExcludeHeaderFilterRegex: ".*"
 
 # Disabled checks:
 # - `bugprone-easily-swappable-parameters` because it's difficult to mitigate.
+# - `misc-no-recursion` because it reduces readability for cases that have no performance concerns
+#   (turning the lint into a premature optimization).
 # - `modernize-use-ranges` because we want to support compiling C++20 code with LLVM/Apple Clang 15,
 #   but those compiler versions don't support ranges.
 # - `portability-template-virtual-member-function` because we don't support MSVC compilers yet.
@@ -32,6 +34,7 @@ Checks: >-
   concurrency-*,
   cppcoreguidelines-*,
   misc-*,
+  -misc-no-recursion,
   modernize-*,
   -modernize-use-ranges,
   performance-*,
