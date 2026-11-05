@@ -1,0 +1,13 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: "docker-libs-test"
+
+  # Exercises exports/docker/ca-trust and exports/docker/build. Docker-free: the
+  # assertions cover shell behaviour only, so this runs anywhere.
+  docker-libs-test:
+    dir: "{{.ROOT_DIR}}"
+    cmds:
+      - "bash '{{.TASKFILE_DIR}}/test-docker-libs.sh'"
